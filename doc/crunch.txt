@@ -46,6 +46,7 @@ with a decimal point. It also makes doing math with Vim so much more easy.
 
 ================================================================================
 USAGE
+
 1. :Crunch
     Crunch then gives you the prompt:
     Calc >> 

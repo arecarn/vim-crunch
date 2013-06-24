@@ -1,8 +1,10 @@
 "s:Crunch                                                                     {{{
 " The Top Level Function that determines  program flow
 "===============================================================================
-function! s:Crunch() range
-    let expression = s:GetInput(a:firstline,a:lastline)
+function! s:Crunch(firstln,lastln) 
+    "execute "normal! mh"
+    "execute "normal! 'h" 
+    let expression = s:GetInput(a:firstln,a:lastln)
     if expression == 'q'
         return
     endif 
@@ -39,7 +41,7 @@ endfunction
 "===============================================================================
 function! s:GetinputString()
     call inputsave()
-    let Expression = input('Calc >> ')
+    let Expression = input("Calc >> ")
     call inputrestore()
     "echo Expression
     return Expression
@@ -160,11 +162,14 @@ endfunction
 "============================================================================}}}
 " Commands                                                                   {{{
 "===============================================================================
-command! -nargs=* -range=% Crunch <line1>,<line2>call s:Crunch()
-"cabbrev vc Vcal
+command! -nargs=* -range=% Crunch call s:Crunch(<line1>,<line2>)
 
 "Crunch Line maping
-nnoremap <leader>cl V:Vcalc<CR>A=<ESC>p
+map <Plug>Crunch_Line V:Crunch<CR>A=<ESC>p
+
+"NOTE
+"the following mapping works in a vimrc 
+"nmap <leader>ee <Plug>Crunch_Line
 
 " notes on making a vim plugin 
 " source after every save 
