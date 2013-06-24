@@ -1,3 +1,4 @@
+*crunch.txt* Unlock Vims build in calculator
 ================================================================================
              ______   ______   __  __   __   __   ______   __  __  
             /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \
@@ -7,7 +8,7 @@
 ================================================================================
 ASCII font courtesy of Patrick Gillespie http://patorjk.com/
 ================================================================================
-OVERVIEW 
+*OVERVIEW*
 
 Crunch makes using Vim as a Calculator easier and forces floating point to be
 used. To use Vim as a calculator you tap into Vim's Scripting language. Without
@@ -17,7 +18,7 @@ From insert mode:
 <CTRL-R>=5+5<CR>
 Then 10 is inserted into the buffer.
 
-or 
+Or 
 
 From command line mode
 <CTRL-R>=5+5<CR>
@@ -45,7 +46,7 @@ floating point equivalent, and  adds the leading zero fixing values that start
 with a decimal point. It also makes doing math with Vim so much more easy.
 
 ================================================================================
-USAGE
+*USAGE*
 
 1. :Crunch
     Crunch then gives you the prompt:
@@ -63,21 +64,23 @@ If invalid expressions are used Crunch will let you know echoing "ERROR:
 invalid input". This same string will be yanked into the paste register.
 
 ================================================================================
-MAPPINGS
+*MAPPINGS*
 :Crunch
 :'<,'>Crunch
 
-================================================================================
-EXTEND
 
-The Following is a custom mapping for making Crunch more usfule for evaluating
+
+================================================================================
+*EXTEND*
+
+The Following mapping for making Crunch more useful for evaluating
 math in a buffer. 
 
-                   nnoremap <leader>eq V:Vcalc<CR>A=<ESC>p
+                       nmap <leader>ee <Plug>Crunch_Line
 
 The mapping yanks the current line and uses it as input to Crunch. The result
 of the result is then pasted onto the end of the expression preceded by "="
-This mapping is invoked with \eq with the default leader 
+This mapping is invoked with \ee with the default leader 
 
 e.g. The mapping would be invoked on the following expression.
 
@@ -87,23 +90,25 @@ e.g. The mapping would be invoked on the following expression.
                            Expression After Mapping
                     .32432/sqrt(23.423)*34.2+1-8=-4.70819
 
+Note: <leader>ee can be replace with any mapping you desire
+
 ================================================================================
-CONFIGURATION
+*CONFIGURATION*
 
 None yet
 
 ================================================================================
-CHANGE LOG
+*CHANGE-LOG*
 
 19 Jun 2013 first version
 
 ================================================================================
-TO-DO/POSSIBLE ADDITIONS
+*TO-DO/ADDITIONS*
 
 * custom prompt
 * interactive buffer mode like VimCalc
 * support for ^ instead of pow()
-* add * before and after functions soo syntax remains valid
+* add * before and after functions so syntax remains valid 
   e.g. 2sin()3 becomes 2*sin()*3
 * add in support for e and pi
   e = exp(1) = 2.718282
@@ -111,10 +116,8 @@ TO-DO/POSSIBLE ADDITIONS
 * save cursor position when using visual selection and normal mode 
 * add support for exponentials e.g. 10e6 for 10000000.0
 
-1000000000000000+1=1.0e15
-
 ================================================================================
-LICENSE
+*LICENSE*
                  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                             Version 2, December 2004
  
@@ -129,7 +132,7 @@ LICENSE
  
                     0. You just DO WHAT THE FUCK YOU WANT TO
 ================================================================================
-REPOSITORY AND BUG TRACKER.
+*REPOSITORY-AND-BUG-TRACKER*
 
 https://github.com/arecarn/crunch
 
