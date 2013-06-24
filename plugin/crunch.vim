@@ -1,0 +1,173 @@
+"s:Crunch                                                                     {{{
+" The Top Level Function that determines  program flow
+"===============================================================================
+function! s:Crunch() range
+    let expression = s:GetInput(a:firstline,a:lastline)
+    if expression == 'q'
+        return
+    endif 
+    let ListExpressionOne = s:ListifyExpression(expression)
+    let ListExpressionTwo = s:FloatifyExpression(ListExpressionOne)
+    let finalExpression = s:RepairExpression(ListExpressionOne,ListExpressionTwo)
+    call s:EvaluateExpression(finalExpression)
+endfunction
+
+"============================================================================}}}
+"s:GetInput                                                                  {{{
+"gets input either though prompt or visual selection
+"===============================================================================
+function! s:GetInput(firstln, lastln)
+    let visualmode = s:CheckForVisual(a:firstln, a:lastln)
+    if visualmode == 'no'
+        let expression = s:GetinputString()
+    elseif visualmode == 'yes'
+        let expression = s:GetVisualSelection()
+        "echo expression
+    elseif visualmode == 'tooMuch'
+        return "q"
+    endif 
+    if expression == ''
+        return "q"
+    endif
+    return expression
+endfunction
+
+
+"============================================================================}}}
+" s:GetinputString                                                           {{{
+" prompt the user for an expression
+"===============================================================================
+function! s:GetinputString()
+    call inputsave()
+    let Expression = input('Calc >> ')
+    call inputrestore()
+    "echo Expression
+    return Expression
+endfunction
+
+"============================================================================}}}
+" s:GetVisualSelection                                                       {{{
+" credit Pete Rodding:
+" http://stackoverflow.com/questions/1533565/how-to-get-visually-selected-text-in-vimscript 
+"
+" gets the visually selected text
+"===============================================================================
+function! s:GetVisualSelection()
+    " Why is this not a built-in Vim script function?!
+    let [lnum1, col1] = getpos("'<")[1:2]
+    let [lnum2, col2] = getpos("'>")[1:2]
+    let lines = getline(lnum1, lnum2)
+    let lines[-1] = lines[-1][: col2 - (&selection == 'inclusive' ? 1 : 2)]
+    let lines[0] = lines[0][col1 - 1:]
+    return join(lines, "\n")
+endfunction
+
+"============================================================================}}}
+" s:CheckForVisual                                                           {{{
+" Checks to see if there is a vialual selection and limits it to 1 line 
+"===============================================================================
+function! s:CheckForVisual(firstln, lastln)
+    let testvar = a:lastln-a:firstln +1
+    let lines = line('$')
+    " echo lines . ' = the lines in the file'
+    " echo testvar . ' = the selected lines '
+    if testvar == lines
+        return 'no'
+        "NOTE: limit selected lines to 1
+    elseif testvar > 1  "
+        return 'tooMuch'
+    else
+        return 'yes'
+    endif
+endfunction
+
+"============================================================================}}}
+" s:ListifyExpression                                                        {{{
+" makes the expression a list of by putting spaces around non numbers 
+"===============================================================================
+function! s:ListifyExpression(expression)
+    "space everything but numbers. eg 3.43*-1299 becoms 3.43 * - .1299
+    "Then the expression is split by it's spaces [ '3.43' , '*', '-', '.1299']
+    let e = a:expression
+    let e = substitute(e, '\([^0-9.]\)', ' \1 ', 'g')
+    let expressionList = split(e, ' ')
+    return expressionList
+endfunction
+
+"============================================================================}}}
+" s:FloatifyExpression                                                       {{{
+" convert all items in the list into their float equivilent 
+"===============================================================================
+function! s:FloatifyExpression(ListExpression)
+    "convert every space delimneted value into a float 
+    " E.G. [ '3.43', '*', '-', '.1299' ] becomes [ '3.43', '0.00', '0.00', '0.1299']
+    let newexpressionList = []
+    for bit in a:ListExpression
+        call add(newexpressionList, string(str2float(bit)))
+    endfor
+    "echom string(newexpressionList)
+    return newexpressionList
+endfunction
+
+"============================================================================}}}
+" s:RepairExpression                                                         {{{
+" Convert Non numbers from 0.0 back to their original value
+"===============================================================================
+function! s:RepairExpression(OldListExpression, ListExpression)
+    " if a non number evaluated to 0.0 replace it with it's old value 
+    " Eg from the last example [ '3.43', '0.00', '0.00', '0.1299'] [ '3.43', '*', '-', '0.1299']
+    " so loop through every part of the list
+    let NewListExpression = a:ListExpression
+    let index = len(a:ListExpression) - 1
+    while index >= 0 
+        if a:ListExpression[index] == "0.0"
+            let NewListExpression[index] = a:OldListExpression[index]
+        endif 
+        let index = index - 1 
+    endwhile
+    "join the expression list and dertermine to output
+    let expressionFinal=join(NewListExpression, '')
+    "echo expressionFinal
+    return expressionFinal
+endfunction
+
+
+"============================================================================}}}
+" s:EvaluateExpression                                                       {{{
+" Evaluates the expression and checks for errors in the process. Also 
+" if there is no error echo the result and save a copy of it to the defualt 
+" pase register
+"===============================================================================
+function! s:EvaluateExpression(expression)
+    let errorFlag = 0
+    try
+        execute "let result =" . a:expression
+    catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
+        let errorFlag = 1  
+    endtry
+    if errorFlag == 1
+        echom "ERROR: invalid input"
+        let @" = "ERROR: invalid input"
+    else
+        redraw
+        echo a:expression
+        echo "= " . string(result)
+        echo "Yanked Result"
+        let @" = string(result)
+    endif
+endfunction
+
+"============================================================================}}}
+" Commands                                                                   {{{
+"===============================================================================
+command! -nargs=* -range=% Crunch <line1>,<line2>call s:Crunch()
+"cabbrev vc Vcal
+
+"Crunch Line maping
+nnoremap <leader>cl V:Vcalc<CR>A=<ESC>p
+
+" notes on making a vim plugin 
+" source after every save 
+"autocmd BufWritePost vcal.vim source ~/.vim/bundle/vcal/plugin/vcal.vim
+"you could also run a particular function every time you save 
+"
