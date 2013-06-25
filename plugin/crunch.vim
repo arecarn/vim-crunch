@@ -187,7 +187,7 @@ endfunction
 " pase register
 "===============================================================================
 function! s:EvaluateExpression(expression)
-    echo a:expression . " this tis the final expression"
+    "echo a:expression . " this tis the final expression"
     let errorFlag = 0
     try
         execute "let result =" . a:expression
