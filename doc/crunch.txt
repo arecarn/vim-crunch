@@ -1,4 +1,5 @@
 *crunch.txt* Unlock Vims build in calculator
+*crunch*
 ================================================================================
              ______   ______   __  __   __   __   ______   __  __  
             /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \
@@ -53,7 +54,7 @@ with a decimal point. It also makes doing math with Vim so much more easy.
     Calc >> 
     for you to enter you mathematical expression
 
-2. :'<,'>Cruch
+2. :'<,'>Crunch
     Use Crunch from visual mode, Crunch Uses the selected line as the expression 
     if more than one line is selected an error is echoed and Crunch is ended
 
@@ -71,8 +72,7 @@ invalid input". This same string will be yanked into the paste register.
 
 
 ================================================================================
-*EXTEND*
-
+*CONFIGURATION*
 The Following mapping for making Crunch more useful for evaluating
 math in a buffer. 
 
@@ -93,27 +93,25 @@ e.g. The mapping would be invoked on the following expression.
 Note: <leader>ee can be replace with any mapping you desire
 
 ================================================================================
-*CONFIGURATION*
+*KNOWN-PROBLEMS*
 
-None yet
-
+Visual selection doesn't work with files with 1 line 
 ================================================================================
 *CHANGE-LOG*
 
+24 Jun 2013 added multiplication fix
 19 Jun 2013 first version
 
 ================================================================================
 *TO-DO/ADDITIONS*
 
-* custom prompt
+some of these might end up happening:
+* custom prompt eg not >>
 * interactive buffer mode like VimCalc
 * support for ^ instead of pow()
-* add * before and after functions so syntax remains valid 
-  e.g. 2sin()3 becomes 2*sin()*3
 * add in support for e and pi
   e = exp(1) = 2.718282
   pi = 3.141593
-* save cursor position when using visual selection and normal mode 
 * add support for exponentials e.g. 10e6 for 10000000.0
 
 ================================================================================

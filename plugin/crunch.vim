@@ -11,6 +11,10 @@ function! s:Crunch(firstln,lastln)
     let ListExpressionOne = s:ListifyExpression(expression)
     let ListExpressionTwo = s:FloatifyExpression(ListExpressionOne)
     let finalExpression = s:RepairExpression(ListExpressionOne,ListExpressionTwo)
+    let finalExpression = tolower(finalExpression) "makes user defined function not work 
+    let finalExpression = s:RemoveSpaces(finalExpression)
+    let finalExpression = s:FixMultiplication(finalExpression)
+    "let finalExpression = s:HandleCarrot(finalExpression)
     call s:EvaluateExpression(finalExpression)
 endfunction
 
@@ -19,6 +23,8 @@ endfunction
 "gets input either though prompt or visual selection
 "===============================================================================
 function! s:GetInput(firstln, lastln)
+    "echo a:firstln . ' =first line '
+    "echo a:lastln . ' =last line '
     let visualmode = s:CheckForVisual(a:firstln, a:lastln)
     if visualmode == 'no'
         let expression = s:GetinputString()
@@ -31,6 +37,7 @@ function! s:GetInput(firstln, lastln)
     if expression == ''
         return "q"
     endif
+    echo expression
     return expression
 endfunction
 
@@ -65,14 +72,17 @@ function! s:GetVisualSelection()
 endfunction
 
 "============================================================================}}}
-" s:CheckForVisual                                                           {{{
+" s:CheckForVisual                                                         {{{
 " Checks to see if there is a vialual selection and limits it to 1 line 
-"===============================================================================
+"=============================================================================
 function! s:CheckForVisual(firstln, lastln)
     let testvar = a:lastln-a:firstln +1
     let lines = line('$')
-    " echo lines . ' = the lines in the file'
-    " echo testvar . ' = the selected lines '
+     "echo lines . ' = the lines in the file'
+     "echo testvar . ' = the selected lines '
+     if lines == 1
+         echo "Warning visual selections don't work with 1 line buffers"
+     endif 
     if testvar == lines
         return 'no'
         "NOTE: limit selected lines to 1
@@ -83,6 +93,42 @@ function! s:CheckForVisual(firstln, lastln)
     endif
 endfunction
 
+"==========================================================================}}}
+" s:RemoveSpaces                                                           {{{
+" prompt the user for an expression
+"=============================================================================
+function! s:RemoveSpaces(expression)
+    let s:e = substitute(a:expression,'\s','','g')
+    echo s:e 'removed whitespace'
+    return s:e
+endfunction
+"==========================================================================}}}
+" s:HandleCarrot                                                           {{{
+" changes '2^5' into 'pow(2,5)' 
+" cases
+" fun()^fun() eg sin(1)^sin(1)
+" fun()^num() eg sin(1)^2
+" num^fun() eg 2^sin(1) 
+" num^num() eg 2^2
+"=============================================================================
+function! s:HandleCarrot(expression)
+    let s:e = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)', 'pow(\1,\2)','g') " good
+    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\([0-9.]\+\)', 'pow(\1,\2)','g') "questionable 
+    let s:e = substitute(s:e, '\([0-9.]\+\)\^\(\a\+(.\{-})\)' , 'pow(\1,\2)','g') "good 
+    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\(\a\+(.\{-})\)' , 'pow(\1,\2)','g') "bad
+    return s:e
+endfunction
+"==========================================================================}}}
+" s:FixMultiplication                                                      {{{
+" turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
+"=============================================================================
+function! s:FixMultiplication(expression)
+    let s:e = substitute(a:expression,'\(\d*\.\{0,1}\d\)\(\a\)', '\1\*\2','g')
+    let s:e = substitute(s:e, '\()\)\(\d*\.\{0,1}\d\)', '\1\*\2', 'g')
+    let s:e = substitute(s:e, '\([0-9.]\+\)\((\)', '\1\*\2', 'g')
+    "echo s:e . '  = fixed muliplication'
+    return s:e
+endfunction
 "============================================================================}}}
 " s:ListifyExpression                                                        {{{
 " makes the expression a list of by putting spaces around non numbers 
@@ -141,6 +187,7 @@ endfunction
 " pase register
 "===============================================================================
 function! s:EvaluateExpression(expression)
+    echo a:expression . " this tis the final expression"
     let errorFlag = 0
     try
         execute "let result =" . a:expression
@@ -165,7 +212,7 @@ endfunction
 command! -nargs=* -range=% Crunch call s:Crunch(<line1>,<line2>)
 
 "Crunch Line maping
-map <Plug>Crunch_Line V:Crunch<CR>A=<ESC>p
+map <Plug>Crunch_Line ^v$:Crunch<CR>A=<ESC>p
 
 "NOTE
 "the following mapping works in a vimrc 
@@ -175,4 +222,5 @@ map <Plug>Crunch_Line V:Crunch<CR>A=<ESC>p
 " source after every save 
 "autocmd BufWritePost vcal.vim source ~/.vim/bundle/vcal/plugin/vcal.vim
 "you could also run a particular function every time you save 
+"
 "
