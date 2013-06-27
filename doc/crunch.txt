@@ -1,11 +1,14 @@
 *crunch.txt* Unlock Vims build in calculator
 *crunch*
 ==============================================================================
-             ______   ______   __  __   __   __   ______   __  __  
-            /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \
-            \ \ \____\ \  __< \ \ \_\ \\ \ \-.  \\ \ \____\ \  __ \
-             \ \_____\\ \_\ \_\\ \_____\\ \_\\"\_\\ \_____\\ \_\ \_\
-              \/_____/ \/_/ /_/ \/_____/ \/_/ \/_/ \/_____/ \/_/\/_/
+|||||||||>                                                          <|||||||||
+|||||||||>  ______   ______   __  __   __   __   ______   __  __    <|||||||||
+|||||||||> /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \   <|||||||||       
+|||||||||> \ \ \____\ \  __< \ \ \_\ \\ \ \-.  \\ \ \____\ \  __ \  <|||||||||
+|||||||||>  \ \_____\\ \_\ \_\\ \_____\\ \_\\"\_\\ \_____\\ \_\ \_\ <|||||||||
+|||||||||>   \/_____/ \/_/ /_/ \/_____/ \/_/ \/_/ \/_____/ \/_/\/_/ <|||||||||
+|||||||||>                                                          <|||||||||
+|||||||||>                                                          <|||||||||
 ==============================================================================
 ASCII font courtesy of Patrick Gillespie http://patorjk.com/
 ==============================================================================
@@ -21,16 +24,16 @@ Then 10 is inserted into the buffer or echoed in the command line.
 
 One Problem with this method is when you expect a floating point result from
 integer division
-e.g. 
+e.g.
 5/2 = 2
 You can see that the result is the truncated version of the actual result.
-When what you actually wanted was: 
+When what you actually wanted was:
 5.0/2.0 = 2.5
 
-Or when you enter a floating point number like this 
-.5/2 
-A decimal without a leading zero produces an error when you actually wanted was 
-this 
+Or when you enter a floating point number like this
+.5/2
+A decimal without a leading zero produces an error when you actually wanted was
+this
 0.5/2 = 0.25
 
 423.234/234 = 1.808692
@@ -39,21 +42,44 @@ Crunch takes care of these problems for you converting all integers into their
 floating point equivalent, and  adds the leading zero fixing values that start
 with a decimal point. It also makes doing math with Vim so much more easy.
 
+
+
+Inspiration:
+Vimcalc: Writen by Greg Sexton
+https://github.com/gregsexton/VimCalc
+
+Tagging Idea and Code:
+VIM incline calculator: written by Ihar Filipau
+http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.html
+
+
 ==============================================================================
 *USAGE*
 
 1. :Crunch
     Crunch then gives you the prompt:
-    Calc >> 
+    Calc >>
     for you to enter you mathematical expression. The result is then available
-    to be pasted from the default register.  
+    to be pasted from the default register.
 
 2. :CrunchLine or <leader>ee
     Crunch Uses the selected line as the expression and adds the result to the
-    end 
+    end
 
-    Example of crunch line usage with tags
-    
+Example: calculate area and volume given the radius. Type this:
+
+radius# = 5
+pi# = 3.1415
+area# pow(#radius,2)*#pi
+volume# pow(#radius,3)*#pi*4.0/3.0
+
+First two lines work like constants denoting Pi and the radius. <leader>ee (or
+^O + <leader>ee if in insert mode) when cursor on 3rd and 4th lines to evaluate
+the expressions and see the results:
+
+area# pow(#radius,2)*#pi = 78.5375
+volume# pow(#radius,3)*#pi*4.0/3.0 = 523.583333
+
 
 If invalid expressions are used Crunch will let you know echoing or inserting
 "ERROR: Invalid Input". This same string will be yanked into the paste
@@ -75,12 +101,14 @@ g:crunch_calc_prompt
 ==============================================================================
 *KNOWN-PROBLEMS*
 
+none right now
+
 ==============================================================================
 *CHANGE-LOG*
 
-27 Jun 2013 * added tags 
-            * clearing of previous result 
-            * made Crunch and CrunchLine two different functions 
+27 Jun 2013 * added tags
+            * clearing of previous result
+            * made Crunch and CrunchLine two different functions
             * Removed visual selection in favor of whole line evaluation.
             * made calculator prompt customizable
 
@@ -103,16 +131,16 @@ Some of these might end up happening:
 *LICENSE*
                  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                             Version 2, December 2004
- 
+
                 Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
- 
+
        Everyone is permitted to copy and distribute verbatim or modified
       copies of this license document, and changing it is allowed as long
                             as the name is changed.
- 
-                  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
+
+                  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
         TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
- 
+
                     0. You just DO WHAT THE FUCK YOU WANT TO
 ==============================================================================
 *REPOSITORY-AND-BUG-TRACKER*
