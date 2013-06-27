@@ -51,6 +51,8 @@ with a decimal point. It also makes doing math with Vim so much more easy.
 2. :CrunchLine or <leader>ee
     Crunch Uses the selected line as the expression and adds the result to the
     end 
+
+    Example of crunch line usage with tags
     
 
 If invalid expressions are used Crunch will let you know echoing or inserting
@@ -65,16 +67,23 @@ register.
 ==============================================================================
 *CONFIGURATION*
 
+defualt '#'
+g:crunch_tag_marker
 
-
+defualt 'Calc >> '
+g:crunch_calc_prompt
 ==============================================================================
 *KNOWN-PROBLEMS*
 
 ==============================================================================
 *CHANGE-LOG*
 
-27 Jun 2013 added tags and clearing of previous result (made Crunch and Crunch
-            line 2 different functions
+27 Jun 2013 * added tags 
+            * clearing of previous result 
+            * made Crunch and CrunchLine two different functions 
+            * Removed visual selection in favor of whole line evaluation.
+            * made calculator prompt customizable
+
 24 Jun 2013 added multiplication fix
 19 Jun 2013 first version
 
@@ -82,7 +91,7 @@ register.
 *TO-DO/ADDITIONS*
 
 Some of these might end up happening:
-* custom prompt eg not >>
+* make a demo of the plugin
 * interactive buffer mode like VimCalc
 * support for ^ instead of pow()
 * add in support for e and pi
