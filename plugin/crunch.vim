@@ -52,10 +52,10 @@ endfunction
 function! s:ReplaceTag(expression) 
     let e = a:expression
     " strip the tag, if any
-    let e = substitute( e, '[a-zA-Z0-9]\+' . crunch_tag_marker . '[[:space:]]*', "", "" )
+    let e = substitute( e, '[a-zA-Z0-9]\+' . g:crunch_tag_marker . '[[:space:]]*', "", "" )
 
     " replace values by the tag
-    let e = substitute( e, crunch_tag_marker . '\([a-zA-Z0-9]\+\)', '\=CalcGetValue(submatch(1))', 'g' )
+    let e = substitute( e, g:crunch_tag_marker . '\([a-zA-Z0-9]\+\)', '\=s:GetTagValue(submatch(1))', 'g' )
     return e
 endfunction
 
@@ -64,7 +64,7 @@ endfunction
 "TODO give the source  this script
 "=============================================================================
 function! s:GetTagValue(tag)
-    let s = search( '^'. a:tag . crunch_tag_marker, "bn" )
+    let s = search( '^'. a:tag . g:crunch_tag_marker, "bn" )
     if s == 0 | throw "Calc error: tag ".tag." not found" | endif
     " avoid substitute() as we are called from inside substitute()
     let line = getline( s )
@@ -95,7 +95,7 @@ function! s:GetInputString()
     "echo Expression
     return Expression
 endfunction
-4234.4324/23
+
 "==========================================================================}}}
 " s:RemoveSpaces                                                           {{{
 " prompt the user for an expression

@@ -62,7 +62,7 @@ http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.htm
     for you to enter you mathematical expression. The result is then available
     to be pasted from the default register.
 
-2. :CrunchLine or <leader>ee
+2. :CrunchLine or <leader>eq
     Crunch Uses the selected line as the expression and adds the result to the
     end
 
@@ -73,8 +73,8 @@ pi# = 3.1415
 area# pow(#radius,2)*#pi
 volume# pow(#radius,3)*#pi*4.0/3.0
 
-First two lines work like constants denoting Pi and the radius. <leader>ee (or
-^O + <leader>ee if in insert mode) when cursor on 3rd and 4th lines to evaluate
+First two lines work like constants denoting Pi and the radius. <leader>eq (or
+^O + <leader>eq if in insert mode) when cursor on 3rd and 4th lines to evaluate
 the expressions and see the results:
 
 area# pow(#radius,2)*#pi = 78.5375
@@ -88,7 +88,7 @@ register.
 ==============================================================================
 *MAPPINGS*
 
-                       nmap <leader>ee <Plug>Crunch_Line
+                       nmap <leader>eq <Plug>Crunch_Line
 
 ==============================================================================
 *CONFIGURATION*
