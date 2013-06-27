@@ -1,8 +1,9 @@
 "Globals                                                                   {{{
 " The Top Level Function that determines  program flow
 "=============================================================================
-let g:crunch_tag_marker = "#" 
-let g:crunch_calc_prompt = "Calc >> "
+let g:crunch_tag_marker = '#' 
+let g:crunch_calc_prompt = 'Calc >> '
+
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
 " The Top Level Function that determines  program flow
@@ -28,7 +29,6 @@ function! s:CrunchLine(line)
 endfunction
 
 "==========================================================================}}}
-
 "s:Core                                                                    {{{
 "the main functionality of crunch
 "=============================================================================
@@ -47,23 +47,24 @@ endfunction
 "==========================================================================}}}
 
 "s:ReplaceTag                                                              {{{
+"TODO give the source of this script
 "=============================================================================
 function! s:ReplaceTag(expression) 
     let e = a:expression
     " strip the tag, if any
-    let e = substitute( e, '[a-zA-Z0-9]\+'.s:tag_marker.'[[:space:]]*', "", "" )
+    let e = substitute( e, '[a-zA-Z0-9]\+' . crunch_tag_marker . '[[:space:]]*', "", "" )
 
     " replace values by the tag
-    let e = substitute( e, s:tag_marker.'\([a-zA-Z0-9]\+\)', '\=CalcGetValue(submatch(1))', 'g' )
+    let e = substitute( e, crunch_tag_marker . '\([a-zA-Z0-9]\+\)', '\=CalcGetValue(submatch(1))', 'g' )
     return e
 endfunction
 
 "==========================================================================}}}
 "s:GetTagValue                                                             {{{
-" TODO source  this script
+"TODO give the source  this script
 "=============================================================================
 function! s:GetTagValue(tag)
-    let s = search( '^'.a:tag.s:tag_marker, "bn" )
+    let s = search( '^'. a:tag . crunch_tag_marker, "bn" )
     if s == 0 | throw "Calc error: tag ".tag." not found" | endif
     " avoid substitute() as we are called from inside substitute()
     let line = getline( s )
@@ -73,9 +74,9 @@ function! s:GetTagValue(tag)
 endfunction
 
 "==========================================================================}}}
-
 "s:RemoveOldResult                                                         {{{
 "Remove old result if any eg '5+5 = 10' becomes '5+5'
+"TODO give the source of this script
 "=============================================================================
 function! s:RemoveOldResult(expression)
     let e = a:expression
@@ -94,7 +95,7 @@ function! s:GetInputString()
     "echo Expression
     return Expression
 endfunction
-
+4234.4324/23
 "==========================================================================}}}
 " s:RemoveSpaces                                                           {{{
 " prompt the user for an expression
