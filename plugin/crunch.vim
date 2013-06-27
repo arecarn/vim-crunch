@@ -1,8 +1,8 @@
 "Globals                                                                   {{{
 " The Top Level Function that determines  program flow
 "=============================================================================
-let g:crunch_tag_marker = "#" "TODO make this a global that can be changed 
-
+let g:crunch_tag_marker = "#" 
+let g:crunch_calc_prompt = "Calc >> "
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
 " The Top Level Function that determines  program flow
@@ -15,7 +15,7 @@ function! s:Crunch()
 endfunction
 
 "==========================================================================}}}
-"s:CrunchLine                                                                  {{{
+"s:CrunchLine                                                              {{{
 " The Top Level Function that determines  program flow
 "=============================================================================
 function! s:CrunchLine(line) 
@@ -89,7 +89,7 @@ endfunction
 "=============================================================================
 function! s:GetInputString()
     call inputsave()
-    let Expression = input("Calc >> ")
+    let Expression = input(g:crunch_calc_prompt)
     call inputrestore()
     "echo Expression
     return Expression
@@ -216,7 +216,7 @@ function! s:EvaluateExpression(expression)
 endfunction
 
 "==========================================================================}}}
-" s:EvaluateExpressionLine                                                     {{{
+" s:EvaluateExpressionLine                                                 {{{
 " Evaluates the expression and checks for errors in the process. Also 
 " if there is no error echo the result and save a copy of it to the defualt 
 " pase register
@@ -230,7 +230,7 @@ function! s:EvaluateExpressionLine(expression)
         let errorFlag = 1  
     endtry
     if errorFlag == 1
-        let result = 'ERROR: Invalid Input' "TODO make this the result if there is an error
+        let result = 'ERROR: Invalid Input' 
     endif
     return result
 endfunction
@@ -246,4 +246,4 @@ command! -nargs=* -range=% CrunchLine call s:CrunchLine('.') "send the current l
 map <Plug>Crunch_Line :CrunchLine<CR>
 
 nmap <leader>ee <silent><Plug>Crunch_Line
-==========================================================
+"=============================================================================
