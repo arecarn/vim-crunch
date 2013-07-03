@@ -199,9 +199,6 @@ function! s:EvaluateExpression(expression)
     let errorFlag = 0
     try
         let result = string(eval(a:expression))
-        if matchstr(test,"\.0$") != "" 
-            result = string(str2nr(result))
-        endif
     catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
         let errorFlag = 1  
     endtry
@@ -211,9 +208,9 @@ function! s:EvaluateExpression(expression)
     else
         redraw
         echo a:expression
-        echo "= " . string(result)
+        echo "= " . result
         echo "Yanked Result"
-        let @" = string(result)
+        let @" = result
     endif
     return result
 endfunction
@@ -225,21 +222,22 @@ endfunction
 " pase register
 "=============================================================================
 function! s:EvaluateExpressionLine(expression)
-    " echo a:expression . " this tis the final expression"
+    " echo a:expression  " this tis the final expression
     let errorFlag = 0
     try
         let result = string(eval(a:expression))
-        if matchstr(test,"\.0$") != "" 
-            result = string(str2nr(result))
-        endif
     catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
         let errorFlag = 1  
     endtry
     if errorFlag == 1
         let result = 'ERROR: Invalid Input' 
     endif
+        if matchstr(test,"\.0$") != "" 
+            result = string(str2nr(result))
+        endif
     return result
 endfunction
+
 
 "==========================================================================}}}
 " Commands                                                                 {{{
