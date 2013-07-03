@@ -198,7 +198,7 @@ function! s:EvaluateExpression(expression)
     " echo a:expression . " this tis the final expression"
     let errorFlag = 0
     try
-        let result = eval(a:expression)
+        let result = printf('%.0f',eval(a:expression))
     catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
         let errorFlag = 1  
     endtry
@@ -225,7 +225,8 @@ function! s:EvaluateExpressionLine(expression)
     " echo a:expression . " this tis the final expression"
     let errorFlag = 0
     try
-        let result = string(eval(a:expression))
+        "let result = string(eval(a:expression))
+        let result = printf('%.0f',eval(a:expression))
     catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
         let errorFlag = 1  
     endtry
@@ -238,7 +239,11 @@ endfunction
 "==========================================================================}}}
 " Commands                                                                 {{{
 "=============================================================================
-command! -nargs=* -range=% Crunch call s:Crunch()
-command! -nargs=* -range=% CrunchLine call s:CrunchLine('.') "send the current line
+if !hasmapto(':Crunch')
+    command! -nargs=* -range=% Crunch call s:Crunch()
+endif
+if !hasmapto(':CrunchLine')
+    command! -nargs=* -range=% CrunchLine call s:CrunchLine('.') "send the current line
+endif
 nnoremap <silent> <unique> <Plug>Crunch_Line :call <SID>CrunchLine('.')<CR>
 
