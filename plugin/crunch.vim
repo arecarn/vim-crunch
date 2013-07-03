@@ -198,7 +198,10 @@ function! s:EvaluateExpression(expression)
     " echo a:expression . " this tis the final expression"
     let errorFlag = 0
     try
-        let result = printf('%.0f',eval(a:expression))
+        let result = string(eval(a:expression))
+        if matchstr(test,"\.0$") != "" 
+            result = string(str2nr(result))
+        endif
     catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
         let errorFlag = 1  
     endtry
@@ -225,8 +228,10 @@ function! s:EvaluateExpressionLine(expression)
     " echo a:expression . " this tis the final expression"
     let errorFlag = 0
     try
-        "let result = string(eval(a:expression))
-        let result = printf('%.0f',eval(a:expression))
+        let result = string(eval(a:expression))
+        if matchstr(test,"\.0$") != "" 
+            result = string(str2nr(result))
+        endif
     catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
         let errorFlag = 1  
     endtry
