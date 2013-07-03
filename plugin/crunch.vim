@@ -199,6 +199,9 @@ function! s:EvaluateExpression(expression)
     let errorFlag = 0
     try
         let result = string(eval(a:expression))
+        if matchstr(result,"\.0$") != "" 
+            result = string(str2nr(result))
+        endif
     catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
         let errorFlag = 1  
     endtry
@@ -226,18 +229,17 @@ function! s:EvaluateExpressionLine(expression)
     let errorFlag = 0
     try
         let result = string(eval(a:expression))
+        if matchstr(result,"\.0$") != "" 
+            result = string(str2nr(result))
+        endif
     catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
         let errorFlag = 1  
     endtry
     if errorFlag == 1
         let result = 'ERROR: Invalid Input' 
     endif
-        if matchstr(test,"\.0$") != "" 
-            result = string(str2nr(result))
-        endif
     return result
 endfunction
-
 
 "==========================================================================}}}
 " Commands                                                                 {{{
