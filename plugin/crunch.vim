@@ -200,7 +200,7 @@ function! s:EvaluateExpression(expression)
     try
         let result = string(eval(a:expression))
         if matchstr(result,"\.0$") != "" 
-            result = string(str2nr(result))
+            let result = string(str2nr(result))
         endif
     catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
         let errorFlag = 1  
@@ -230,7 +230,7 @@ function! s:EvaluateExpressionLine(expression)
     try
         let result = string(eval(a:expression))
         if matchstr(result,"\.0$") != "" 
-            result = string(str2nr(result))
+          let result = string(str2nr(result))
         endif
     catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
         let errorFlag = 1  
