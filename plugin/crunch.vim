@@ -240,3 +240,5 @@ endfunction
 "=============================================================================
 command! -nargs=* -range=% Crunch call s:Crunch()
 command! -nargs=* -range=% CrunchLine call s:CrunchLine('.') "send the current line
+nnoremap <silent> <unique> <Plug>Crunch_Line :call <SID>CrunchLine('.')<CR>
+
