@@ -239,6 +239,4 @@ endfunction
 " Commands                                                                 {{{
 "=============================================================================
 command! -nargs=* -range=% Crunch call s:Crunch()
-
 command! -nargs=* -range=% CrunchLine call s:CrunchLine('.') "send the current line
-
