@@ -3,6 +3,7 @@
 "=============================================================================
 let g:crunch_tag_marker = '#' 
 let g:crunch_calc_prompt = 'Calc >> '
+"let g:crunch_load_default_mappings = 1
 
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
@@ -45,7 +46,6 @@ function! s:Core(e)
 endfunction
 
 "==========================================================================}}}
-
 "s:ReplaceTag                                                              {{{
 "TODO give the source of this script
 "=============================================================================
@@ -243,8 +243,3 @@ command! -nargs=* -range=% Crunch call s:Crunch()
 
 command! -nargs=* -range=% CrunchLine call s:CrunchLine('.') "send the current line
 
-"Crunch Line maping
-map <Plug>Crunch_Line :CrunchLine<CR>
-
-nmap <leader>ee <silent><Plug>Crunch_Line
-"=============================================================================

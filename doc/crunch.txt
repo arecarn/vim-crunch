@@ -1,14 +1,14 @@
 *crunch.txt* Unlock Vims build in calculator
 *crunch*
 ==============================================================================
-|||||||||>                                                          <|||||||||
-|||||||||>  ______   ______   __  __   __   __   ______   __  __    <|||||||||
-|||||||||> /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \   <|||||||||       
-|||||||||> \ \ \____\ \  __< \ \ \_\ \\ \ \-.  \\ \ \____\ \  __ \  <|||||||||
-|||||||||>  \ \_____\\ \_\ \_\\ \_____\\ \_\\"\_\\ \_____\\ \_\ \_\ <|||||||||
-|||||||||>   \/_____/ \/_/ /_/ \/_____/ \/_/ \/_/ \/_____/ \/_/\/_/ <|||||||||
-|||||||||>                                                          <|||||||||
-|||||||||>                                                          <|||||||||
+--------->                                                          <---------
+--------->  ______   ______   __  __   __   __   ______   __  __    <---------
+---------> /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \   <---------
+---------> \ \ \____\ \  __< \ \ \_\ \\ \ \-.  \\ \ \____\ \  __ \  <---------
+--------->  \ \_____\\ \_\ \_\\ \_____\\ \_\\"\_\\ \_____\\ \_\ \_\ <---------
+--------->   \/_____/ \/_/ /_/ \/_____/ \/_/ \/_/ \/_____/ \/_/\/_/ <---------
+--------->                                                          <---------
+--------->                                                          <---------
 ==============================================================================
 ASCII font courtesy of Patrick Gillespie http://patorjk.com/
 ==============================================================================
@@ -19,24 +19,24 @@ used. To use Vim as a calculator you tap into Vim's Scripting language. Without
 Crunch the process goes as follows.
 
 From insert mode or command line more:
-<CTRL-R>=5+5<CR>
+    <CTRL-R>=5+5<CR>
 Then 10 is inserted into the buffer or echoed in the command line.
 
 One Problem with this method is when you expect a floating point result from
 integer division
-e.g.
-5/2 = 2
+                                     e.g.
+                                   5/2 = 2
 You can see that the result is the truncated version of the actual result.
 When what you actually wanted was:
-5.0/2.0 = 2.5
+                                5.0/2.0 = 2.5
 
 Or when you enter a floating point number like this
-.5/2
+                                     .5/2
 A decimal without a leading zero produces an error when you actually wanted was
 this
-0.5/2 = 0.25
+                                 0.5/2 = 0.25
 
-423.234/234 = 1.808692
+                            423.234/234 = 1.808692
 
 Crunch takes care of these problems for you converting all integers into their
 floating point equivalent, and  adds the leading zero fixing values that start
@@ -57,7 +57,7 @@ http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.htm
 *USAGE*
 
 1. :Crunch
-    Crunch then gives you the prompt:
+    Crunch then gives you the following prompt in the command line:
     Calc >>
     for you to enter you mathematical expression. The result is then available
     to be pasted from the default register.
@@ -71,15 +71,15 @@ Example: calculate area and volume given the radius. Type this:
 radius# = 5
 pi# = 3.1415
 area# pow(#radius,2)*#pi
-volume# pow(#radius,3)*#pi*4.0/3.0
+volume# pow(#radius,3)*#pi*4/3
 
 First two lines work like constants denoting Pi and the radius. <leader>eq (or
-^O + <leader>eq if in insert mode) when cursor on 3rd and 4th lines to evaluate
-the expressions and see the results:
+CTRL-O <leader>eq if in insert mode) when cursor on 3rd and 4th lines to
+evaluate the expressions and see the results:
 
 area# pow(#radius,2)*#pi = 78.5375
-volume# pow(#radius,3)*#pi*4.0/3.0 = 523.583333
-
+volume# pow(#radius,3)*#pi*4/3 = 523.583333
+volume# pow(#radius,3)*#pi*4/4 = 392.6875
 
 If invalid expressions are used Crunch will let you know echoing or inserting
 "ERROR: Invalid Input". This same string will be yanked into the paste
@@ -101,7 +101,7 @@ g:crunch_calc_prompt
 ==============================================================================
 *KNOWN-PROBLEMS*
 
-none right now
+none
 
 ==============================================================================
 *CHANGE-LOG*
