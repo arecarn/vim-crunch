@@ -69,8 +69,11 @@ function! s:GetTagValue(tag)
     let line = getline( s )
     let idx = strridx( line, "=" )
     if idx == -1 |  throw "Calc error: line with tag ".tag."doesn't contain the '='" | endif
-    return strpart( line, idx+1 )
+    let tagvalue= strpart( line, idx+1 )
+    echom "[" . tagvalue . "] = the tag value"
+    return tagvalue
 endfunction
+
 
 "==========================================================================}}}
 "s:RemoveOldResult                                                         {{{
@@ -158,11 +161,14 @@ endfunction
 function! s:FloatifyExpression(ListExpression)
     "convert every space delimneted value into a float 
     " E.G. [ '3.43', '*', '-', '.1299' ] becomes [ '3.43', '0.00', '0.00', '0.1299']
+    echom string(a:ListExpression) . ' = before flotification'
     let newexpressionList = []
-    for bit in a:ListExpression
-        call add(newexpressionList, string(str2float(bit)))
+    for num in a:ListExpression
+        "call add(newexpressionList, (str2float(num)))
+        call add(newexpressionList, printf('%f',str2float(num)))
     endfor
-    "echom string(newexpressionList)
+    echom string(newexpressionList)
+    echom string(newexpressionList) . ' = after flotification'
     return newexpressionList
 endfunction
 
@@ -175,18 +181,20 @@ function! s:RepairExpression(OldListExpression, ListExpression)
     " Eg from the last example [ '3.43', '0.00', '0.00', '0.1299'] [ '3.43', '*', '-', '0.1299']
     " so loop through every part of the list
     let NewListExpression = a:ListExpression
+    echo '[' . string(NewListExpression) . '] = the before repaired expression'
     let index = len(a:ListExpression) - 1
     while index >= 0 
-        if a:ListExpression[index] == "0.0"
+        if a:ListExpression[index] == "0.000000"
             let NewListExpression[index] = a:OldListExpression[index]
         endif 
         let index = index - 1 
     endwhile
     "join the expression list and dertermine to output
     let expressionFinal=join(NewListExpression, '')
-    "echo expressionFinal
+    echo '[' . expressionFinal . '] = the repaired expression'
     return expressionFinal
 endfunction
+
 
 "==========================================================================}}}
 " s:EvaluateExpression                                                     {{{
@@ -195,27 +203,28 @@ endfunction
 " pase register
 "=============================================================================
 function! s:EvaluateExpression(expression)
-    " echo a:expression . " this tis the final expression"
+    echom a:expression . " this tis the final expression"
     let errorFlag = 0
-    try
-        let result = string(eval(a:expression))
-        if matchstr(result,"\.0$") != "" 
-            let result = string(str2nr(result))
-        endif
-    catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
-        let errorFlag = 1  
-    endtry
-    if errorFlag == 1
-        echom "ERROR: invalid input"
-        let @" = "ERROR: invalid input"
-    else
-        redraw
-        echo a:expression
-        echo "= " . result
-        echo "Yanked Result"
-        let @" = result
+    " try
+    let result = string(eval(a:expression))
+    if matchstr(result,"\m\.0$") == ".0"  "had to use \m for normal magic ness for some reason
+        let result = string(str2nr(result))
     endif
-    return result
+    " catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
+    " let errorFlag = 1  
+    " endtry
+    " if errorFlag == 1
+    " let result = "ERROR: invalid input"
+    " echom "ERROR: invalid input"
+    " let @" = "ERROR: invalid input"
+    " else
+    redraw
+    echo a:expression
+    echo "= " . result
+    echo "Yanked Result"
+    let @" = result
+endif
+return result
 endfunction
 
 "==========================================================================}}}
@@ -225,19 +234,24 @@ endfunction
 " pase register
 "=============================================================================
 function! s:EvaluateExpressionLine(expression)
-    " echo a:expression  " this tis the final expression
+    echom a:expression  " this this the final expression"
     let errorFlag = 0
-    try
-        let result = string(eval(a:expression))
-        if matchstr(result,"\.0$") != "" 
-          let result = string(str2nr(result))
-        endif
-    catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
-        let errorFlag = 1  
-    endtry
-    if errorFlag == 1
-        let result = 'ERROR: Invalid Input' 
+    echom a:expression
+    " try
+    let result = string(eval(a:expression))
+    echom result  " this this the final result before intization"
+    if matchstr(result,"\m\.0$") == ".0"  "had to use \m for normal magic ness for some reason
+        echo '[' . matchstr(result,"\.0$") . '] is the matched string'
+        "TODO add in printf for large nums that would eval to e numbers
+        let result = string(str2nr(result))
+        echom result  " this this the final result after intization"
     endif
+    " catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
+    "     let errorFlag = 1  
+    " endtry
+    " if errorFlag == 1
+    "     let result = 'ERROR: Invalid Input' 
+    " endif
     return result
 endfunction
 
