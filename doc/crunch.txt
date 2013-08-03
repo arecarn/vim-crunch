@@ -1,6 +1,9 @@
-*crunch.txt* Unlock Vims build in calculator
+*crunch.txt* Perform incline calculations inside a Vim buffer
 *crunch*
-==============================================================================
+
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 --------->                                                          <---------
 --------->  ______   ______   __  __   __   __   ______   __  __    <---------
 ---------> /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \   <---------
@@ -9,18 +12,39 @@
 --------->   \/_____/ \/_/ /_/ \/_____/ \/_/ \/_/ \/_____/ \/_/\/_/ <---------
 --------->                                                          <---------
 --------->                                                          <---------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+        A Vim plugin that provides an inline calculator with tag support
+                                                                              
 ==============================================================================
-ASCII font courtesy of Patrick Gillespie http://patorjk.com/
+*CONTENTS*
+
+     1. Overview .................................... |CrunchOverview|
+     2. Usage ....................................... |CrunchUsage|
+     3. Mappings  ................................... |CrunchMappings|
+     4. Configuration ............................... |CrunchConfiguration|
+         4.1 g:crunch_tag_marker .................... |CrunchTagMarker|
+         4.2 g:crunch_calc_prompt ................... |CrunchCalcPrompt|
+     5. Known Issues ................................ |CrunchKnownIssues|
+     6. Contribute .................................. |CrunchContribute|
+     7. Change Log .................................. |CrunchChangeLog|
+     8. Credits ..................................... |CrunchCredits|
+     9. License ..................................... |CrunchLicenece|
+
 ==============================================================================
-*OVERVIEW*
+1. *OVERVIEW*                                                     *CrunchOverview*
 
 Crunch makes using Vim as a Calculator easier and forces floating point to be
-used. To use Vim as a calculator you tap into Vim's Scripting language. Without
-Crunch the process goes as follows.
+used. To use Vim as a calculator you tap into Vim's Scripting language.
+Without Crunch the process goes as follows.
 
 From insert mode or command line more:
     <CTRL-R>=5+5<CR>
-Then 10 is inserted into the buffer or echoed in the command line.
+Then "ERROR: Invalid Input" is inserted into the buffer or echoed in the
+command line.
+ 
 
 One Problem with this method is when you expect a floating point result from
 integer division
@@ -32,9 +56,8 @@ When what you actually wanted was:
 
 Or when you enter a floating point number like this
                                      .5/2
-A decimal without a leading zero produces an error when you actually wanted was
-this
-                                 0.5/2 = 0.25
+A decimal without a leading zero produces an error when you actually wanted
+was this 0.5/2 = 0.25
 
                             423.234/234 = 1.808692
 
@@ -42,19 +65,8 @@ Crunch takes care of these problems for you converting all integers into their
 floating point equivalent, and  adds the leading zero fixing values that start
 with a decimal point. It also makes doing math with Vim so much more easy.
 
-
-
-Inspiration:
-Vimcalc: Writen by Greg Sexton
-https://github.com/gregsexton/VimCalc
-
-Tagging Idea and Code:
-VIM incline calculator: written by Ihar Filipau
-http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.html
-
-
 ==============================================================================
-*USAGE*
+2. *USAGE*                                                           *CrunchUsage*
 
 1. :Crunch
     Crunch then gives you the following prompt in the command line:
@@ -86,25 +98,36 @@ If invalid expressions are used Crunch will let you know echoing or inserting
 register.
 
 ==============================================================================
-*MAPPINGS*
-
+3. *Mappings*                                                     *CrunchMappings*
                        nmap <leader>eq <Plug>Crunch_Line
 
 ==============================================================================
-*CONFIGURATION*
+4. *CONFIGURATION*                                           *CrunchConfiguration*
 
-defualt '#'
-g:crunch_tag_marker
 
-defualt 'Calc >> '
-g:crunch_calc_prompt
+------------------------------------------------------------------------------
+4.1 g:crunch_tag_marker                                        *CrunchTagMarker*
+
+Default = '#'
+
+------------------------------------------------------------------------------
+4.2 g:crunch_calc_prompt                                      *CrunchCalcPrompt*
+
+Default 'Calc >> '
+
 ==============================================================================
-*KNOWN-PROBLEMS*
+5. *KNOWN_ISSUES*                                              *CrunchKnownIssues*
 
-none
+None that I know about.
 
 ==============================================================================
-*CHANGE-LOG*
+6. *CONTRIBUTE*                                                 *CrunchContribute*
+
+Repository and Bug Tracker:
+https://github.com/arecarn/crunch
+
+==============================================================================
+7. *CHANGE_LOG*                                                  *CrunchChangeLog*
 
 27 Jun 2013 * added tags
             * clearing of previous result
@@ -115,20 +138,48 @@ none
 24 Jun 2013 added multiplication fix
 19 Jun 2013 first version
 
-==============================================================================
-*TO-DO/ADDITIONS*
+------------------------------------------------------------------------------
+TODO:
 
-Some of these might end up happening:
+Will Happen:
+------------
+* add support for modulus
+* add a check to see if there is a blank line and do nothing
 * make a demo of the plugin
-* interactive buffer mode like VimCalc
-* support for ^ instead of pow()
-* add in support for e and pi
+* add support for neocomplete and neocompletecache completion like neco-calc
+    * also look into how neco-calc converts floats it looks pretty eleagant
+
+Might Happen:
+-------------
+* interactive buffer mode like VimCalc // maybe I don't want this
+* support for ^ instead of pow() // this seems like it might be pretty hard
+* add in support for e and pi // note sure I want to do this with tags now
   e = exp(1) = 2.718282
-  pi = 3.141593
+  pi = 2acos(0) = 2asin(1) = 3.141593
 * add support for exponentials e.g. 10e6 for 10000000.0
+* possibly remove support for a situation like this sin(2)2 being equal to
+  sin(2)*2
+    
+==============================================================================
+8. *CREDITS*                                                       *CrunchCredits*
+
+Sources inspiration and credits for this plugin
+
+- http://patorjk.com/
+  ASCII font courtesy of Patrick Gillespie 
+
+- https://github.com/gregsexton/VimCalc
+  Greg Sexton Wrote  Vimcalc
+
+- http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.html
+  Ihar Filipau wrote most of the tagging code as well as VIM incline
+  calculator 
+
+- Neco-calc
+  TODO:find source in bookmarks 
 
 ==============================================================================
-*LICENSE*
+9. *LICENSE*                                                      *CrunchLicenece*
                  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                             Version 2, December 2004
 
@@ -142,9 +193,6 @@ Some of these might end up happening:
         TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
                     0. You just DO WHAT THE FUCK YOU WANT TO
+
 ==============================================================================
-*REPOSITORY-AND-BUG-TRACKER*
-
-https://github.com/arecarn/crunch
-
 vim:tw=78:ts=8:ft=help:norl:fdm=manual:

@@ -1,8 +1,35 @@
-"Globals                                                                   {{{
+"=============================================================================
+"Header                                                                    {{{
+"=============================================================================
+"A cross platform compatible (Windows/Linux/OSX) plugin that facilitates
+"entering a search terms and opening web browsers 
+"Last Change: 25 Jul 2013
+"Maintainer: Ryan Carney arecarn@gmail.com
+"License:        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+"                           Version 2, December 2004
+"
+"               Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+"
+"      Everyone is permitted to copy and distribute verbatim or modified
+"     copies of this license document, and changing it is allowed as long
+"                           as the name is changed.
+"
+"                 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
+"       TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+"
+"                   0. You just DO WHAT THE FUCK YOU WANT TO
+
+"==========================================================================}}}
+"Globals + Dev Variable                                                    {{{
 " The Top Level Function that determines  program flow
 "=============================================================================
 let g:crunch_tag_marker = '#' 
 let g:crunch_calc_prompt = 'Calc >> '
+
+"=============================================================================
+"crunch_debug enables varias echos throughout the code                                                                              
+"=============================================================================
+let s:crunch_debug = 1
 
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
@@ -21,8 +48,10 @@ endfunction
 "=============================================================================
 function! s:CrunchLine(line) 
     let OriginalExpression = getline(a:line)
+    if s:ValidLine(OriginalExpression) == 0 | return | endif
     let OriginalExpression = s:RemoveOldResult(OriginalExpression)
     let expression = s:ReplaceTag(OriginalExpression)
+    if s:crunch_debug | echo '[' OriginalExpression . '] is the OriginalExpression' | endif
     let expression = s:Core(expression)
     let resultStr = s:EvaluateExpressionLine(expression)
     call setline(a:line, OriginalExpression.' = '.resultStr)
@@ -34,14 +63,43 @@ endfunction
 "=============================================================================
 function! s:Core(e) 
     let expression = a:e
-    let ListExpressionOne = s:ListifyExpression(expression)
-    let ListExpressionTwo = s:FloatifyExpression(ListExpressionOne)
-    let expression = s:RepairExpression(ListExpressionOne,ListExpressionTwo)
+
+    " convert ints to floats
+    let expression = substitute(expression, '\(\d\+\(\.\d\+\)\=\)', '\=str2float(submatch(0))' , 'g')
+    if s:crunch_debug | echom '[' . expression . '] = is the expression converted to floats' | endif
+
+    "let ListExpressionOne = s:ListifyExpression(expression)
+    "let ListExpressionTwo = s:FloatifyExpression(ListExpressionOne)
+    "let expression = s:RepairExpression(ListExpressionOne,ListExpressionTwo)
+
     let expression = tolower(expression) "makes user defined function not work 
+
     let expression = s:RemoveSpaces(expression)
+
     let expression = s:FixMultiplication(expression)
     "let finalExpression = s:HandleCarrot(expression)
     return expression
+endfunction
+
+"==========================================================================}}}
+"s:ValidLine                                                               {{{
+"Checks the line to see if it is a variable definition, or a blank line that
+"may or may not contain whitespace. 
+
+"If the line is invalid this function returns false
+"=============================================================================
+function! s:ValidLine(expression) 
+    let result = 1
+    if a:expression == '' | let result = 0 | endif
+    if matchstr(a:expression, "^*\s$") !=''  | let result = 0 | endif
+    if matchstr(a:expression, "^*\s$") !=''  | let result = 0 | endif
+    if s:crunch_debug | echom '[' . a:expression . '] = the tested string' | endif
+    if s:crunch_debug | echom '[' .  matchstr(a:expression, '.\+#\s\+=\s\+.\+') . "] = the matched string cool guy" |  endif
+    "let test = matchstr(a:expression, '.\+' . '\s\+=\s\+.\+')
+    let test = matchstr(a:expression, '.\+' . g:crunch_tag_marker . '\s\+=\s\+.\+')
+    if test !='' | let result = 0 | endif
+    "if matchstr(a:expression, '.\+#\s\+=\s\+.\+') !=''  | return | endif " Not working
+    return result
 endfunction
 
 "==========================================================================}}}
@@ -70,7 +128,7 @@ function! s:GetTagValue(tag)
     let idx = strridx( line, "=" )
     if idx == -1 |  throw "Calc error: line with tag ".tag."doesn't contain the '='" | endif
     let tagvalue= strpart( line, idx+1 )
-    echom "[" . tagvalue . "] = the tag value"
+    if s:crunch_debug | echom "[" . tagvalue . "] = the tag value" | endif
     return tagvalue
 endfunction
 
@@ -161,14 +219,14 @@ endfunction
 function! s:FloatifyExpression(ListExpression)
     "convert every space delimneted value into a float 
     " E.G. [ '3.43', '*', '-', '.1299' ] becomes [ '3.43', '0.00', '0.00', '0.1299']
-    echom string(a:ListExpression) . ' = before flotification'
+    if s:crunch_debug | echom string(a:ListExpression) . ' = before flotification' | endif
     let newexpressionList = []
     for num in a:ListExpression
         "call add(newexpressionList, (str2float(num)))
         call add(newexpressionList, printf('%f',str2float(num)))
     endfor
-    echom string(newexpressionList)
-    echom string(newexpressionList) . ' = after flotification'
+    if s:crunch_debug | echom string(newexpressionList) | endif
+    if s:crunch_debug | echom string(newexpressionList) . ' = after flotification' | endif
     return newexpressionList
 endfunction
 
@@ -181,7 +239,7 @@ function! s:RepairExpression(OldListExpression, ListExpression)
     " Eg from the last example [ '3.43', '0.00', '0.00', '0.1299'] [ '3.43', '*', '-', '0.1299']
     " so loop through every part of the list
     let NewListExpression = a:ListExpression
-    echo '[' . string(NewListExpression) . '] = the before repaired expression'
+    if s:crunch_debug | echo '[' . string(NewListExpression) . '] = the before repaired expression' | endif
     let index = len(a:ListExpression) - 1
     while index >= 0 
         if a:ListExpression[index] == "0.000000"
@@ -191,7 +249,7 @@ function! s:RepairExpression(OldListExpression, ListExpression)
     endwhile
     "join the expression list and dertermine to output
     let expressionFinal=join(NewListExpression, '')
-    echo '[' . expressionFinal . '] = the repaired expression'
+    if s:crunch_debug | echo '[' . expressionFinal . '] = the repaired expression' | endif
     return expressionFinal
 endfunction
 
@@ -199,15 +257,16 @@ endfunction
 "==========================================================================}}}
 " s:EvaluateExpression                                                     {{{
 " Evaluates the expression and checks for errors in the process. Also 
-" if there is no error echo the result and save a copy of it to the defualt 
-" pase register
+" if there is no error echo the result and save a copy of it to the default 
+" paste register
 "=============================================================================
 function! s:EvaluateExpression(expression)
-    echom a:expression . " this tis the final expression"
+    if s:crunch_debug | echom a:expression . " this tis the final expression" | endif
     let errorFlag = 0
     " try
     let result = string(eval(a:expression))
-    if matchstr(result,"\m\.0$") == ".0"  "had to use \m for normal magic ness for some reason
+    if s:crunch_debug | echo '[' . matchstr(result,"\\.0$") . '] is the matched string' | endif
+    if matchstr(result,"\\.0$") == ".0"  "matches  the 10 in 8e10 for some reason 
         let result = string(str2nr(result))
     endif
     " catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
@@ -230,21 +289,22 @@ endfunction
 "==========================================================================}}}
 " s:EvaluateExpressionLine                                                 {{{
 " Evaluates the expression and checks for errors in the process. Also 
-" if there is no error echo the result and save a copy of it to the defualt 
+" if there is no error echo the result and save a copy of it to the default 
 " pase register
 "=============================================================================
 function! s:EvaluateExpressionLine(expression)
-    echom a:expression  " this this the final expression"
+    if s:crunch_debug |     echom a:expression  " this this the final expression" | endif
     let errorFlag = 0
     echom a:expression
     " try
     let result = string(eval(a:expression))
-    echom result  " this this the final result before intization"
-    if matchstr(result,"\m\.0$") == ".0"  "had to use \m for normal magic ness for some reason
-        echo '[' . matchstr(result,"\.0$") . '] is the matched string'
-        "TODO add in printf for large nums that would eval to e numbers
+    if s:crunch_debug | echo '[' . matchstr(result,"\\.0$") . '] is the matched string' | endif
+    if s:crunch_debug | echom result  " this this the final result before intization" | endif
+    if matchstr(result,"\\.0$") == ".0"  "had to use \m for normal magicness for some reason
+        if s:crunch_debug | echo '[' . matchstr(result,"\.0$") . '] is the matched string' | endif
+        "TODO? add in printf for large nums that would eval to e numbers
         let result = string(str2nr(result))
-        echom result  " this this the final result after intization"
+        if s:crunch_debug | echom result  " this this the final result after intization" | endif
     endif
     " catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
     "     let errorFlag = 1  
@@ -258,11 +318,14 @@ endfunction
 "==========================================================================}}}
 " Commands                                                                 {{{
 "=============================================================================
+
 if !hasmapto(':Crunch')
     command! -nargs=* -range=% Crunch call s:Crunch()
 endif
+
 if !hasmapto(':CrunchLine')
-    command! -nargs=* -range=% CrunchLine call s:CrunchLine('.') "send the current line
+    command! -nargs=* -range CrunchLine <line1>,<line2>call s:CrunchLine('.') "send the current line
 endif
+
 nnoremap <silent> <unique> <Plug>Crunch_Line :call <SID>CrunchLine('.')<CR>
 
