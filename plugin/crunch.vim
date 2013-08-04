@@ -281,5 +281,5 @@ if !hasmapto(':CrunchLine')
     command! -nargs=* -range CrunchLine <line1>,<line2>call s:CrunchLine('.') "send the current line
 endif
 
-nnoremap <silent> <unique> <Plug>Crunch_Line :call <SID>CrunchLine('.')<CR>
+noremap <silent> <unique> <Plug>Crunch_Line :call <SID>CrunchLine('.')<CR>
 
