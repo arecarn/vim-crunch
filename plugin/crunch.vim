@@ -30,7 +30,7 @@ let g:crunch_calc_comment = '"'
 "=============================================================================
 "crunch_debug enables varies echos throughout the code                                                                              
 "=============================================================================
-let s:crunch_debug = 1
+let s:crunch_debug = 0
 
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
@@ -236,8 +236,8 @@ function! s:EvaluateExpression(expression)
     echo "= " . result
     echo "Yanked Result"
     let @" = result
-endif
-return result
+    "endif
+    return result
 endfunction
 
 "==========================================================================}}}
