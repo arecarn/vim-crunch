@@ -249,7 +249,7 @@ endfunction
 function! s:EvaluateExpressionLine(expression)
     if s:crunch_debug |     echom a:expression  " this this the final expression" | endif
     let errorFlag = 0
-    echom a:expression
+    " echom a:expression
     " try
     let result = string(eval(a:expression))
     if s:crunch_debug | echo '[' . matchstr(result,"\\.0$") . '] is the matched string' | endif
