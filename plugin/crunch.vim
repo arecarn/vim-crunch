@@ -29,7 +29,7 @@ let g:crunch_calc_prompt = 'Calc >> '
 "=============================================================================
 "crunch_debug enables varias echos throughout the code                                                                              
 "=============================================================================
-let s:crunch_debug = 1
+let s:crunch_debug = 0
 
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
@@ -68,16 +68,12 @@ function! s:Core(e)
     let expression = substitute(expression, '\(\d\+\(\.\d\+\)\=\)', '\=str2float(submatch(0))' , 'g')
     if s:crunch_debug | echom '[' . expression . '] = is the expression converted to floats' | endif
 
-    "let ListExpressionOne = s:ListifyExpression(expression)
-    "let ListExpressionTwo = s:FloatifyExpression(ListExpressionOne)
-    "let expression = s:RepairExpression(ListExpressionOne,ListExpressionTwo)
-
     let expression = tolower(expression) "makes user defined function not work 
-
     let expression = s:RemoveSpaces(expression)
-
     let expression = s:FixMultiplication(expression)
+
     "let finalExpression = s:HandleCarrot(expression)
+
     return expression
 endfunction
 
@@ -198,61 +194,6 @@ function! s:FixMultiplication(expression)
     " echo s:e . '  = fixed muliplication'
     return s:e
 endfunction
-
-"==========================================================================}}}
-" s:ListifyExpression                                                      {{{
-" makes the expression a list of by putting spaces around non numbers 
-"=============================================================================
-function! s:ListifyExpression(expression)
-    "space everything but numbers. eg 3.43*-1299 becoms 3.43 * - .1299
-    "Then the expression is split by it's spaces [ '3.43' , '*', '-', '.1299']
-    let e = a:expression
-    let e = substitute(e, '\([^0-9.]\)', ' \1 ', 'g')
-    let expressionList = split(e, ' ')
-    return expressionList
-endfunction
-
-"==========================================================================}}}
-" s:FloatifyExpression                                                     {{{
-" convert all items in the list into their float equivilent 
-"=============================================================================
-function! s:FloatifyExpression(ListExpression)
-    "convert every space delimneted value into a float 
-    " E.G. [ '3.43', '*', '-', '.1299' ] becomes [ '3.43', '0.00', '0.00', '0.1299']
-    if s:crunch_debug | echom string(a:ListExpression) . ' = before flotification' | endif
-    let newexpressionList = []
-    for num in a:ListExpression
-        "call add(newexpressionList, (str2float(num)))
-        call add(newexpressionList, printf('%f',str2float(num)))
-    endfor
-    if s:crunch_debug | echom string(newexpressionList) | endif
-    if s:crunch_debug | echom string(newexpressionList) . ' = after flotification' | endif
-    return newexpressionList
-endfunction
-
-"==========================================================================}}}
-" s:RepairExpression                                                       {{{
-" Convert Non numbers from 0.0 back to their original value
-"=============================================================================
-function! s:RepairExpression(OldListExpression, ListExpression)
-    " if a non number evaluated to 0.0 replace it with it's old value 
-    " Eg from the last example [ '3.43', '0.00', '0.00', '0.1299'] [ '3.43', '*', '-', '0.1299']
-    " so loop through every part of the list
-    let NewListExpression = a:ListExpression
-    if s:crunch_debug | echo '[' . string(NewListExpression) . '] = the before repaired expression' | endif
-    let index = len(a:ListExpression) - 1
-    while index >= 0 
-        if a:ListExpression[index] == "0.000000"
-            let NewListExpression[index] = a:OldListExpression[index]
-        endif 
-        let index = index - 1 
-    endwhile
-    "join the expression list and dertermine to output
-    let expressionFinal=join(NewListExpression, '')
-    if s:crunch_debug | echo '[' . expressionFinal . '] = the repaired expression' | endif
-    return expressionFinal
-endfunction
-
 
 "==========================================================================}}}
 " s:EvaluateExpression                                                     {{{
