@@ -25,11 +25,12 @@
 "=============================================================================
 let g:crunch_tag_marker = '#' 
 let g:crunch_calc_prompt = 'Calc >> '
+let g:crunch_calc_comment = '"'
 
 "=============================================================================
-"crunch_debug enables varias echos throughout the code                                                                              
+"crunch_debug enables varies echos throughout the code                                                                              
 "=============================================================================
-let s:crunch_debug = 0
+let s:crunch_debug = 1
 
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
@@ -68,12 +69,10 @@ function! s:Core(e)
     let expression = substitute(expression, '\(\d\+\(\.\d\+\)\=\)', '\=str2float(submatch(0))' , 'g')
     if s:crunch_debug | echom '[' . expression . '] = is the expression converted to floats' | endif
 
-    let expression = tolower(expression) "makes user defined function not work 
-    let expression = s:RemoveSpaces(expression)
+    " let expression = tolower(expression) "makes user defined function not work 
+    " let expression = s:RemoveSpaces(expression)
     let expression = s:FixMultiplication(expression)
-
     "let finalExpression = s:HandleCarrot(expression)
-
     return expression
 endfunction
 
@@ -86,20 +85,24 @@ endfunction
 "=============================================================================
 function! s:ValidLine(expression) 
     let result = 1
-    if a:expression == '' | let result = 0 | endif
-    if matchstr(a:expression, "^*\s$") !=''  | let result = 0 | endif
-    if matchstr(a:expression, "^*\s$") !=''  | let result = 0 | endif
+
+    if a:expression == '' | let result = 0 | endif "checks for blank lines
+    if matchstr(a:expression, "^\s*" . g:crunch_calc_comment . ".*$") !=''  | let result = 0 | endif "checks for commented lines
+
+    if s:crunch_debug | echom '[' . a:expression . '] = the tested string' | endif
+    if s:crunch_debug | echom '[' .  matchstr(a:expression, "^\s*" . g:crunch_calc_comment . ".*$") . "] = the matched string & result =" . result |  endif
+
+    if matchstr(a:expression, "^*\s$") !=''  | let result = 0 | endif " checks for empty lines
     if s:crunch_debug | echom '[' . a:expression . '] = the tested string' | endif
     if s:crunch_debug | echom '[' .  matchstr(a:expression, '.\+#\s\+=\s\+.\+') . "] = the matched string cool guy" |  endif
-    "let test = matchstr(a:expression, '.\+' . '\s\+=\s\+.\+')
-    let test = matchstr(a:expression, '.\+' . g:crunch_tag_marker . '\s\+=\s\+.\+')
+    let test = matchstr(a:expression, '.\+' . g:crunch_tag_marker . '\s\+=\s\+.\+') " checks for tag lines
     if test !='' | let result = 0 | endif
-    "if matchstr(a:expression, '.\+#\s\+=\s\+.\+') !=''  | return | endif " Not working
     return result
 endfunction
 
 "==========================================================================}}}
 "s:ReplaceTag                                                              {{{
+"Replaces the tag within an expression with the value of that tag
 "TODO give the source of this script
 "=============================================================================
 function! s:ReplaceTag(expression) 
@@ -114,6 +117,7 @@ endfunction
 
 "==========================================================================}}}
 "s:GetTagValue                                                             {{{
+"Searches for the value of a tag and returns the value assigned to the tag
 "TODO give the source  this script
 "=============================================================================
 function! s:GetTagValue(tag)
@@ -170,7 +174,7 @@ endfunction
 " fun()^num() eg sin(1)^2
 " num^fun() eg 2^sin(1) 
 " num^num() eg 2^2
-" NOTE: this is not implemented and is a work in progress
+" NOTE: this is not implemented and is a work in progress/failure
 "=============================================================================
 function! s:HandleCarrot(expression)
     let s:e = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)', 'pow(\1,\2)','g') " good
@@ -185,13 +189,22 @@ endfunction
 " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
 "=============================================================================
 function! s:FixMultiplication(expression)
+    "TODO deal with )( -> )*(
+    let s:e = substitute(a:expression,'\()\)\s*\((\)', '\1\*\2','g')
+    if s:crunch_debug | echom s:e . "= fixed multiplication 1" | endif
+    "TODO deal with sin(1)sin(1)
+    let s:e = substitute(s:e,'\()\)\s*\(\a\+\)', '\1\*\2','g')
+    if s:crunch_debug | echom s:e . "= fixed multiplication 2" | endif
     "deal with 5sin( -> 5*sin(
-    let s:e = substitute(a:expression,'\([0-9.]\+\)\(\a\+\)', '\1\*\2','g')
+    " '\(\d\+\(\.\d\+\)\=\)'
+    let s:e = substitute(s:e,'\([0-9.]\+\)\s*\(\a\+\)', '\1\*\2','g')
+    if s:crunch_debug | echom s:e . "= fixed multiplication 3" | endif
     "deal with )5 -> )*5
-    let s:e = substitute(s:e, '\()\)\(\d*\.\{0,1}\d\)', '\1\*\2', 'g')
+    let s:e = substitute(s:e, '\()\)\s*\(\d*\.\{0,1}\d\+\)', '\1\*\2', 'g')
+    if s:crunch_debug | echom s:e . "= fixed multiplication 4" | endif
     "deal with 5( -> 5*(
-    let s:e = substitute(s:e, '\([0-9.]\+\)\((\)', '\1\*\2', 'g')
-    " echo s:e . '  = fixed muliplication'
+    let s:e = substitute(s:e, '\([0-9.]\+\)\s*\((\)', '\1\*\2', 'g')
+    if s:crunch_debug | echom s:e . "= fixed multiplication 5" | endif
     return s:e
 endfunction
 
