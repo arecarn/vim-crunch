@@ -5,9 +5,9 @@
 ##Overview
 Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.
 Most of Crunch's syntax loosening is accomplished by extensive search and
-replace. Crunch also Forces floating point to be used. 
+replace. Crunch also forces floating point to be used. 
 
-Crunch Allows you to just type in mathematical expressions without having to
+Crunch allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
 ##Demo
@@ -22,13 +22,12 @@ A screen capture demoing Crunch can be viewed [here]()
     to be pasted from the default register.
 
 2. :CrunchLine, :'<'>CrunchLine, or <leader>cl
-
     Crunch Uses the current line or the visually selected lines as the
     expression(s) and adds the result to the end of the line(s).
 
 ###Variables
 
-When using :CrunchLine  or the mapping <leader>cl you can use variables of a
+When using :CrunchLine or the mapping <leader>cl you can use variables of a
 sort to define values and store results. 
 
 * Declaring a variable like this: 
@@ -37,8 +36,8 @@ sort to define values and store results.
 * Use a variable in an expression like this:
   `cat# +10`
 
-* Variable names contain the ranges [a-z, A-Z, 0-9]. By default the marker for a
-  variable is '#' but it can be redefined by changing the g:crunch_tag_marker
+* Variable names contain the ranges [a-z, A-Z, 0-9]. By default the marker for
+  a variable is '#' but it can be redefined by changing the g:crunch_tag_marker
   global variable. 
 
 ###Example 
@@ -51,12 +50,12 @@ and use the CrunchLine command or mapping <leader>cl:
     area# pow(#radius,2)*#pi
     circumference# 2 * #pi * #radius 
 
-First two lines work like constants denoting Pi and the radius.  You can then
+First two lines work like constants denoting Pi and the radius. You can then
 visually select the next two lines and use either :CrunchLine, or <leader>cl
 to evaluate the expressions and see the results.
 
     area# pow(#radius,2)*#pi = 78.5375
-    circumference# 2 * #pi * #radius  = 31.415
+    circumference# 2 * #pi * #radius = 31.415
 
 If invalid expressions are used Vim will report it's errors, and may give a
 result of zero.
@@ -124,7 +123,7 @@ Sources inspiration and credits for this plugin
   ASCII font courtesy of Patrick Gillespie 
 
 - https://github.com/gregsexton/VimCalc
-  Greg Sexton Wrote  Vimcalc
+  Greg Sexton Wrote Vimcalc
 
 - http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.html
   Ihar Filipau wrote most of the tagging code as well as VIM incline
