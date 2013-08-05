@@ -9,7 +9,7 @@ Crunch Allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
 Demo
-----
+====
 A screen capture demoing Crunch can be viewed [here]()
 
 
@@ -27,8 +27,7 @@ Usage
     Crunch Uses the current line or the visually selected lines as the
     expression(s) and adds the result to the end of the line(s).
 
-Variables
----------
+###Variables
 
 When using :CrunchLine  or the mapping <leader>cl you can use variables of a
 sort to define values and store results. 
@@ -45,7 +44,6 @@ Variable names contain the ranges [a-z, A-Z, 0-9]. By default the marker for a
 variable is '#' but it can be redefined by changing the g:crunch_tag_marker
 global variable. 
 
-------------------------------------------------------------------------------
 **Example**: calculate area and volume given the radius. Type the below and
 use the = 0 CrunchLine command or mapping:
 
@@ -64,10 +62,8 @@ to evaluate the expressions and see the results.
 If invalid expressions are used Vim will report it's errors, and may give a
 result of zero.
 
-------------------------------------------------------------------------------
 
-Comments
---------
+###Comments
 If you don't want a line evaluated but want to leave some text there crunch
 has support for ignoring lines with comments. By default the string to start a
 comment it '"' just like Vim, but this can be configured g:crunch_calc_comment
@@ -78,7 +74,7 @@ work.
 
 
 Syntax Loosening
-----------------
+================
 
 The following chart summarizes the features that make using math with Crunch a
 better experience than vanilla Vim when just considering syntax. 
@@ -104,10 +100,37 @@ better experience than vanilla Vim when just considering syntax.
 |Removed Zeros In Result    |                       |                        |
 |                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
 |                           |`pow(2,8) = 256`       |`pow(2,8)= 256.0`       |
-
 **Note**: all the examples 'Without Crunch' work fine with Crunch as well.
 
-Make Crunch Better
-------------------
+Installation
+=============
+Use your favorite plugin manager.
+* [Neobundle](https://github.com/Shougo/neobundle.vim) <-- I use this one
+* [Vundle](https://github.com/gmarik/vundle)
+* [pathogen](https://github.com/tpope/vim-pathogen)
+* [VAM](https://github.com/MarcWeber/vim-addon-manager)
+
+
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+
+### Make Crunch Better
 If you have any tips or ideas to make Crunch better feel free to contact me or
 open an issue.  
+
+###Credits
+Sources inspiration and credits for this plugin
+
+- http://patorjk.com/
+  ASCII font courtesy of Patrick Gillespie 
+
+- https://github.com/gregsexton/VimCalc
+  Greg Sexton Wrote  Vimcalc
+
+- http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.html
+  Ihar Filipau wrote most of the tagging code as well as VIM incline
+  calculator 
+
+- https://github.com/hrsh7th/vim-neco-calc
+- hrsh7th wrote Neco-calc, and inspired the int to float conversion method
