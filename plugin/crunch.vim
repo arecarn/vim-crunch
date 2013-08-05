@@ -66,7 +66,7 @@ function! s:Core(e)
     let expression = a:e
 
     " convert ints to floats
-    let expression = substitute(expression, '\(\d\+\(\.\d\+\)\=\)', '\=str2float(submatch(0))' , 'g')
+    let expression = substitute(expression, '\(\d*\.\=\d\+\)', '\=str2float(submatch(0))' , 'g')
     if s:crunch_debug | echom '[' . expression . '] = is the expression converted to floats' | endif
 
     " let expression = tolower(expression) "makes user defined function not work 
@@ -189,10 +189,10 @@ endfunction
 " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
 "=============================================================================
 function! s:FixMultiplication(expression)
-    "TODO deal with )( -> )*(
+    "deal with )( -> )*(
     let s:e = substitute(a:expression,'\()\)\s*\((\)', '\1\*\2','g')
     if s:crunch_debug | echom s:e . "= fixed multiplication 1" | endif
-    "TODO deal with sin(1)sin(1)
+    "deal with sin(1)sin(1)
     let s:e = substitute(s:e,'\()\)\s*\(\a\+\)', '\1\*\2','g')
     if s:crunch_debug | echom s:e . "= fixed multiplication 2" | endif
     "deal with 5sin( -> 5*sin(
@@ -273,10 +273,5 @@ endfunction
 " Commands                                                                 {{{
 "=============================================================================
 
-if !hasmapto(':Crunch')
-    command! -nargs=* -range=% Crunch call s:Crunch()
-endif
-
-if !hasmapto(':CrunchLine')
-    command! -nargs=* -range CrunchLine <line1>,<line2>call s:CrunchLine('.') "send the current line
-endif
+command! -nargs=* -range=% Crunch call s:Crunch()
+command! -nargs=* -range CrunchLine <line1>,<line2>call s:CrunchLine('.') "send the current line
