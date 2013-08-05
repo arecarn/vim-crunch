@@ -1,5 +1,4 @@
-Overview
-========
+#Overview
 
 Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.
 Most of Crunch's syntax loosening is accomplished by extensive search and
@@ -8,14 +7,11 @@ replace. Crunch also Forces floating point to be used.
 Crunch Allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
-Demo
-====
+#Demo
 A screen capture demoing Crunch can be viewed [here]()
 
 
-Usage
-=====
-
+#Usage
 1. :Crunch
     Crunch then gives you the following prompt in the command line:
     Calc >>
@@ -42,7 +38,7 @@ sort to define values and store results.
   variable is '#' but it can be redefined by changing the g:crunch_tag_marker
   global variable. 
 
-####Example 
+###Example 
 
 Calculate area and circumference of a sphere given the radius. Type the below
 and use the CrunchLine command or mapping <leader>cl:
@@ -73,8 +69,7 @@ global variable.
 work.
 
 
-Syntax Loosening
-================
+#Syntax Loosening
 
 The following chart summarizes the features that make using math with Crunch a
 better experience than vanilla Vim when just considering syntax. 
@@ -102,8 +97,7 @@ better experience than vanilla Vim when just considering syntax.
 |                           |`pow(2,8) = 256`       |`pow(2,8)= 256.0`       |
 **Note**: all the examples 'Without Crunch' work fine with Crunch as well.
 
-Installation
-=============
+#Installation
 Use your favorite plugin manager.
 * [Neobundle](https://github.com/Shougo/neobundle.vim) <-- I use this one
 * [Vundle](https://github.com/gmarik/vundle)
@@ -115,8 +109,10 @@ Use your favorite plugin manager.
 ------------------------------------------------------------------------------
 
 ### Make Crunch Better
-If you have any tips or ideas to make Crunch better feel free to contact me or
-open an issue.  
+I'm pretty new to Vim Script so any tips are appreciated. Think you can make
+Crunch better? Fork it on GitHub and send a pull request. If you find bugs,
+want new functionality contact me by making an issue on
+[GitHub](https://github.com/arecarn/crunch/issues) and I'll see what I can do. 
 
 ###Credits
 Sources inspiration and credits for this plugin
@@ -132,4 +128,4 @@ Sources inspiration and credits for this plugin
   calculator 
 
 - https://github.com/hrsh7th/vim-neco-calc
-- hrsh7th wrote Neco-calc, and inspired the int to float conversion method
+  hrsh7th wrote Neco-calc, and inspired the int to float conversion method
