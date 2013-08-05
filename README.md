@@ -11,8 +11,12 @@ Crunch allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
 ##Demo
-A screen capture demoing Crunch can be viewed [here]()
 
+[Command Line Mode](http://i.imgur.com/uJbfln9.gif)
+
+[Visual Selection](http://i.imgur.com/2Q2zTyt)
+
+[Variables](http://i.imgur.com/lxwbqG8)
 
 ##Usage
 1. :Crunch
