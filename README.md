@@ -32,32 +32,32 @@ Usage
 When using :CrunchLine  or the mapping <leader>cl you can use variables of a
 sort to define values and store results. 
 
-When declaring a variable the Tag marker comes after the variable name. So if
-you wanted the variable 'cat' to equal '5' you would use '#cat 5' as your
-line.
+* Declaring a variable like this: 
+  `#cat 5` 
 
-To use the variable in an expression you reverse the order of the marker and
-the variable name. So if we wanted to use the variable 'cat' in an expression
-we would it would look like this 'cat# + 10'
+* Use a variable in an expression like this:
+  `cat# +10`
 
-Variable names contain the ranges [a-z, A-Z, 0-9]. By default the marker for a
-variable is '#' but it can be redefined by changing the g:crunch_tag_marker
-global variable. 
+* Variable names contain the ranges [a-z, A-Z, 0-9]. By default the marker for a
+  variable is '#' but it can be redefined by changing the g:crunch_tag_marker
+  global variable. 
 
-**Example**: calculate area and volume given the radius. Type the below and
-use the = 0 CrunchLine command or mapping:
+####Example 
+
+Calculate area and circumference of a sphere given the radius. Type the below
+and use the CrunchLine command or mapping <leader>cl:
 
     radius# = 5
     pi# = 3.1415
     area# pow(#radius,2)*#pi
-    volume# pow(#radius,3)*#pi*4/3
+    circumference# 2 * #pi * #radius 
 
 First two lines work like constants denoting Pi and the radius.  You can then
 visually select the next two lines and use either :CrunchLine, or <leader>cl
 to evaluate the expressions and see the results.
 
     area# pow(#radius,2)*#pi = 78.5375
-    volume# pow(#radius,3)*#pi*4/3 = 523.583333
+    circumference# 2 * #pi * #radius  = 31.415
 
 If invalid expressions are used Vim will report it's errors, and may give a
 result of zero.
@@ -96,7 +96,7 @@ better experience than vanilla Vim when just considering syntax.
 |Decimals w/o Leading Zeros |                       |                        |
 |                           |`.5/2 = 0.25`          |`0.5/2 = 0.25`          |
 |                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
-|---------------------------|-----------------------|------------------------|
+|                           |                       |                        |
 |Removed Zeros In Result    |                       |                        |
 |                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
 |                           |`pow(2,8) = 256`       |`pow(2,8)= 256.0`       |
@@ -112,7 +112,6 @@ Use your favorite plugin manager.
 
 
 ------------------------------------------------------------------------------
-
 ------------------------------------------------------------------------------
 
 ### Make Crunch Better
