@@ -5,37 +5,12 @@ Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.
 Most of Crunch's syntax loosening is accomplished by extensive search and
 replace. Crunch also Forces floating point to be used. 
 
-
-The following chart summarizes the features that make using math with Crunch a
-better experience than vanilla Vim when just considering syntax. 
-
-|       **Feature**         |    **With Crunch**    |   **Without Crunch**   |
-| ------------------------- | --------------------- | ---------------------- |
-| Multiplication Fix        |                       |                        |
-|                           |`cos(0)cos(0) = 1`     |`cos(0)*cos(0) = 1.0`   |
-|                           |`2sin(1) = 1.682942`   |`2*sin(1) = 1.682942`   |
-|                           |`sin(1)2 = 1.682942`   |`sin(1)*2 = 1.682942`   |
-|                           |`(2*3)(3*2) = 36`      |`(2*3)*(3*2) = 36`      |
-|                           |`2(3*2) = 12`          |`2*(3*2) = 12`          |
-|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
-|                           |                       |                        |
-|Integer to Float Conversion|                       |                        |
-|                           |`1/2 = 0.5`            |`1.0/2.0 = 0.5`         |
-|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
-|                           |                       |                        |
-|Decimals w/o Leading Zeros |                       |                        |
-|                           |`.5/2 = 0.25`          |`0.5/2 = 0.25`          |
-|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
-|---------------------------|-----------------------|------------------------|
-|Removed Zeros In Result    |                       |                        |
-|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
-|                           |`pow(2,8) = 256`       |`pow(2,8)= 256.0`       |
-
-**Note**: all the examples 'Without Crunch' work fine with Crunch as well.
-
 Crunch Allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
+Demo
+----
+A screen capture demoing Crunch can be viewed [here]()
 
 
 Usage
@@ -101,10 +76,36 @@ global variable.
 **Note**: The comment must be the first character in a line for the comment to
 work.
 
-Demo
-----
-A screen capture demoing Crunch can be viewed [here]()
 
+Syntax Loosening
+----------------
+
+The following chart summarizes the features that make using math with Crunch a
+better experience than vanilla Vim when just considering syntax. 
+
+|       **Feature**         |    **With Crunch**    |   **Without Crunch**   |
+| ------------------------- | --------------------- | ---------------------- |
+| Multiplication Fix        |                       |                        |
+|                           |`cos(0)cos(0) = 1`     |`cos(0)*cos(0) = 1.0`   |
+|                           |`2sin(1) = 1.682942`   |`2*sin(1) = 1.682942`   |
+|                           |`sin(1)2 = 1.682942`   |`sin(1)*2 = 1.682942`   |
+|                           |`(2*3)(3*2) = 36`      |`(2*3)*(3*2) = 36`      |
+|                           |`2(3*2) = 12`          |`2*(3*2) = 12`          |
+|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
+|                           |                       |                        |
+|Integer to Float Conversion|                       |                        |
+|                           |`1/2 = 0.5`            |`1.0/2.0 = 0.5`         |
+|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
+|                           |                       |                        |
+|Decimals w/o Leading Zeros |                       |                        |
+|                           |`.5/2 = 0.25`          |`0.5/2 = 0.25`          |
+|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
+|---------------------------|-----------------------|------------------------|
+|Removed Zeros In Result    |                       |                        |
+|                           |`.25*4 = 1`            |`0.25*4 = 1.0`          |
+|                           |`pow(2,8) = 256`       |`pow(2,8)= 256.0`       |
+
+**Note**: all the examples 'Without Crunch' work fine with Crunch as well.
 
 Make Crunch Better
 ------------------
