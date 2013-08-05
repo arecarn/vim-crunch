@@ -12,11 +12,11 @@ worry about the syntax as much, and getting the answer you expect.
 
 ##Demo
 
-[Command Line Mode](http://i.imgur.com/uJbfln9.gif)
+![Command Line Mode](http://i.imgur.com/uJbfln9.gif)
 
-[Visual Selection](http://i.imgur.com/2Q2zTyt)
+![Visual Selection](http://i.imgur.com/2Q2zTyt)
 
-[Variables](http://i.imgur.com/lxwbqG8)
+![Variables](http://i.imgur.com/lxwbqG8)
 
 ##Usage
 1. :Crunch
