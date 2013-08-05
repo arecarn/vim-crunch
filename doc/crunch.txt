@@ -132,8 +132,7 @@ variable is '#' but it can be redefined by changing the |CrunchTagMarker|
 global variable. 
 
 ------------------------------------------------------------------------------
-Example: calculate area and volume given the radius. Type the below and use
-the = 0 CrunchLine command or mapping:
+Example: calculate area and volume given the radius. 
 
 radius# = 5
 pi# = 3.1415
