@@ -31,6 +31,13 @@ let g:crunch_calc_comment = '"'
 "crunch_debug enables varies echos throughout the code                                                                              
 "=============================================================================
 let s:crunch_debug = 0
+let s:crunch_debug_vl = 0
+let s:crunch_debug_c = 0
+let s:crunch_debug_cl = 0 
+let s:crunch_debug_ee = 0
+let s:crunch_debug_fm = 0
+let s:crunch_debug_eel = 0
+let s:crunch_debug_tv = 0
 
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
@@ -38,6 +45,7 @@ let s:crunch_debug = 0
 "=============================================================================
 function! s:Crunch() 
     let OriginalExpression = s:GetInputString()
+    if s:ValidInput(OriginalExpression) == 0 | return | endif
     let expression = s:RemoveOldResult(OriginalExpression)
     let expression = s:Core(expression)
     let result = s:EvaluateExpression(expression)
@@ -52,10 +60,12 @@ function! s:CrunchLine(line)
     if s:ValidLine(OriginalExpression) == 0 | return | endif
     let OriginalExpression = s:RemoveOldResult(OriginalExpression)
     let expression = s:ReplaceTag(OriginalExpression)
-    if s:crunch_debug | echo '[' OriginalExpression . '] is the OriginalExpression' | endif
+    if s:crunch_debug_cl | echo '['. OriginalExpression . '] is the OriginalExpression' | endif
     let expression = s:Core(expression)
     let resultStr = s:EvaluateExpressionLine(expression)
     call setline(a:line, OriginalExpression.' = '.resultStr)
+    if s:crunch_debug_cl | echo '['. resultStr . '] is the result' | endif
+    return resultStr
 endfunction
 
 "==========================================================================}}}
@@ -63,11 +73,12 @@ endfunction
 "the main functionality of crunch
 "=============================================================================
 function! s:Core(e) 
+    let s:crunch_debug_c = 0
     let expression = a:e
 
     " convert ints to floats
     let expression = substitute(expression, '\(\d*\.\=\d\+\)', '\=str2float(submatch(0))' , 'g')
-    if s:crunch_debug | echom '[' . expression . '] = is the expression converted to floats' | endif
+    if s:crunch_debug_c | echom '[' . expression . '] = is the expression converted to floats' | endif
 
     " let expression = tolower(expression) "makes user defined function not work 
     " let expression = s:RemoveSpaces(expression)
@@ -86,17 +97,43 @@ endfunction
 function! s:ValidLine(expression) 
     let result = 1
 
+    if s:crunch_debug_vl | echom '[' . a:expression . '] = the tested string' | endif
+
     if a:expression == '' | let result = 0 | endif "checks for blank lines
+    if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '') . "] = is the match for blank lines, result = " . result | endif
+
     if matchstr(a:expression, "^\s*" . g:crunch_calc_comment . ".*$") !='' | let result = 0 | endif "checks for commented lines
+    if s:crunch_debug_vl | echom '[' . matchstr(a:expression, "^\s*" . g:crunch_calc_comment . ".*$") . "] = is the match for comment lines result = " . result | endif
 
-    if s:crunch_debug | echom '[' . a:expression . '] = the tested string' | endif
-    if s:crunch_debug | echom '[' . matchstr(a:expression, "^\s*" . g:crunch_calc_comment . ".*$") . "] = the matched string & result =" . result | endif
+    if matchstr(a:expression, '^\s\+$') !='' | let result = 0 | endif " checks for empty lines
+    if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '^\s\+$') . "] = is the match for empty lines, result = " . result | endif
 
-    if matchstr(a:expression, "^*\s$") !='' | let result = 0 | endif " checks for empty lines
-    if s:crunch_debug | echom '[' . a:expression . '] = the tested string' | endif
-    if s:crunch_debug | echom '[' . matchstr(a:expression, '.\+#\s\+=\s\+.\+') . "] = the matched string cool guy" | endif
-    let test = matchstr(a:expression, '.\+' . g:crunch_tag_marker . '\s\+=\s\+.\+') " checks for tag lines
+    if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '.\+#\s\+=\s\+.\+') . "] = is the match for tag lines result = " . result | endif
+    "TODO may need to remove this check for tag lines
+    let test = matchstr(a:expression, '.\+' . g:crunch_tag_marker . '\s\+=\s\+.\+') " checks for tag lines 
     if test !='' | let result = 0 | endif
+    return result
+endfunction
+
+          
+"==========================================================================}}}
+"s:ValidInput                                                              {{{
+"Checks the line to see if it is a variable definition, or a blank line that
+"may or may not contain whitespace. 
+
+"If the line is invalid this function returns false
+"=============================================================================
+function! s:ValidInput(expression) 
+    let result = 1
+
+    if s:crunch_debug_vl | echom '[' . a:expression . '] = the tested string' | endif
+
+    if a:expression == '' | let result = 0 | endif "checks for blank lines
+    if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '') . "] = is the match for blank lines, result = " . result | endif
+
+    if matchstr(a:expression, '^\s\+$') !='' | let result = 0 | endif " checks for empty lines
+    if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '^\s\+$') . "] = is the match for empty lines, result = " . result | endif
+
     return result
 endfunction
 
@@ -122,13 +159,18 @@ endfunction
 "=============================================================================
 function! s:GetTagValue(tag)
     let s = search( '^'. a:tag . g:crunch_tag_marker, "bn" )
-    if s == 0 | throw "Calc error: tag ".tag." not found" | endif
+    if s == 0 | throw "Calc error: tag ".a:tag." not found" | endif
     " avoid substitute() as we are called from inside substitute()
     let line = getline( s )
+    if s:crunch_debug_tv | echom "[" . line . "] = line with tag value" | endif
+
+    "TODO reevaluate tag expression here 
+    
+    if s:crunch_debug_tv | echom "[" . line . "] = line with tag value after" | endif
     let idx = strridx( line, "=" )
-    if idx == -1 | throw "Calc error: line with tag ".tag."doesn't contain the '='" | endif
+    if idx == -1 | throw "Calc error: line with tag ".a:tag." doesn't contain the '='" | endif
     let tagvalue= strpart( line, idx+1 )
-    if s:crunch_debug | echom "[" . tagvalue . "] = the tag value" | endif
+    if s:crunch_debug_tv | echom "[" . tagvalue . "] = the tag value" | endif
     return tagvalue
 endfunction
 
@@ -189,22 +231,25 @@ endfunction
 " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
 "=============================================================================
 function! s:FixMultiplication(expression)
+
+    let s:crunch_debug_fm = 0
+
     "deal with )( -> )*(
     let s:e = substitute(a:expression,'\()\)\s*\((\)', '\1\*\2','g')
-    if s:crunch_debug | echom s:e . "= fixed multiplication 1" | endif
+    if s:crunch_debug_fm | echom s:e . "= fixed multiplication 1" | endif
     "deal with sin(1)sin(1)
     let s:e = substitute(s:e,'\()\)\s*\(\a\+\)', '\1\*\2','g')
-    if s:crunch_debug | echom s:e . "= fixed multiplication 2" | endif
+    if s:crunch_debug_fm | echom s:e . "= fixed multiplication 2" | endif
     "deal with 5sin( -> 5*sin(
     " '\(\d\+\(\.\d\+\)\=\)'
     let s:e = substitute(s:e,'\([0-9.]\+\)\s*\(\a\+\)', '\1\*\2','g')
-    if s:crunch_debug | echom s:e . "= fixed multiplication 3" | endif
+    if s:crunch_debug_fm | echom s:e . "= fixed multiplication 3" | endif
     "deal with )5 -> )*5
     let s:e = substitute(s:e, '\()\)\s*\(\d*\.\{0,1}\d\+\)', '\1\*\2', 'g')
-    if s:crunch_debug | echom s:e . "= fixed multiplication 4" | endif
+    if s:crunch_debug_fm | echom s:e . "= fixed multiplication 4" | endif
     "deal with 5( -> 5*(
     let s:e = substitute(s:e, '\([0-9.]\+\)\s*\((\)', '\1\*\2', 'g')
-    if s:crunch_debug | echom s:e . "= fixed multiplication 5" | endif
+    if s:crunch_debug_fm | echom s:e . "= fixed multiplication 5" | endif
     return s:e
 endfunction
 
@@ -215,14 +260,17 @@ endfunction
 " paste register
 "=============================================================================
 function! s:EvaluateExpression(expression)
-    if s:crunch_debug | echom a:expression . " this tis the final expression" | endif
+
+
+    if s:crunch_debug_ee | echom a:expression . " this tis the final expression" | endif
     let errorFlag = 0
     " try
     let result = string(eval(a:expression))
-    if s:crunch_debug | echo '[' . matchstr(result,"\\.0$") . '] is the matched string' | endif
+    if s:crunch_debug_ee | echo '[' . matchstr(result,"\\.0$") . '] is the matched string' | endif
     if matchstr(result,"\\.0$") == ".0" "matches the 10 in 8e10 for some reason 
         let result = string(str2nr(result))
     endif
+
     " catch /^Vim\%((\a\+)\)\=:E/	" catch all Vim errors
     " let errorFlag = 1
     " endtry
@@ -231,6 +279,7 @@ function! s:EvaluateExpression(expression)
     " echom "ERROR: invalid input"
     " let @" = "ERROR: invalid input"
     " else
+    "
     redraw
     echo a:expression
     echo "= " . result
@@ -247,25 +296,28 @@ endfunction
 " pase register
 "=============================================================================
 function! s:EvaluateExpressionLine(expression)
-    if s:crunch_debug | echom a:expression " this this the final expression" | endif
+
+    if s:crunch_debug_eel | echom a:expression " this this the final expression" | endif
     let errorFlag = 0
     " echom a:expression
     " try
     let result = string(eval(a:expression))
-    if s:crunch_debug | echo '[' . matchstr(result,"\\.0$") . '] is the matched string' | endif
-    if s:crunch_debug | echom result " this this the final result before intization" | endif
+    if s:crunch_debug_eel | echo '[' . matchstr(result,"\\.0$") . '] is the matched string' | endif
+    if s:crunch_debug_eel | echom result " this this the final result before intization" | endif
     if matchstr(result,"\\.0$") == ".0" "had to use \m for normal magicness for some reason
-        if s:crunch_debug | echo '[' . matchstr(result,"\.0$") . '] is the matched string' | endif
+        if s:crunch_debug_eel | echo '[' . matchstr(result,"\.0$") . '] is the matched string' | endif
         "TODO? add in printf for large nums that would eval to e numbers
         let result = string(str2nr(result))
-        if s:crunch_debug | echom result " this this the final result after intization" | endif
+        if s:crunch_debug_eel | echom result " this this the final result after intization" | endif
     endif
+
     " catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
     "     let errorFlag = 1
     " endtry
     " if errorFlag == 1
     "     let result = 'ERROR: Invalid Input' 
     " endif
+    
     return result
 endfunction
 

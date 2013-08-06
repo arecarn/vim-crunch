@@ -14,7 +14,7 @@ worry about the syntax as much, and getting the answer you expect.
 
 ![Command Line Mode](http://i.imgur.com/uJbfln9.gif)
 
-![Visual Selection](http://i.imgur.com/9ayGoqV.gif)
+![Visual Selection](http://i.imgur.com/3KTujLF.gif)
 
 ![Variables](http://i.imgur.com/LHzT4HY.gif)
 

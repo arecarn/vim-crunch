@@ -44,7 +44,7 @@ Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.
 Most of Crunch's syntax loosening is accomplished by extensive search and
 replace. Crunch also Forces floating point to be used. 
 
-If you want to do math in vim without Crunch the process goes as follows.
+If you want to do math in Vim without Crunch the process goes as follows.
 From insert mode or command line more:
     <CTRL-R>=5+5<CR>
 
@@ -103,6 +103,7 @@ worry about the syntax as much, and getting the answer you expect.
 2. *USAGE*                                                           *CrunchUsage*
 
 1. :Crunch
+
     Crunch then gives you the following prompt in the command line:
     Calc >>
     for you to enter you mathematical expression. The result is then available
@@ -111,7 +112,9 @@ worry about the syntax as much, and getting the answer you expect.
 2. :CrunchLine, :'<'>CrunchLine, or <leader>cl
 
     Crunch Uses the current line or the visually selected lines as the
-    expression(s) and adds the result to the end of the line(s).
+    expression(s) and adds the result to the end of the line(s). When the
+    expression in a line is changed is changed using :CrunchLine again will
+    reevaluate it
 
 ------------------------------------------------------------------------------
 2.1 *VARIABLES*                                                  *CrunchVariables*
@@ -223,7 +226,9 @@ https://github.com/arecarn/crunch
 ------------------------------------------------------------------------------
 TODO:
 
-* make a demo of the plugin
+* add about section to help, with maintainer name
+* add command line mode fix to not evaluate blank entries 
+* reevaluate tag lines before their tag value is used
 
 ==============================================================================
 8. *CREDITS*                                                       *CrunchCredits*
