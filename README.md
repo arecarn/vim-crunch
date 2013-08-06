@@ -12,11 +12,17 @@ worry about the syntax as much, and getting the answer you expect.
 
 ##Demo
 
-![Command Line Mode](http://i.imgur.com/uJbfln9.gif)
+![Command Line Mode](http://i.imgur.com/uJbfln9.gif) 
+Crunch works from the command line for quick off hand calculations. The result
+of these calculations are then available to be pasted.
 
-![Visual Selection](http://i.imgur.com/3KTujLF.gif)
 
 ![Variables](http://i.imgur.com/LHzT4HY.gif)
+Variables can be used to save expressions so they can be used later.
+
+![Visual Selection](http://i.imgur.com/3KTujLF.gif) 
+Multiple lines can be evaluated/reevaluated , with visual selections.
+Optionally single lines can be evaluated/reevaluated.
 
 ##Usage
 1. :Crunch
