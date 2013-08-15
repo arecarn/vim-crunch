@@ -1,4 +1,4 @@
-*crunch.txt* A easier way to perform calculations inside Vim
+*crunch.txt* An easier way to perform calculations inside Vim
 *crunch*
 
 ------------------------------------------------------------------------------
