@@ -30,7 +30,7 @@
      4. Configuration ............................... |CrunchConfiguration|
          4.1 g:crunch_tag_marker .................... |CrunchTagMarker|
          4.2 g:crunch_calc_prompt ................... |CrunchCalcPrompt|
-         4.2 g:crunch_calc_comment .................. |CrunchCalcComment|
+         4.3 g:crunch_calc_comment .................. |CrunchCalcComment|
      5. Known Issues ................................ |CrunchKnownIssues|
      6. Contribute .................................. |CrunchContribute|
      7. Change Log .................................. |CrunchChangeLog|
@@ -38,7 +38,7 @@
      9. License ..................................... |CrunchLicenece|
 
 ==============================================================================
-1. *OVERVIEW*                                                     *CrunchOverview*
+1. *OVERVIEW*                                           *CrunchOverview*
 
 Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.
 Most of Crunch's syntax loosening is accomplished by extensive search and
@@ -100,7 +100,7 @@ Crunch Allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
 ==============================================================================
-2. *USAGE*                                                           *CrunchUsage*
+2. *USAGE*                                                      *CrunchUsage*
 
 1. :Crunch
 
@@ -117,18 +117,18 @@ worry about the syntax as much, and getting the answer you expect.
     reevaluate it
 
 ------------------------------------------------------------------------------
-2.1 *VARIABLES*                                                  *CrunchVariables*
+2.1 *VARIABLES*                                         *CrunchVariables*
 
 When using :CrunchLine  or the mapping <leader>cl you can use variables of a
 sort to define values and store results. 
 
 When declaring a variable the Tag marker comes after the variable name. So if
-you wanted the variable 'cat' to equal '5' you would use '#cat 5' as your
+you wanted the variable 'cat' to equal '5' you would use 'cat# 5' as your
 line.
 
 To use the variable in an expression you reverse the order of the marker and
 the variable name. So if we wanted to use the variable 'cat' in an expression
-we would it would look like this 'cat# + 10'
+we would it would look like this '#cat + 10'
 
 Variable names contain the ranges [a-z, A-Z, 0-9]. By default the marker for a
 variable is '#' but it can be redefined by changing the |CrunchTagMarker|
@@ -163,51 +163,50 @@ global variable.
 Note:The comment must be the first character in a line for the comment to work.
 
 ==============================================================================
-3. *Mappings*                                                     *CrunchMappings*
-                       noremap <leader>cl :CrunchLine
+3. *Mappings*                                           *CrunchMappings*
+        
+By default CrunchLine is mapped to '<leader>cl'. To use a different map:
 
-If you don't want this mapping to be loaded set 
-    g:crunch_load_default_mappings = 0
+        map <silent> <leader>cr <plug>CrunchCrunchLine
+
+If you don't want this mapping to be loaded set
+
+        map <silent> <plug>NoCrunchCrunchLine <plug>CrunchCrunchLine
 
 ==============================================================================
-4. *CONFIGURATION*                                           *CrunchConfiguration*
+4. *CONFIGURATION*                                      *CrunchConfiguration*
 
 ------------------------------------------------------------------------------
-4.1 g:crunch_tag_marker                                        *CrunchTagMarker*
+4.1 g:crunch_tag_marker                                 *CrunchTagMarker*
 
 Default = '#'
 
 ------------------------------------------------------------------------------
-4.2 g:crunch_calc_prompt                                      *CrunchCalcPrompt*
+4.2 g:crunch_calc_prompt                                *CrunchCalcPrompt*
 
 Default 'Calc >> '
 
 
 ------------------------------------------------------------------------------
-4.3 g:crunch_calc_comment                                    *CrunchCalcComment*
+4.3 g:crunch_calc_comment                               *CrunchCalcComment*
 
 Default '"'
 
-------------------------------------------------------------------------------
-4.4 g:crunch_load_default_mappings                       *CrunchDefualtMappings*
-
-Default 1
-
 ==============================================================================
-5. *KNOWN_ISSUES*                                              *CrunchKnownIssues*
+5. *KNOWN_ISSUES*                                       *CrunchKnownIssues*
 
 * Modulus operation is not supported due to converting all numbers into floats
 * Expression similar to the following evaluate 23.43.22 + 0 = 23.43. This is
   caused by the way str2float() converts 23.34.22 into 23.34
 
 ==============================================================================
-6. *CONTRIBUTE*                                                 *CrunchContribute*
+6. *CONTRIBUTE*                                         *CrunchContribute*
 
 Repository and Bug Tracker:
 https://github.com/arecarn/crunch
 
 ==============================================================================
-7. *CHANGE_LOG*                                                  *CrunchChangeLog*
+7. *CHANGE_LOG*                                         *CrunchChangeLog*
 
 04 July 2013 * Streamline code
              * Add more multiplication fixes
@@ -231,7 +230,7 @@ TODO:
 * reevaluate tag lines before their tag value is used
 
 ==============================================================================
-8. *CREDITS*                                                       *CrunchCredits*
+8. *CREDITS*                                                    *CrunchCredits*
 
 Sources inspiration and credits for this plugin
 

@@ -1,11 +1,3 @@
-"=============================================================================
-"Crunch Line mapping
-"Allows for users to define their own mappings. 
-"=============================================================================
-if g:crunch_load_default_mappings || !exists('g:crunch_load_default_mappings')
-    noremap <silent><leader>cl :CrunchLine<CR>
-endif
-
 "==========================================================================}}}
 "Globals + Dev Variable                                                    {{{
 " The Top Level Function that determines program flow
