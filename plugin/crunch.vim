@@ -1,8 +1,6 @@
 "=============================================================================
 "Header                                                                    {{{
 "=============================================================================
-"A cross platform compatible (Windows/Linux/OSX) plugin that facilitates
-"entering a search terms and opening web browsers 
 "Last Change: 25 Jul 2013
 "Maintainer: Ryan Carney arecarn@gmail.com
 "License:        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
@@ -23,12 +21,18 @@
 "Globals + Dev Variable                                                    {{{
 " The Top Level Function that determines program flow
 "=============================================================================
-let g:crunch_tag_marker = '#' 
-let g:crunch_calc_prompt = 'Calc >> '
-let g:crunch_calc_comment = '"'
+if !exists("g:crunch_tag_marker")
+    let g:crunch_tag_marker = '#' 
+endif
+if !exists("g:crunch_calc_prompt")
+    let g:crunch_calc_prompt = 'Calc >> '
+endif
+if !exists("g:crunch_tag_marker")
+    let g:crunch_calc_comment = '#' 
+endif
 
 "=============================================================================
-"crunch_debug enables varies echos throughout the code                                                                              
+"crunch_debug enables varies echos throughout the code
 "=============================================================================
 let s:crunch_debug = 0
 let s:crunch_debug_vl = 0
