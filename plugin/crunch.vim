@@ -19,7 +19,7 @@
 
 " Allows the user to disable the plugin
 if exists("g:loaded_crunch")
-   finish
+    finish
 endif
 let g:loaded_crunch = 1
 
@@ -30,3 +30,14 @@ let g:loaded_crunch = 1
 
 command! -nargs=* -range=% Crunch call crunch#Crunch()
 command! -nargs=* -range CrunchLine <line1>,<line2>call crunch#CrunchLine('.')
+
+"=============================================================================
+"Crunch Line mapping
+"Allows for users to define their own mappings. 
+"=============================================================================
+if !hasmapto('<Plug>CrunchCrunchLine')
+    map <unique> <leader>cl  <Plug>CrunchCrunchLine
+endif
+noremap <unique> <script>   <Plug>CrunchCrunchLine  <SID>CrunchLine
+noremap <SID>CrunchLine :CrunchLine<CR>
+
