@@ -17,12 +17,13 @@
 "
 "                   0. You just DO WHAT THE FUCK YOU WANT TO
 
+"==========================================================================}}}
+
 " Allows the user to disable the plugin
 if exists("g:loaded_crunch")
     finish
 endif
 let g:loaded_crunch = 1
-
 
 "==========================================================================}}}
 " Commands                                                                 {{{
