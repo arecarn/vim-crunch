@@ -1,6 +1,6 @@
 #Crunch
 
-### A Easier way to perform calculations inside Vim
+### A easier way to perform calculations inside Vim
 
 ##Overview
 Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.

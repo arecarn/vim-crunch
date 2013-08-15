@@ -1,4 +1,4 @@
-*crunch.txt* Perform incline calculations inside a Vim buffer
+*crunch.txt* A easier way to perform calculations inside Vim
 *crunch*
 
 ------------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
 
-        A Vim plugin that provides an inline calculator with tag support
+        A Vim plugin that provides a calculator with tag support
                                                                               
 ==============================================================================
 *CONTENTS*
