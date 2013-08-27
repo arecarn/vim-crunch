@@ -102,7 +102,12 @@ worry about the syntax as much, and getting the answer you expect.
 ==============================================================================
 2. *USAGE*                                                      *CrunchUsage*
 
-1. :Crunch
+1. :Crunch <args> 
+
+    Where <args> is some mathematical expression to be evaluated. The result
+    is then available to be pasted from the default register.
+
+2. :Crunch
 
     Crunch then gives you the following prompt in the command line:
     Calc >>
