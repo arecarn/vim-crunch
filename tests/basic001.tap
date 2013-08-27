@@ -1,0 +1,4 @@
+1..3
+ok 1 - g:crunch_tag_marker
+ok 2 - g:crunch_calc_prompt
+ok 3 - g:crunch_calc_comment
