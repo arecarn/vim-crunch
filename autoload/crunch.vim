@@ -28,8 +28,12 @@ let s:crunch_debug_tv = 0
 "s:Crunch                                                                  {{{
 " The Top Level Function that determines program flow
 "=============================================================================
-function! crunch#Crunch() 
-    let OriginalExpression = s:GetInputString()
+function! crunch#Crunch(input) 
+    if a:input != ''
+        let OriginalExpression = a:input
+    else
+        let OriginalExpression = s:GetInputString()
+    endif
     if s:ValidInput(OriginalExpression) == 0 | return | endif
     let expression = s:RemoveOldResult(OriginalExpression)
     let expression = s:Core(expression)

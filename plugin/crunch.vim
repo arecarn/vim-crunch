@@ -29,7 +29,7 @@ let g:loaded_crunch = 1
 " Commands                                                                 {{{
 "=============================================================================
 
-command! -nargs=* -range=% Crunch call crunch#Crunch()
+command! -nargs=* -range=% Crunch call crunch#Crunch('')
 command! -nargs=* -range CrunchLine <line1>,<line2>call crunch#CrunchLine('.')
 
 "=============================================================================
