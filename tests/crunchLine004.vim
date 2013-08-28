@@ -1,10 +1,10 @@
-" Basic test with CrunchLine command using comment string
+" CrunchLine without range (check inclusion of surrounding lines)
 
 " Load the test data. 
 edit crunchLine003.in
 
 call search('pow')
--1,.CrunchLine
+CrunchLine
 
 " Save the processed buffer contents 
 call vimtest#SaveOut()
