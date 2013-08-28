@@ -4,7 +4,7 @@
 edit crunchLine001.in
 
 call search('pow')
-.CrunchLine
+-1,.CrunchLine
 
 " Save the processed buffer contents 
 call vimtest#SaveOut()

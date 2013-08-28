@@ -44,17 +44,33 @@ endfunction
 "s:CrunchLine                                                              {{{
 " The Top Level Function that determines program flow
 "=============================================================================
-function! crunch#CrunchLine(line) 
-    let OriginalExpression = getline(a:line)
-    if s:ValidLine(OriginalExpression) == 0 | return | endif
-    let OriginalExpression = s:RemoveOldResult(OriginalExpression)
-    let expression = s:ReplaceTag(OriginalExpression)
-    if s:crunch_debug_cl | echo '['. OriginalExpression . '] is the OriginalExpression' | endif
-    let expression = s:Core(expression)
-    let resultStr = s:EvaluateExpressionLine(expression)
-    call setline(a:line, OriginalExpression.' = '.resultStr)
-    if s:crunch_debug_cl | echo '['. resultStr . '] is the result' | endif
-    return resultStr
+function! crunch#CrunchLine() range
+    let top = a:firstline
+    let bot = a:lastline
+    if s:crunch_debug_cl | echo "range: " . top . ", " . bot | endif
+    if top == bot
+        " when no range is given (or a sigle line, as it is not possible to
+        " detect the difference), use the set of lines separed by blank lines
+        let emptyLinePat = '\v^\s*$'
+        while top > 1 && getline(top-1) !~ emptyLinePat
+            let top -= 1
+        endwhile
+        while bot < line('$') && getline(bot+1) !~ emptyLinePat
+            let bot += 1
+        endwhile
+        if s:crunch_debug_cl | echo "new range: " . top . ", " . bot | endif
+    endif
+    for line in range(top, bot)
+        let OriginalExpression = getline(line)
+        if s:ValidLine(OriginalExpression) == 0 | continue | endif
+        let OriginalExpression = s:RemoveOldResult(OriginalExpression)
+        let expression = s:ReplaceTag(OriginalExpression)
+        if s:crunch_debug_cl | echo '['. OriginalExpression . '] is the OriginalExpression' | endif
+        let expression = s:Core(expression)
+        let resultStr = s:EvaluateExpressionLine(expression)
+        call setline(line, OriginalExpression.' = '.resultStr)
+        if s:crunch_debug_cl | echo '['. resultStr . '] is the result' | endif
+    endfor
 endfunction
 
 "==========================================================================}}}

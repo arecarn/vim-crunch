@@ -116,10 +116,14 @@ worry about the syntax as much, and getting the answer you expect.
 
 2. :CrunchLine, :'<'>CrunchLine, or <leader>cl
 
-    Crunch Uses the current line or the visually selected lines as the
-    expression(s) and adds the result to the end of the line(s). When the
-    expression in a line is changed is changed using :CrunchLine again will
-    reevaluate it
+    Crunch the selected lines as the expression(s) and adds the result to the
+    end of the line(s). If no range is provided or it consists of a single
+    line Crunch uses the current block of lines (which starts and ends on
+    lines doesn't contains non-whitspace characters, similiar to a
+    |paragraph|).
+
+    When the expression in a line is changed using :CrunchLine again will
+    reevaluate it.
 
 ------------------------------------------------------------------------------
 2.1 *VARIABLES*                                         *CrunchVariables*
