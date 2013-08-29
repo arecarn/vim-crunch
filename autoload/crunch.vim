@@ -1,3 +1,22 @@
+"=============================================================================
+"Header                                                                    {{{
+"=============================================================================
+"Last Change: 29 Aug 2013
+"Maintainer: Ryan Carney arecarn@gmail.com
+"License:        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+"                           Version 2, December 2004
+"
+"               Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+"
+"      Everyone is permitted to copy and distribute verbatim or modified
+"     copies of this license document, and changing it is allowed as long
+"                           as the name is changed.
+"
+"                 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
+"       TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+"
+"                   0. You just DO WHAT THE FUCK YOU WANT TO
+
 "==========================================================================}}}
 "Globals + Dev Variable                                                    {{{
 " The Top Level Function that determines program flow
@@ -13,12 +32,13 @@ if !exists("g:crunch_calc_comment")
 endif
 
 "=============================================================================
-"crunch_debug enables varies echos throughout the code
+"crunch_debug enables varies echoes throughout the code
 "=============================================================================
 let s:crunch_debug = 0
 let s:crunch_debug_vl = 0
 let s:crunch_debug_c = 0
 let s:crunch_debug_cl = 0 
+let s:crunch_debug_cb = 0 
 let s:crunch_debug_ee = 0
 let s:crunch_debug_fm = 0
 let s:crunch_debug_eel = 0
@@ -55,6 +75,31 @@ function! crunch#CrunchLine(line)
     call setline(a:line, OriginalExpression.' = '.resultStr)
     if s:crunch_debug_cl | echo '['. resultStr . '] is the result' | endif
     return resultStr
+endfunction
+
+"==========================================================================}}}
+"s:CrunchBlock                                                             {{{
+" The Top Level Function that determines program flow
+"=============================================================================
+function! crunch#CrunchBlock() range
+    let top = a:firstline
+    let bot = a:lastline
+    if s:crunch_debug_cb | echo "range: " . top . ", " . bot | endif
+    if top == bot
+        " when no range is given (or a sigle line, as it is not possible to
+        " detect the difference), use the set of lines separed by blank lines
+        let emptyLinePat = '\v^\s*$'
+        while top > 1 && getline(top-1) !~ emptyLinePat
+            let top -= 1
+        endwhile
+        while bot < line('$') && getline(bot+1) !~ emptyLinePat
+            let bot += 1
+        endwhile
+        if s:crunch_debug_cb | echo "new range: " . top . ", " . bot | endif
+    endif
+    for line in range(top, bot)
+        call crunch#CrunchLine(line)
+    endfor
 endfunction
 
 "==========================================================================}}}
@@ -104,7 +149,7 @@ function! s:ValidLine(expression)
     return result
 endfunction
 
-          
+
 "==========================================================================}}}
 "s:ValidInput                                                              {{{
 "Checks the line to see if it is a variable definition, or a blank line that
@@ -154,7 +199,7 @@ function! s:GetTagValue(tag)
     if s:crunch_debug_tv | echom "[" . line . "] = line with tag value" | endif
 
     "TODO reevaluate tag expression here 
-    
+
     if s:crunch_debug_tv | echom "[" . line . "] = line with tag value after" | endif
     let idx = strridx( line, "=" )
     if idx == -1 | throw "Calc error: line with tag ".a:tag." doesn't contain the '='" | endif
@@ -189,7 +234,6 @@ endfunction
 
 "==========================================================================}}}
 " s:RemoveSpaces                                                           {{{
-" prompt the user for an expression
 "=============================================================================
 function! s:RemoveSpaces(expression)
     let s:e = substitute(a:expression,'\s','','g')
@@ -306,7 +350,7 @@ function! s:EvaluateExpressionLine(expression)
     " if errorFlag == 1
     "     let result = 'ERROR: Invalid Input' 
     " endif
-    
+
     return result
 endfunction
 

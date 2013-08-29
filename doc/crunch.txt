@@ -102,30 +102,36 @@ worry about the syntax as much, and getting the answer you expect.
 ==============================================================================
 2. *USAGE*                                                      *CrunchUsage*
 
-1. :Crunch <args> 
+*   :Crunch <args> 
 
     Where <args> is some mathematical expression to be evaluated. The result
     is then available to be pasted from the default register.
 
-2. :Crunch
+*  :Crunch
 
     Crunch then gives you the following prompt in the command line:
     Calc >>
     for you to enter you mathematical expression. The result is then available
     to be pasted from the default register.
 
-2. :CrunchLine, :'<'>CrunchLine, or <leader>cl
+*  :CrunchLine, :'<'>CrunchLine, or <leader>cl
 
     Crunch Uses the current line or the visually selected lines as the
     expression(s) and adds the result to the end of the line(s). When the
-    expression in a line is changed is changed using :CrunchLine again will
-    reevaluate it
+    expression(s) changes using :CrunchLine again will reevaluate the line(s)
+
+*  :CrunchBlock, or <leader>cb
+
+    Crunch Uses the current paragraph (block of text starting and ending with
+    an empty line) as the expressions and adds the result to the end of the
+    lines. When a expressions in a paragraph changes using :CrunchBlock again
+    will reevaluate them
 
 ------------------------------------------------------------------------------
 2.1 *VARIABLES*                                         *CrunchVariables*
 
-When using :CrunchLine  or the mapping <leader>cl you can use variables of a
-sort to define values and store results. 
+When using :CrunchLine or :CrunchBlock (and their mappings) you can use
+variables of a sort to define values and store results. 
 
 When declaring a variable the Tag marker comes after the variable name. So if
 you wanted the variable 'cat' to equal '5' you would use 'cat# 5' as your
@@ -213,6 +219,15 @@ https://github.com/arecarn/crunch
 ==============================================================================
 7. *CHANGE_LOG*                                         *CrunchChangeLog*
 
+29 Aug  2013 * Add CrunchBlock mapping
+
+27 Aug  2013 * Allow expressions to be inputed as an argument to :Crunch command
+               e.g. ':Crunch 5*5'
+
+08 July 2013 * Improved Map handling
+
+07 July 2013 * Move most of plugin to autoload
+
 04 July 2013 * Streamline code
              * Add more multiplication fixes
                 - )(, n(
@@ -230,12 +245,17 @@ https://github.com/arecarn/crunch
 ------------------------------------------------------------------------------
 TODO:
 
-* add about section to help, with maintainer name
-* add command line mode fix to not evaluate blank entries 
-* reevaluate tag lines before their tag value is used
+see http://github.com/arecarn/crunch/issues
+
 
 ==============================================================================
 8. *CREDITS*                                                    *CrunchCredits*
+
+The core maintainers of crunch are:
+
+-    Ryan Carney (github: arecarn)
+-    github: mMontu
+
 
 Sources inspiration and credits for this plugin
 
