@@ -176,13 +176,16 @@ Note:The comment must be the first character in a line for the comment to work.
 ==============================================================================
 3. *Mappings*                                           *CrunchMappings*
         
-By default CrunchLine is mapped to '<leader>cl'. To use a different map:
+By default CrunchLine is mapped to '<leader>cl' and CrunchBlock to
+'<leader>cb'. To use different mappings:
 
         map <silent> <leader>cr <plug>CrunchCrunchLine
+        map <silent> <leader>cx <plug>CrunchCrunchBlock
 
-If you don't want this mapping to be loaded set
+If you don't want these mappings to be loaded set
 
-        map <silent> <plug>NoCrunchCrunchLine <plug>CrunchCrunchLine
+        map <silent> <plug>NoCrunchCrunchLine  <plug>CrunchCrunchLine
+        map <silent> <plug>NoCrunchCrunchBlock <plug>CrunchCrunchBlock
 
 ==============================================================================
 4. *CONFIGURATION*                                      *CrunchConfiguration*
@@ -254,7 +257,7 @@ see http://github.com/arecarn/crunch/issues
 The core maintainers of crunch are:
 
 -    Ryan Carney (github: arecarn)
--    github: mMontu
+-    Marcelo Montu (github: mMontu)
 
 
 Sources inspiration and credits for this plugin
