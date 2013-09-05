@@ -1,12 +1,10 @@
-" Basic test with CrunchLine command and variables
+" Basic tests with CrunchLine command
 
 " Load the test data. 
-edit crunchLine003.in
+edit crunchLine050.in
 
 %CrunchLine
 
 " Save the processed buffer contents 
 call vimtest#SaveOut()
 call vimtest#Quit()
-
-

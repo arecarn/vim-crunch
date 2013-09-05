@@ -21,6 +21,7 @@
 "Globals + Dev Variable                                                    {{{
 " The Top Level Function that determines program flow
 "=============================================================================
+"TODO Remove tag marker
 if !exists("g:crunch_tag_marker")
     let g:crunch_tag_marker = '#' 
 endif
@@ -43,6 +44,7 @@ let s:crunch_debug_ee = 0
 let s:crunch_debug_fm = 0
 let s:crunch_debug_eel = 0
 let s:crunch_debug_tv = 0
+let s:crunch_debug_rt  = 0
 
 "==========================================================================}}}
 "s:Crunch                                                                  {{{
@@ -142,10 +144,15 @@ function! s:ValidLine(expression)
     if matchstr(a:expression, '^\s\+$') !='' | let result = 0 | endif " checks for empty lines
     if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '^\s\+$') . "] = is the match for empty lines, result = " . result | endif
 
-    if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '.\+#\s\+=\s\+.\+') . "] = is the match for tag lines result = " . result | endif
-    "TODO may need to remove this check for tag lines
-    let test = matchstr(a:expression, '.\+' . g:crunch_tag_marker . '\s\+=\s\+.\+') " checks for tag lines 
-    if test !='' | let result = 0 | endif
+    " TODO remove tag marker from this check
+     " if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '.\+\s\+=\s\+.\+') . "] = is the match for tag lines result = " . result | endif
+     " let test = matchstr(a:expression, '.\+\s\+=\s\+.\+') " checks for tag lines 
+     " if test !='' | let result = 0 | endif
+     " if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '.\+\#\s\+=\s\+.\+') . "] = is the match for tag lines result = " . result | endif
+
+     let test = matchstr(a:expression, '\s*\a\+\s*=\s*[0-9.]\+') " checks for tag lines 
+     if test !='' | let result = 0 | endif
+     if s:crunch_debug_vl | echom '[' . matchstr(a:expression, '^\s*\a\+\s*=\s*[0-9.]\+') . "] = is the match for tag lines result = " . result | endif
     return result
 endfunction
 
@@ -174,25 +181,35 @@ endfunction
 "==========================================================================}}}
 "s:ReplaceTag                                                              {{{
 "Replaces the tag within an expression with the value of that tag
-"TODO give the source of this script
+"inspired by Ihar Filipau's incline calculator
 "=============================================================================
 function! s:ReplaceTag(expression) 
     let e = a:expression
+
+    if s:crunch_debug_rt | echom "[" . e . "] = expression before tag replacement " | endif
+    " DID remove tag marker from this check
     " strip the tag, if any
-    let e = substitute( e, '[a-zA-Z0-9]\+' . g:crunch_tag_marker . '[[:space:]]*', "", "" )
+    let e = substitute( e, '[a-zA-Z]\+\s*=\s*', "", "" )
+    if s:crunch_debug_rt | echom "[" . e . "] = expression steeped of tag" | endif
 
     " replace values by the tag
-    let e = substitute( e, g:crunch_tag_marker . '\([a-zA-Z0-9]\+\)', '\=s:GetTagValue(submatch(1))', 'g' )
+    " DID remove tag marker from this check
+    let e = substitute( e, '\([a-zA-Z]\+\)\ze\([^(a-zA-z]\|$\)', '\=s:GetTagValue(submatch(1))', 'g' )
+
+    if s:crunch_debug_rt | echom "[" . e . "] = expression after tag replacement " | endif
     return e
 endfunction
 
 "==========================================================================}}}
 "s:GetTagValue                                                             {{{
 "Searches for the value of a tag and returns the value assigned to the tag
-"TODO give the source this script
+"inspired by Ihar Filipau's incline calculator
 "=============================================================================
 function! s:GetTagValue(tag)
-    let s = search( '^'. a:tag . g:crunch_tag_marker, "bn" )
+
+    " DID remove tag marker from this check
+    "TODO need to consider ignorecase smartcase and magic
+    let s = search( '^'. a:tag .'\s*=\s*' , "bn" )
     if s == 0 | throw "Calc error: tag ".a:tag." not found" | endif
     " avoid substitute() as we are called from inside substitute()
     let line = getline( s )
@@ -212,11 +229,25 @@ endfunction
 "==========================================================================}}}
 "s:RemoveOldResult                                                         {{{
 "Remove old result if any eg '5+5 = 10' becomes '5+5'
-"TODO give the source of this script
+"inspired by Ihar Filipau's incline calculator
+"cases:
+"1: var = pow(2,10) = 1024
+"2: var = pow(2,10) =
+"3: var = pow(2,10)
+"4: 5+5 = 10
+"5: 5+5 =
+"6: 5+5
+"TODO finish with this 
 "=============================================================================
 function! s:RemoveOldResult(expression)
     let e = a:expression
-    let e = substitute( e, '[[:space:]]*=.*', "", "" )
+    "if it's a variable with an expression ignore the first = sign
+    "else if it's just a normal expression just remove it
+    if matchstr(a:expression, '^\s*\a\+\s*=\s*') != ''
+        let e = substitute( e, '\s*=\{-}$', "", "" )
+    else
+        let e = substitute( e, '\s*=\{-}$', "", "" )
+    endif 
     return e
 endfunction
 

@@ -1,7 +1,7 @@
 " Basic test with CrunchLine command and variables
 
 " Load the test data. 
-edit crunchLine003.in
+edit crunchLine006.in
 
 %CrunchLine
 
