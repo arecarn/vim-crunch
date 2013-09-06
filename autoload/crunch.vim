@@ -180,10 +180,12 @@ function! s:ValidInput(expression)
     let result = 1
     call s:PrintDebugMessage('[' . a:expression . '] = the tested string' )
 
-    if a:expression == '' | let result = 0 | endif "checks for blank lines
+    "checks for blank lines
+    if a:expression == '' | let result = 0 | endif 
     call s:PrintDebugMessage('[' . matchstr(a:expression, '') . "] = is the match for blank lines, result = " . result )
 
-    if matchstr(a:expression, '^\s\+$') !='' | let result = 0 | endif " checks for empty lines
+    " checks for empty lines
+    if matchstr(a:expression, '^\s\+$') !='' | let result = 0 | endif 
     call s:PrintDebugMessage('[' . matchstr(a:expression, '^\s\+$') . "] = is the match for empty lines, result = " . result )
 
     return result
@@ -243,14 +245,6 @@ endfunction
 "s:RemoveOldResult                                                         {{{
 "Remove old result if any eg '5+5 = 10' becomes '5+5'
 "inspired by Ihar Filipau's incline calculator
-"cases:
-"1: var = pow(2,10) = 1024
-"2: var = pow(2,10) =
-"3: var = pow(2,10)
-"4: 5+5 = 10
-"5: 5+5 =
-"6: 5+5
-"TODO finish with this 
 "=============================================================================
 function! s:RemoveOldResult(expression)
     call s:PrintDebugHeader('Remove Old Result')
@@ -260,26 +254,14 @@ function! s:RemoveOldResult(expression)
     "else if it's just a normal expression just remove it
     call s:PrintDebugMessage('[' . e . ']= expression before removed result')
 
-    if matchstr(a:expression, '^\s*\a\+\s*=\s*') != ''
-        call s:PrintDebugMessage("Double equal sign line")
+    let e = substitute( e, '\s\+$', "", "" )
+    call s:PrintDebugMessage('[' . e . ']= expression after removed trailing space')
 
-        let e = substitute( e, '\s\+$', "", "" )
-        call s:PrintDebugMessage('[' . e . ']= expression after removed trailing space')
+    let e = substitute( e, '\s*=\s*[-0-9e.]*\s*$', "", "" )
+    call s:PrintDebugMessage('[' . e . ']= expression after removed old result')
 
-        let e = substitute( e, '\s*=\s*[-0-9e.]*\s*$', "", "" )
-        call s:PrintDebugMessage('[' . e . ']= expression after removed old result')
+    call s:PrintDebugMessage('[' . e . ']= expression after removed result')
 
-    else
-        call s:PrintDebugMessage("Single equal sign line")
-
-        let e = substitute( e, '\s\+$', "", "" )
-        call s:PrintDebugMessage('[' . e . ']= expression after removed trailing space')
-
-        let e = substitute( e, '\s*=\s*[-0-9e.]*\s*$', "", "" )
-        call s:PrintDebugMessage('[' . e . ']= expression after removed old result')
-
-        call s:PrintDebugMessage('[' . e . ']= expression after removed result')
-    endif 
     return e
 endfunction
 
@@ -291,17 +273,7 @@ function! s:GetInputString()
     call inputsave()
     let Expression = input(g:crunch_calc_prompt)
     call inputrestore()
-    "echo Expression
     return Expression
-endfunction
-
-"==========================================================================}}}
-" s:RemoveSpaces                                                           {{{
-"=============================================================================
-function! s:RemoveSpaces(expression)
-    let s:e = substitute(a:expression,'\s','','g')
-    "echo s:e 'removed whitespace'
-    return s:e
 endfunction
 
 "==========================================================================}}}
