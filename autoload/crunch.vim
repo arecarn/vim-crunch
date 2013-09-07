@@ -69,11 +69,15 @@ function! crunch#Crunch(input)
     else
         let OriginalExpression = s:GetInputString()
     endif
-    if OriginalExpression =~ '\v^\s*$' | return | endif
-    call s:PrintDebugMsg('ValidInput')
+    if s:ValidLine(OriginalExpression) == 0 | return | endif
     let expression = s:RemoveOldResult(OriginalExpression)
     let expression = s:Core(expression)
     let result = s:EvaluateExpression(expression)
+    " redraw
+    echo expression
+    echo "= " . result
+    echo "Yanked Result"
+    let @" = result
 endfunction
 
 "==========================================================================}}}
@@ -87,7 +91,7 @@ function! crunch#CrunchLine(line)
     let expression = s:ReplaceTag(OriginalExpression)
     call s:PrintDebugMsg('['.OriginalExpression.'] is the OriginalExpression')
     let expression = s:Core(expression)
-    let resultStr = s:EvaluateExpressionLine(expression)
+    let resultStr = s:EvaluateExpression(expression)
     call setline(a:line, OriginalExpression.' = '.resultStr)
     call s:PrintDebugMsg('['. resultStr . '] is the result' )
     return resultStr
@@ -145,29 +149,24 @@ endfunction
 "=============================================================================
 function! s:ValidLine(expression) 
     call s:PrintDebugHeader('Valid Line')
-
-    let result = 1
-
     call s:PrintDebugMsg('[' . a:expression . '] = the tested string' )
 
-    "checks for blank lines
-    if a:expression == '' | let result = 0 | endif 
-    call s:PrintDebugMsg('[' . matchstr(a:expression, '') . "] = is the match for blank lines, result = " . result )
-
     "checks for commented lines
-    if matchstr(a:expression, "^\s*" . g:crunch_calc_comment . ".*$") !='' | let result = 0 | endif 
-    call s:PrintDebugMsg('[' . matchstr(a:expression, "^\s*" . g:crunch_calc_comment . ".*$") . "] = is the match for comment lines result = " . result )
+    if a:expression =~ '\v^\s*' . g:crunch_calc_comment 
+        return 0 
+    endif
+    " checks for empty/blank lines
+    if a:expression =~ '\v^\s*$'
+        return 0 
+    endif 
 
-    " checks for empty lines
-    if matchstr(a:expression, '^\s\+$') !='' | let result = 0 | endif 
-    call s:PrintDebugMsg('[' . matchstr(a:expression, '^\s\+$') . "] = is the match for empty lines, result = " . result )
+    " checks for lines that don't need evaluation
+    if a:expression =~ '\v\C^\s*var\s+\a+\s*\=\s*[0-9.]+$'
+        return 0 
+    endif 
 
-    " checks for tag lines that don't need evaluation
-    let test = matchstr(a:expression, '^\s*var\s\+\a\+\s*=\s*[0-9.]\+$') 
-    if test !='' | let result = 0 | endif
-    call s:PrintDebugMsg('[' . matchstr(a:expression, '^\s*var\s*\a\+\s*=\s*[0-9.]\+$') . "] = is the match for tag lines result = " . result )
-
-    return result
+    call s:PrintDebugMsg('It is a valid line!')
+    return 1
 endfunction
 
 
@@ -183,11 +182,12 @@ function! s:ReplaceTag(expression)
     call s:PrintDebugMsg("[" . e . "] = expression before tag replacement " )
 
     " strip the variable marker, if any
-    let e = substitute( e, '^\s*var\s\+\a\+\s*=\s*', "", "" )
+    let e = substitute( e, '\v\C^\s*var\s+\a+\s*\=\s*', "", "" )
     call s:PrintDebugMsg("[" . e . "] = expression striped of tag") 
 
     " replace values by the tag
-    let e = substitute( e, '\(\a\+\)\ze\([^(a-zA-z]\|$\)', '\=s:GetTagValue(submatch(1))', 'g' )
+    let e = substitute( e, '\v(\a+)\ze([^(a-zA-z]|$)', 
+                \ '\=s:GetTagValue(submatch(1))', 'g' )
 
     call s:PrintDebugMsg("[" . e . "] = expression after tag replacement ") 
     return e
@@ -201,20 +201,23 @@ endfunction
 function! s:GetTagValue(tag)
     call s:PrintDebugHeader('Get Tag Value')
 
-    "TODO need to consider ignorecase smartcase and magic
     call s:PrintDebugMsg("[" . a:tag . "] = the tag") 
-    let s = search( '^\s*var\s\+' . a:tag . '\s*=\s*' , "bn" )
-    call s:PrintDebugMsg("[" . search( '^\s*var\s\+' . a:tag . '\s*=\s*' , "bn" ) . "] = result of search for tag") 
-    if s == 0 | throw "Calc error: tag ".a:tag." not found" | endif
+    let s = search('\v\C^\s*var\s+\V' . a:tag . '\v\s*\=\s*' , "bn")
+    call s:PrintDebugMsg("[" . s . "] = result of search for tag") 
+    if s == 0 
+        throw "Calc error: tag ".a:tag." not found" 
+    endif
     " avoid substitute() as we are called from inside substitute()
-    let line = getline( s )
+    let line = getline(s)
     call s:PrintDebugMsg("[" . line . "] = line with tag value") 
 
     "TODO reevaluate tag expression here 
 
     call s:PrintDebugMsg("[" . line . "] = line with tag value after") 
     let idx = strridx( line, "=" )
-    if idx == -1 | throw "Calc error: line with tag ".a:tag." doesn't contain the '='" | endif
+    if idx == -1 
+        throw "Calc error: line with tag ".a:tag." doesn't contain the '='" 
+    endif
     let tagvalue= strpart( line, idx+1 )
     call s:PrintDebugMsg("[" . tagvalue . "] = the tag value") 
     return tagvalue
@@ -265,10 +268,14 @@ endfunction
 " NOTE: this is not implemented and is a work in progress/failure
 "=============================================================================
 function! s:HandleCarrot(expression)
-    let s:e = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)', 'pow(\1,\2)','g') " good
-    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\([0-9.]\+\)', 'pow(\1,\2)','g') "questionable 
-    let s:e = substitute(s:e, '\([0-9.]\+\)\^\(\a\+(.\{-})\)', 'pow(\1,\2)','g') "good 
-    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\(\a\+(.\{-})\)' , 'pow(\1,\2)','g') "bad
+    let s:e = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)', 
+                \ 'pow(\1,\2)','g') " good
+    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\([0-9.]\+\)', 
+                \ 'pow(\1,\2)','g') "questionable 
+    let s:e = substitute(s:e, '\([0-9.]\+\)\^\(\a\+(.\{-})\)', 
+                \ 'pow(\1,\2)','g') "good 
+    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\(\a\+(.\{-})\)',
+                \ 'pow(\1,\2)','g') "bad
     return s:e
 endfunction
 
@@ -299,12 +306,13 @@ endfunction
 function! s:EvaluateExpression(expression)
     call s:PrintDebugHeader('Evaluate Expression')
 
-    call s:PrintDebugMsg(" this tis the final expression") 
+    call s:PrintDebugMsg(" this is the final expression") 
     let errorFlag = 0
     " try
     let result = string(eval(a:expression))
     call s:PrintDebugMsg('['.matchstr(result,"\\.0$").'] is the matched string')
     if result =~ '\v\.0$'  "matches the 10 in 8e10 for some reason 
+        "TODO? add in printf for large nums that would eval to e numbers
         let result = string(str2nr(result))
     endif
 
@@ -316,45 +324,7 @@ function! s:EvaluateExpression(expression)
     " echom "ERROR: invalid input"
     " let @" = "ERROR: invalid input"
     " else
-    redraw
-    echo a:expression
-    echo "= " . result
-    echo "Yanked Result"
-    let @" = result
     "endif
-    return result
-endfunction
-
-"==========================================================================}}}
-" s:EvaluateExpressionLine                                                 {{{
-" Evaluates the expression and checks for errors in the process. Also 
-" if there is no error echo the result and save a copy of it to the default 
-" pase register
-"=============================================================================
-function! s:EvaluateExpressionLine(expression)
-    call s:PrintDebugHeader('Evaluate Expression Line')
-
-    call s:PrintDebugMsg(" this this the final expression") 
-    let errorFlag = 0
-    " echom a:expression
-    " try
-    let result = string(eval(a:expression))
-    call s:PrintDebugMsg('[' . matchstr(result,"\\.0$") . '] is the matched string' )
-    call s:PrintDebugMsg(" this this the final result before intization") 
-    if matchstr(result,"\\.0$") == ".0" "had to use \m for normal magicness for some reason
-        call s:PrintDebugMsg("\.0$" . '] is the matched string') 
-        "TODO? add in printf for large nums that would eval to e numbers
-        let result = string(str2nr(result))
-        call s:PrintDebugMsg(" this this the final result after intization") 
-    endif
-
-    " catch /^Vim\%((\a\+)\)\=:E/	"catch all Vim errors
-    "     let errorFlag = 1
-    " endtry
-    " if errorFlag == 1
-    "     let result = 'ERROR: Invalid Input' 
-    " endif
-
     return result
 endfunction
 
