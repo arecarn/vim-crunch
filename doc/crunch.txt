@@ -188,6 +188,7 @@ If you don't want this mapping to be loaded set
 4. *CONFIGURATION*                                      *CrunchConfiguration*
 
 ------------------------------------------------------------------------------
+TODO: remove old marker from docs
 4.1 g:crunch_tag_marker                                 *CrunchTagMarker*
 
 Default = '#'
