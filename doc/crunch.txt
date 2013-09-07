@@ -171,8 +171,6 @@ has support for ignoring lines with comments. By default the string to start a
 comment it '"' just like Vim, but this can be configured |CrunchCalcComment|
 global variable. 
 
-Note:The comment must be the first character in a line for the comment to work.
-
 ==============================================================================
 3. *Mappings*                                           *CrunchMappings*
         
@@ -188,6 +186,7 @@ If you don't want this mapping to be loaded set
 4. *CONFIGURATION*                                      *CrunchConfiguration*
 
 ------------------------------------------------------------------------------
+TODO: remove old marker from docs
 4.1 g:crunch_tag_marker                                 *CrunchTagMarker*
 
 Default = '#'
