@@ -22,20 +22,17 @@
 " The Top Level Function that determines program flow
 "=============================================================================
 "TODO Remove tag marker
-if !exists("g:crunch_tag_marker")
-    let g:crunch_tag_marker = '#' 
-endif
 if !exists("g:crunch_calc_prompt")
     let g:crunch_calc_prompt = 'Calc >> '
 endif
 if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
-
+let s:using_octave = 1
 "=============================================================================
 "crunch_debug enables varies echoes throughout the code
 "=============================================================================
-let s:debug = 0
+let s:debug = 1
 
 "==========================================================================}}}
 " s:PrintDebugHeader()                                                     {{{
@@ -225,7 +222,11 @@ function! s:GetTagValue(tag)
     call s:PrintDebugMessage("[" . a:tag . "] = the tag") 
     let s = search( '^\s*var\s\+' . a:tag . '\s*=\s*' , "bn" )
     call s:PrintDebugMessage("[" . search( '^\s*var\s\+' . a:tag . '\s*=\s*' , "bn" ) . "] = result of search for tag") 
-    if s == 0 | throw "Calc error: tag ".a:tag." not found" | endif
+
+    if s == 0 
+        throw "Calc error: tag ".a:tag." not found" 
+    endif
+
     " avoid substitute() as we are called from inside substitute()
     let line = getline( s )
     call s:PrintDebugMessage("[" . line . "] = line with tag value") 
@@ -234,7 +235,9 @@ function! s:GetTagValue(tag)
 
     call s:PrintDebugMessage("[" . line . "] = line with tag value after") 
     let idx = strridx( line, "=" )
-    if idx == -1 | throw "Calc error: line with tag ".a:tag." doesn't contain the '='" | endif
+    if idx == -1 
+        throw "Calc error: line with tag ".a:tag." doesn't contain the '='" 
+    endif
     let tagvalue= strpart( line, idx+1 )
     call s:PrintDebugMessage("[" . tagvalue . "] = the tag value") 
     return tagvalue
@@ -332,11 +335,15 @@ endfunction
 "=============================================================================
 function! s:EvaluateExpression(expression)
     call s:PrintDebugHeader('Evaluate Expression')
+    call s:PrintDebugMessage(']' . a:expression . "]= the final expression") 
 
-    call s:PrintDebugMessage(" this tis the final expression") 
     let errorFlag = 0
     " try
-    let result = string(eval(a:expression))
+    if s:using_octave == 1
+        let result = OctaveEval(a:expression)
+    else
+        let result = string(eval(a:expression))
+    endif
     call s:PrintDebugMessage('[' . matchstr(result,"\\.0$") . '] is the matched string' )
     if matchstr(result,"\\.0$") == ".0" "matches the 10 in 8e10 for some reason 
         let result = string(str2nr(result))
@@ -354,7 +361,16 @@ function! s:EvaluateExpression(expression)
     echo a:expression
     echo "= " . result
     echo "Yanked Result"
-    let @" = result
+
+    "yank the result into the correct register
+    if &cb == 'unnamed'
+        let @* = result
+    elseif &cb == 'unnamedplus'
+        let @+ = result
+    else
+        let @" = result
+    endif
+
     "endif
     return result
 endfunction
@@ -363,21 +379,26 @@ endfunction
 " s:EvaluateExpressionLine                                                 {{{
 " Evaluates the expression and checks for errors in the process. Also 
 " if there is no error echo the result and save a copy of it to the default 
-" pase register
+" register
 "=============================================================================
 function! s:EvaluateExpressionLine(expression)
     call s:PrintDebugHeader('Evaluate Expression Line')
 
-    call s:PrintDebugMessage(" this this the final expression") 
+    call s:PrintDebugMessage(']' . a:expression . "]= the final expression") 
     let errorFlag = 0
-    " echom a:expression
     " try
-    let result = string(eval(a:expression))
+    if s:using_octave == 1
+        let result = OctaveEval(a:expression)
+    else
+        let result = string(eval(a:expression))
+    endif
+
+
     call s:PrintDebugMessage('[' . matchstr(result,"\\.0$") . '] is the matched string' )
     call s:PrintDebugMessage(" this this the final result before intization") 
-    if matchstr(result,"\\.0$") == ".0" "had to use \m for normal magicness for some reason
+    "check for a ".0" at the end of a number and remove it 
+    if matchstr(result,"\\.0$") == ".0" 
         call s:PrintDebugMessage("\.0$" . '] is the matched string') 
-        "TODO? add in printf for large nums that would eval to e numbers
         let result = string(str2nr(result))
         call s:PrintDebugMessage(" this this the final result after intization") 
     endif
@@ -392,3 +413,21 @@ function! s:EvaluateExpressionLine(expression)
     return result
 endfunction
 
+function! OctaveEval(expression)
+    let expression = a:expression
+
+    let result = system('octave --quiet --norc', expression)
+
+    let result = substitute(result, "\s*\n$", '' , 'g')
+    call s:PrintDebugMessage('[' . result . ']= expression after newline removed')
+
+    if matchstr(result, '^error:') != ''
+        throw "Calc " . result
+    endif
+
+    let result = substitute(result, 'ans =\s*', '' , 'g')
+    call s:PrintDebugMessage('[' . result . ']= expression after ans removed')
+
+
+    return result
+endfunction
