@@ -21,14 +21,19 @@
 "Globals + Dev Variable                                                    {{{
 " The Top Level Function that determines program flow
 "=============================================================================
-"TODO Remove tag marker
 if !exists("g:crunch_calc_prompt")
     let g:crunch_calc_prompt = 'Calc >> '
 endif
 if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
-let s:using_octave = 1
+
+if !exists("s:crunch_using_octave")
+    let s:crunch_using_octave = 0
+endif
+if !exists("s:crunch_using_vimscript")
+    let s:crunch_using_vimscript = 1
+endif
 "=============================================================================
 "crunch_debug enables varies echoes throughout the code
 "=============================================================================
@@ -220,12 +225,16 @@ function! s:GetTagValue(tag)
 
     "TODO need to consider ignorecase smartcase and magic
     call s:PrintDebugMessage("[" . a:tag . "] = the tag") 
-    let s = search( '^\s*var\s\+' . a:tag . '\s*=\s*' , "bn" )
+
+    "bnW => b = search backwards, n = don't move cursor, W => don't wrap around file
+    let s = search( '^\s*var\s\+' . a:tag . '\s*=\s*' , "bnW" )
     call s:PrintDebugMessage("[" . search( '^\s*var\s\+' . a:tag . '\s*=\s*' , "bn" ) . "] = result of search for tag") 
 
-    if s == 0 
-        throw "Calc error: tag ".a:tag." not found" 
-    endif
+    try
+        if s == 0 
+            throw "Crunch error: tag ".a:tag." not found" 
+        endif
+    endtry
 
     " avoid substitute() as we are called from inside substitute()
     let line = getline( s )
@@ -233,11 +242,12 @@ function! s:GetTagValue(tag)
 
     "TODO reevaluate tag expression here 
 
-    call s:PrintDebugMessage("[" . line . "] = line with tag value after") 
     let idx = strridx( line, "=" )
-    if idx == -1 
-        throw "Calc error: line with tag ".a:tag." doesn't contain the '='" 
-    endif
+    try
+        if idx == -1 
+            throw "Crunch error: line with tag ".a:tag." doesn't contain the '='" 
+        endif
+    endtry
     let tagvalue= strpart( line, idx+1 )
     call s:PrintDebugMessage("[" . tagvalue . "] = the tag value") 
     return tagvalue
@@ -339,8 +349,8 @@ function! s:EvaluateExpression(expression)
 
     let errorFlag = 0
     " try
-    if s:using_octave == 1
-        let result = OctaveEval(a:expression)
+    if s:crunch_using_octave == 1
+        let result = s:OctaveEval(a:expression)
     else
         let result = string(eval(a:expression))
     endif
@@ -387,9 +397,13 @@ function! s:EvaluateExpressionLine(expression)
     call s:PrintDebugMessage(']' . a:expression . "]= the final expression") 
     let errorFlag = 0
     " try
-    if s:using_octave == 1
-        let result = OctaveEval(a:expression)
+
+    if s:crunch_using_octave == 1
+        let result = s:OctaveEval(a:expression)
+    elseif s:crunch_using_vimscript == 1
+        let result = string(eval(a:expression))
     else
+        let s:crunch_using_vimscript
         let result = string(eval(a:expression))
     endif
 
@@ -413,7 +427,13 @@ function! s:EvaluateExpressionLine(expression)
     return result
 endfunction
 
-function! OctaveEval(expression)
+"==========================================================================}}}
+" s:OctaveEval
+" Evaluates and expression using a systems Octave installation
+" removes 'ans =' and trailing newline
+" Errors in octave evaluation are thrown 
+"=============================================================================
+function! s:OctaveEval(expression)
     let expression = a:expression
 
     let result = system('octave --quiet --norc', expression)
@@ -421,13 +441,49 @@ function! OctaveEval(expression)
     let result = substitute(result, "\s*\n$", '' , 'g')
     call s:PrintDebugMessage('[' . result . ']= expression after newline removed')
 
-    if matchstr(result, '^error:') != ''
-        throw "Calc " . result
-    endif
+    try
+        if matchstr(result, '^error:') != ''
+        throw "Calc " . result 
+        endif
+    endtry
 
     let result = substitute(result, 'ans =\s*', '' , 'g')
     call s:PrintDebugMessage('[' . result . ']= expression after ans removed')
 
 
     return result
+endfunction
+
+"==========================================================================}}}
+" crunch#EvalTypes
+" returns the possible evaluation types for Crunch 
+"=============================================================================
+function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
+    let s:evalTypes = [ 'Octave',  'VimScript' ]
+    return s:evalTypes
+endfunction
+
+"==========================================================================}}}
+" crunch#ChooseEval()
+" returns the possible evaluation types for Crunch 
+"=============================================================================
+function! crunch#ChooseEval(EvalSource)
+
+    let s:crunch_using_octave = 0
+    let s:crunch_using_vimscript = 0
+
+    if a:EvalSource == 'VimScript'
+        let s:crunch_using_vimscript = 1
+    elseif a:EvalSource == 'Octave' 
+        let s:crunch_using_octave = 1
+    else
+        Throw 'Crunch error: "'. a:EvalSource . '" is an invalid evaluation source, Defaulting to VimScript"
+        let s:crunch_using_vimscript = 1
+    endif
+
+endfunction
+
+
+function! Throw(text)
+    throw a:text
 endfunction
