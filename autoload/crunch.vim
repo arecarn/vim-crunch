@@ -43,7 +43,7 @@ endif
 "=============================================================================
 "crunch_debug enables varies echoes throughout the code
 "=============================================================================
-let s:debug = 0
+let s:debug = 1
 
 "==========================================================================}}}
 " s:PrintDebugHeader()                                                     {{{
@@ -143,11 +143,13 @@ endfunction
 function! s:Core(e) 
     let expression = a:e
 
-    " convert ints to floats
-    let expression = substitute(expression, 
-                \ '\v(\d*\.=\d+)', '\=str2float(submatch(0))' , 'g')
-    call s:PrintDebugMsg('[' . expression . 
-                \'] = is the expression converted to floats')
+    if s:crunch_using_vimscript
+        " convert ints to floats
+        let expression = substitute(expression, 
+                    \ '\v(\d*\.=\d+)', '\=str2float(submatch(0))' , 'g')
+        call s:PrintDebugMsg('[' . expression . 
+                    \'] = is the expression converted to floats')
+    endif
     " convert implicit multiplication to explicit
     let expression = s:FixMultiplication(expression)
 
@@ -213,10 +215,10 @@ endfunction
 "inspired by Ihar Filipau's inline calculator
 "=============================================================================
 function! s:GetTagValue(tag)
+
     call s:PrintDebugHeader('Get Tag Value')
 
     call s:PrintDebugMsg("[" . a:tag . "] = the tag") 
-    "bnW => b = search backwards, n = don't move cursor, W => don't wrap around file
     let s = search('\v\C^\s*var\s+\V' . a:tag . '\v\s*\=\s*' , "bnW")
     call s:PrintDebugMsg("[" . s . "] = result of search for tag") 
     if s == 0 
