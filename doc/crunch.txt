@@ -28,9 +28,9 @@
         2.2 Comments ................................ |CrunchComment|
      3. Mappings  ................................... |CrunchMappings|
      4. Configuration ............................... |CrunchConfiguration|
-         4.1 g:crunch_tag_marker .................... |CrunchTagMarker|
-         4.2 g:crunch_calc_prompt ................... |CrunchCalcPrompt|
-         4.3 g:crunch_calc_comment .................. |CrunchCalcComment|
+         4.1 g:crunch_calc_prompt ................... |CrunchCalcPrompt|
+         4.2 g:crunch_calc_comment .................. |CrunchCalcComment|
+         4.3 CrunchEval ............................. |CrunchEvaluation|
      5. Known Issues ................................ |CrunchKnownIssues|
      6. Contribute .................................. |CrunchContribute|
      7. Change Log .................................. |CrunchChangeLog|
@@ -38,7 +38,7 @@
      9. License ..................................... |CrunchLicenece|
 
 ==============================================================================
-1. *OVERVIEW*                                           *CrunchOverview*
+1. *OVERVIEW*                                                     *CrunchOverview*
 
 Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.
 Most of Crunch's syntax loosening is accomplished by extensive search and
@@ -66,7 +66,7 @@ was this 0.5/2 = 0.25
 
 Crunch solves these trivial problems and many more.
 ------------------------------------------------------------------------------
-1.1 *FEATURE_CHART*                                         *CrunchFeatureChart*
+1.1 *FEATURE_CHART*                                           *CrunchFeatureChart*
 
 The following chart summarizes the features that make using math with Crunch a
 better experience than vanilla Vim when just considering syntax. 
@@ -74,7 +74,7 @@ better experience than vanilla Vim when just considering syntax.
 ==============================================================================
          Feature           |      With Crunch      |      Without Crunch
 ==============================================================================
-Multiplication Fix         |                       |
+Implied Multiplication     |                       |
                            |cos(0)cos(0) = 1       |cos(0)*cos(0) = 1.0
                            |2sin(1) = 1.682942     |2*sin(1) = 1.682942
                            |sin(1)2 = 1.682942     |sin(1)*2 = 1.682942
@@ -83,7 +83,7 @@ Multiplication Fix         |                       |
                            |.25*4 = 1              |0.25*4 = 1.0
 ---------------------------+-----------------------+--------------------------
 Integer to Float Conversion|                       |
-                           |1/2 = 0.5              |1.0/2.0 = 0.5
+(for VimScript Evaluation) |1/2 = 0.5              |1.0/2.0 = 0.5
                            |.25*4 = 1              |0.25*4 = 1.0
 ---------------------------+-----------------------+--------------------------
 Decimals w/o Leading Zeros |                       |
@@ -100,7 +100,7 @@ Crunch Allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
 ==============================================================================
-2. *USAGE*                                                      *CrunchUsage*
+2. *USAGE*                                                           *CrunchUsage*
 
 *   :Crunch <args> 
 
@@ -128,43 +128,42 @@ worry about the syntax as much, and getting the answer you expect.
     will reevaluate them
 
 ------------------------------------------------------------------------------
-2.1 *VARIABLES*                                         *CrunchVariables*
+2.1 *VARIABLES*                                                  *CrunchVariables*
 
 When using :CrunchLine or :CrunchBlock (and their mappings) you can use
 variables of a sort to define values and store results. 
 
+Variable names can contain characters [a-z, A-Z]. 
+
 When declaring a variable the Tag marker comes after the variable name. So if
-you wanted the variable 'cat' to equal '5' you would use 'cat# 5' as your
+you wanted the variable 'cat' to equal '5' you would use 'var cat = 5' as your
 line.
 
 To use the variable in an expression you reverse the order of the marker and
 the variable name. So if we wanted to use the variable 'cat' in an expression
-we would it would look like this '#cat + 10'
+we would it would look like this 'cat + 10'
 
-Variable names contain the ranges [a-z, A-Z, 0-9]. By default the marker for a
-variable is '#' but it can be redefined by changing the |CrunchTagMarker|
-global variable. 
 
 ------------------------------------------------------------------------------
 Example: calculate area and volume given the radius. 
 
-radius# = 5
-pi# = 3.1415
-area# pow(#radius,2)*#pi
-volume# pow(#radius,3)*#pi*4/3
+var radius = 5
+var pi = 3.1415
+var area = pow(radius,2)*pi
+var volume = pow(radius,3)*pi*4/3
 
 First two lines work like constants denoting Pi and the radius.  You can then
 visually select the next two lines and use either :CrunchLine, or <leader>cl
 to evaluate the expressions and see the results.
 
-area# pow(#radius,2)*#pi = 78.5375
-volume# pow(#radius,3)*#pi*4/3 = 523.583333
+var area = pow(radius,2)*pi = 78.5375
+var volume = pow(radius,3)*pi*4/3 = 523.583333
 
 If invalid expressions are used Vim will report it's errors, and may give a
 result of zero.
 
 ------------------------------------------------------------------------------
-2.2 *COMMENTS*                                                  *CrunchComment*
+2.2 *COMMENTS*                                                     *CrunchComment*
 
 If you don't want a line evaluated but want to leave some text there crunch
 has support for ignoring lines with comments. By default the string to start a
@@ -172,7 +171,7 @@ comment it '"' just like Vim, but this can be configured |CrunchCalcComment|
 global variable. 
 
 ==============================================================================
-3. *Mappings*                                           *CrunchMappings*
+3. *Mappings*                                                     *CrunchMappings*
         
 By default CrunchLine is mapped to '<leader>cl'. To use a different map:
 
@@ -183,40 +182,47 @@ If you don't want this mapping to be loaded set
         map <silent> <plug>NoCrunchCrunchLine <plug>CrunchCrunchLine
 
 ==============================================================================
-4. *CONFIGURATION*                                      *CrunchConfiguration*
+4. *CONFIGURATION*                                           *CrunchConfiguration*
 
 ------------------------------------------------------------------------------
-TODO: remove old marker from docs
-4.1 g:crunch_tag_marker                                 *CrunchTagMarker*
-
-Default = '#'
-
-------------------------------------------------------------------------------
-4.2 g:crunch_calc_prompt                                *CrunchCalcPrompt*
+4.1 g:crunch_calc_prompt                                      *CrunchCalcPrompt*
 
 Default 'Calc >> '
 
-
 ------------------------------------------------------------------------------
-4.3 g:crunch_calc_comment                               *CrunchCalcComment*
+4.2 g:crunch_calc_comment                                    *CrunchCalcComment*
 
 Default '"'
 
+------------------------------------------------------------------------------
+4.3 CrunchEval                                                *CrunchEvaluation*
+
+This command allows you to choose what evaluation method you would like to use
+so far Crunch supports the following.
+
+* VimScript
+* Octave (must have Octave installed)
+
+Usage:
+:CrunchEval Octave
+or 
+:CrunchEval VimScript
+
 ==============================================================================
-5. *KNOWN_ISSUES*                                       *CrunchKnownIssues*
+5. *KNOWN_ISSUES*                                              *CrunchKnownIssues*
 
 * Modulus operation is not supported due to converting all numbers into floats
 * Expression similar to the following evaluate 23.43.22 + 0 = 23.43. This is
   caused by the way str2float() converts 23.34.22 into 23.34
 
 ==============================================================================
-6. *CONTRIBUTE*                                         *CrunchContribute*
+6. *CONTRIBUTE*                                                 *CrunchContribute*
 
 Repository and Bug Tracker:
 https://github.com/arecarn/crunch
 
 ==============================================================================
-7. *CHANGE_LOG*                                         *CrunchChangeLog*
+7. *CHANGE_LOG*                                                  *CrunchChangeLog*
 
 29 Aug  2013 * Add CrunchBlock mapping
 
@@ -248,7 +254,7 @@ see http://github.com/arecarn/crunch/issues
 
 
 ==============================================================================
-8. *CREDITS*                                                    *CrunchCredits*
+8. *CREDITS*                                                       *CrunchCredits*
 
 The core maintainers of crunch are:
 

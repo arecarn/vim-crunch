@@ -24,7 +24,7 @@ let s:save_cpo = &cpo   " allow line continuation
 set cpo&vim
 
 "==========================================================================}}}
-"Globals + Dev Variable                                                    {{{
+"Globals                                                                   {{{
 " The Top Level Function that determines program flow
 "=============================================================================
 if !exists("g:crunch_calc_prompt")
@@ -40,13 +40,16 @@ endif
 if !exists("s:crunch_using_vimscript")
     let s:crunch_using_vimscript = 1
 endif
-"=============================================================================
-"crunch_debug enables varies echoes throughout the code
-"=============================================================================
-let s:debug = 1
+
 
 "==========================================================================}}}
-" s:PrintDebugHeader()                                                     {{{
+"DEBUG                                                                     {{{
+"crunch_debug enables varies echoes throughout the code
+"=============================================================================
+let s:debug = 0
+
+"=============================================================================
+" s:PrintDebugHeader()                                                    {{{2
 "=============================================================================
 function! s:PrintDebugHeader(text)
     if s:debug 
@@ -57,8 +60,8 @@ function! s:PrintDebugHeader(text)
     endif
 endfunction
 
-"==========================================================================}}}
-" s:PrintDebugMsg()                                                        {{{
+"=========================================================================}}}2
+" s:PrintDebugMsg()                                                       {{{2
 "=============================================================================
 function! s:PrintDebugMsg(text)
     if s:debug 
@@ -66,8 +69,14 @@ function! s:PrintDebugMsg(text)
     endif
 endfunction
 
+"=========================================================================}}}2
+
 "==========================================================================}}}
-"crunch#Crunch                                                             {{{
+"MAIN                                                                      {{{
+"=============================================================================
+
+"=========================================================================}}}2
+"crunch#Crunch                                                            {{{2
 " The Top Level Function that determines program flow
 "=============================================================================
 function! crunch#Crunch(input) 
@@ -94,15 +103,15 @@ function! crunch#Crunch(input)
     endif
 endfunction
 
-"==========================================================================}}}
-"crunch#CrunchLine                                                         {{{
+"=========================================================================}}}2
+"crunch#CrunchLine                                                        {{{2
 " The Top Level Function that determines program flow
 "=============================================================================
 function! crunch#CrunchLine(line) 
     let OriginalExpression = getline(a:line)
     if s:ValidLine(OriginalExpression) == 0 | return | endif
     let OriginalExpression = s:RemoveOldResult(OriginalExpression)
-    let expression = s:ReplaceTag(OriginalExpression)
+    let expression = s:ReplaceVariable(OriginalExpression)
     call s:PrintDebugMsg('['.OriginalExpression.'] is the OriginalExpression')
     let expression = s:Core(expression)
     let resultStr = s:EvaluateExpression(expression)
@@ -111,8 +120,8 @@ function! crunch#CrunchLine(line)
     return resultStr
 endfunction
 
-"==========================================================================}}}
-"crunch#CrunchBlock                                                        {{{
+"=========================================================================}}}2
+"crunch#CrunchBlock                                                       {{{2
 " The Top Level Function that determines program flow
 "=============================================================================
 function! crunch#CrunchBlock() range
@@ -136,6 +145,25 @@ function! crunch#CrunchBlock() range
     endfor
 endfunction
 
+"=========================================================================}}}2
+
+"==========================================================================}}}
+"s:Int2Float                                                               {{{
+"Convert Integers to floats
+"=============================================================================
+function! s:Int2Float(number)
+    let num = a:number
+    call s:PrintDebugMsg('['.num.'] = number before converted to floats')
+
+    if num =~ '\v^\d{8,}$' 
+        throw 'Calc error:' . num .' is too large for VimScript evaluation'
+    endif
+
+    let result = str2float(num)
+    call s:PrintDebugMsg('['.string(result).'] = number converted to floats 1')
+    return  result
+endfunction
+
 "==========================================================================}}}
 "s:Core                                                                    {{{
 "the main functionality of crunch
@@ -143,14 +171,13 @@ endfunction
 function! s:Core(e) 
     let expression = a:e
 
+    "convert Ints to floats
     if s:crunch_using_vimscript
-        " convert ints to floats
+        call s:PrintDebugHeader('Integer To Floats')
         let expression = substitute(expression, 
-                    \ '\v(\d*\.=\d+)', '\=str2float(submatch(0))' , 'g')
-        call s:PrintDebugMsg('[' . expression . 
-                    \'] = is the expression converted to floats')
+                    \ '\v(\d*\.=\d+)', '\=s:Int2Float(submatch(0))' , 'g')
     endif
-    " convert implicit multiplication to explicit
+    " convert implied multiplication to explicit multipication
     let expression = s:FixMultiplication(expression)
 
     return expression
@@ -187,54 +214,54 @@ endfunction
 
 
 "==========================================================================}}}
-"s:ReplaceTag                                                              {{{
-"Replaces the tag within an expression with the value of that tag
+"s:ReplaceVariable                                                         {{{
+"Replaces the variable within an expression with the value of that variable
 "inspired by Ihar Filipau's inline calculator
 "=============================================================================
-function! s:ReplaceTag(expression) 
-    call s:PrintDebugHeader('Replace Tag')
+function! s:ReplaceVariable(expression) 
+    call s:PrintDebugHeader('Replace Variable')
 
     let e = a:expression
-    call s:PrintDebugMsg("[" . e . "] = expression before tag replacement " )
+    call s:PrintDebugMsg("[" . e . "] = expression before variable replacement " )
 
     " strip the variable marker, if any
     let e = substitute( e, '\v\C^\s*var\s+\a+\s*\=\s*', "", "" )
-    call s:PrintDebugMsg("[" . e . "] = expression striped of tag") 
+    call s:PrintDebugMsg("[" . e . "] = expression striped of variable") 
 
-    " replace values by the tag
+    " replace values by the variable
     let e = substitute( e, '\v(\a+)\ze([^(a-zA-z]|$)', 
-                \ '\=s:GetTagValue(submatch(1))', 'g' )
+                \ '\=s:GetVariableValue(submatch(1))', 'g' )
 
-    call s:PrintDebugMsg("[" . e . "] = expression after tag replacement ") 
+    call s:PrintDebugMsg("[" . e . "] = expression after variable replacement ") 
     return e
 endfunction
 
 "==========================================================================}}}
-"s:GetTagValue                                                             {{{
-"Searches for the value of a tag and returns the value assigned to the tag
-"inspired by Ihar Filipau's inline calculator
+"s:GetVariableValue                                                        {{{
+"Searches for the value of a variable and returns the value assigned to the 
+"variable inspired by Ihar Filipau's inline calculator
 "=============================================================================
-function! s:GetTagValue(tag)
+function! s:GetVariableValue(variable)
 
-    call s:PrintDebugHeader('Get Tag Value')
+    call s:PrintDebugHeader('Get Variable Value')
 
-    call s:PrintDebugMsg("[" . a:tag . "] = the tag") 
-    let s = search('\v\C^\s*var\s+\V' . a:tag . '\v\s*\=\s*' , "bnW")
-    call s:PrintDebugMsg("[" . s . "] = result of search for tag") 
+    call s:PrintDebugMsg("[" . a:variable . "] = the variable") 
+    let s = search('\v\C^\s*var\s+\V' . a:variable . '\v\s*\=\s*' , "bnW")
+    call s:PrintDebugMsg("[" . s . "] = result of search for variable") 
     if s == 0 
-        throw "Calc error: tag ".a:tag." not found" 
+        throw "Calc error: variable ".a:variable." not found" 
     endif
 
     " avoid substitute() as we are called from inside substitute()
     let line = getline(s)
-    call s:PrintDebugMsg("[" . line . "] = line with tag value after") 
+    call s:PrintDebugMsg("[" . line . "] = line with variable value after") 
     let idx = strridx( line, "=" )
     if idx == -1 
-        throw "Calc error: line with tag ".a:tag." doesn't contain the '='" 
+        throw "Calc error: line with variable ".a:variable." doesn't contain the '='" 
     endif
-    let tagvalue= strpart( line, idx+1 )
-    call s:PrintDebugMsg("[" . tagvalue . "] = the tag value") 
-    return tagvalue
+    let variableValue= strpart( line, idx+1 )
+    call s:PrintDebugMsg("[" . variableValue . "] = the variable value") 
+    return variablevalue
 endfunction
 
 
@@ -368,12 +395,11 @@ function! s:OctaveEval(expression)
     let result = substitute(result, 'ans =\s*', '' , 'g')
     call s:PrintDebugMsg('['.result.']= expression after ans removed')
 
-
     return result
 endfunction
 
 "==========================================================================}}}
-" crunch#EvalTypes "                                                       }}}
+" crunch#EvalTypes "                                                       {{{
 " returns the possible evaluation types for Crunch 
 "=============================================================================
 function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
@@ -382,7 +408,7 @@ function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
 endfunction
 
 "==========================================================================}}}
-" crunch#ChooseEval()                                                      }}}
+" crunch#ChooseEval()                                                      {{{
 " returns the possible evaluation types for Crunch 
 "=============================================================================
 function! crunch#ChooseEval(EvalSource)
@@ -393,7 +419,12 @@ function! crunch#ChooseEval(EvalSource)
     if a:EvalSource == 'VimScript'
         let s:crunch_using_vimscript = 1
     elseif a:EvalSource == 'Octave' 
-        let s:crunch_using_octave = 1
+        if s:OctaveEval('1+1')  == 2
+            let s:crunch_using_octave = 1
+        else 
+            let s:crunch_using_vimscript = 1
+            throw 'Calc error: Octave not avaiable'
+        endif 
     else
         Throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation 
                     \ source, Defaulting to VimScript"
