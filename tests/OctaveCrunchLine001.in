@@ -5,10 +5,12 @@ sin(1)2
 (2*3)(3*2)
 (2*3)(3*2)
 2(3*2)
+
 " Integer Conversion Test
 1/2
+
 " Decimal w/o Leading Zeros Conversion
 .5/2
 " Remove Zeros In Result
 .25*4
-pow(2,8)
+2^8
