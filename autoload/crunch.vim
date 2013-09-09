@@ -43,7 +43,7 @@ endif
 "=============================================================================
 "crunch_debug enables varies echoes throughout the code
 "=============================================================================
-let s:debug = 1
+let s:debug = 0
 
 "==========================================================================}}}
 " s:PrintDebugHeader()                                                     {{{
@@ -319,7 +319,6 @@ function! s:EvaluateExpression(expression)
     call s:PrintDebugHeader('Evaluate Expression')
     call s:PrintDebugMsg(']' . a:expression . "]= the final expression") 
 
-    let errorFlag = 0
     if s:crunch_using_octave == 1
         let result = s:OctaveEval(a:expression)
     elseif s:crunch_using_vimscript == 1
@@ -329,13 +328,19 @@ function! s:EvaluateExpression(expression)
         let result = string(eval(a:expression))
     endif
 
-    call s:PrintDebugMsg('['.matchstr(result,"\\.0$").'] is the matched string')
-    "check for trailing '.0' in result and remove it 
-    if result =~ '\v\.0$'  
+    call s:PrintDebugMsg('['.result.']= before trailing ".0" removed')
+    call s:PrintDebugMsg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
+    "check for trailing '.0' in result and remove it (occurs with vim eval)
+    if result =~ '\v\.0+$'  
         let result = string(str2nr(result))
     endif
 
-return result
+    call s:PrintDebugMsg('['.result.']= before trailing "0" removed')
+    call s:PrintDebugMsg('['.matchstr(result,'\v\.\d{-1,}\zs0+$').']= trailing "0"')
+    "check for trailing '0' in result ex .250 -> .25 (occurs with octave "eval)
+    let result = substitute( result, '\v\.\d{-1,}\zs0+$', '', 'g')
+
+    return result
 endfunction
 
 "==========================================================================}}}
@@ -388,7 +393,8 @@ function! crunch#ChooseEval(EvalSource)
     elseif a:EvalSource == 'Octave' 
         let s:crunch_using_octave = 1
     else
-        Throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation source, Defaulting to VimScript"
+        Throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation 
+                    \ source, Defaulting to VimScript"
         let s:crunch_using_vimscript = 1
     endif
 
