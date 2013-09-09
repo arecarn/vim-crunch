@@ -38,11 +38,11 @@
      9. License ..................................... |CrunchLicenece|
 
 ==============================================================================
-1. *OVERVIEW*                                                     *CrunchOverview*
+1. *OVERVIEW*                                                 *CrunchOverview*
 
-Crunch makes calculations in Vim more accessible and loosens Vim's math syntax.
-Most of Crunch's syntax loosening is accomplished by extensive search and
-replace. Crunch also Forces floating point to be used. 
+Crunch makes calculations in Vim more accessible and loosens Vim's math
+syntax. Most of Crunch's syntax loosening is accomplished by extensive search
+and replace. Crunch also Forces floating point to be used. 
 
 If you want to do math in Vim without Crunch the process goes as follows.
 From insert mode or command line more:
@@ -66,7 +66,7 @@ was this 0.5/2 = 0.25
 
 Crunch solves these trivial problems and many more.
 ------------------------------------------------------------------------------
-1.1 *FEATURE_CHART*                                           *CrunchFeatureChart*
+1.1 *FEATURE_CHART*                                       *CrunchFeatureChart*
 
 The following chart summarizes the features that make using math with Crunch a
 better experience than vanilla Vim when just considering syntax. 
@@ -100,7 +100,7 @@ Crunch Allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect. 
 
 ==============================================================================
-2. *USAGE*                                                           *CrunchUsage*
+2. *USAGE*                                                       *CrunchUsage*
 
 *   :Crunch <args> 
 
@@ -128,7 +128,7 @@ worry about the syntax as much, and getting the answer you expect.
     will reevaluate them
 
 ------------------------------------------------------------------------------
-2.1 *VARIABLES*                                                  *CrunchVariables*
+2.1 *VARIABLES*                                              *CrunchVariables*
 
 When using :CrunchLine or :CrunchBlock (and their mappings) you can use
 variables of a sort to define values and store results. 
@@ -163,7 +163,7 @@ If invalid expressions are used Vim will report it's errors, and may give a
 result of zero.
 
 ------------------------------------------------------------------------------
-2.2 *COMMENTS*                                                     *CrunchComment*
+2.2 *COMMENTS*                                                 *CrunchComment*
 
 If you don't want a line evaluated but want to leave some text there crunch
 has support for ignoring lines with comments. By default the string to start a
@@ -171,7 +171,7 @@ comment it '"' just like Vim, but this can be configured |CrunchCalcComment|
 global variable. 
 
 ==============================================================================
-3. *Mappings*                                                     *CrunchMappings*
+3. *Mappings*                                                 *CrunchMappings*
         
 By default CrunchLine is mapped to '<leader>cl'. To use a different map:
 
@@ -182,20 +182,20 @@ If you don't want this mapping to be loaded set
         map <silent> <plug>NoCrunchCrunchLine <plug>CrunchCrunchLine
 
 ==============================================================================
-4. *CONFIGURATION*                                           *CrunchConfiguration*
+4. *CONFIGURATION*                                       *CrunchConfiguration*
 
 ------------------------------------------------------------------------------
-4.1 g:crunch_calc_prompt                                      *CrunchCalcPrompt*
+4.1 g:crunch_calc_prompt                                  *CrunchCalcPrompt*
 
 Default 'Calc >> '
 
 ------------------------------------------------------------------------------
-4.2 g:crunch_calc_comment                                    *CrunchCalcComment*
+4.2 g:crunch_calc_comment                                *CrunchCalcComment*
 
 Default '"'
 
 ------------------------------------------------------------------------------
-4.3 CrunchEval                                                *CrunchEvaluation*
+4.3 CrunchEval                                            *CrunchEvaluation*
 
 This command allows you to choose what evaluation method you would like to use
 so far Crunch supports the following.
@@ -209,25 +209,25 @@ or
 :CrunchEval VimScript
 
 ==============================================================================
-5. *KNOWN_ISSUES*                                              *CrunchKnownIssues*
+5. *KNOWN_ISSUES*                                          *CrunchKnownIssues*
 
 * Modulus operation is not supported due to converting all numbers into floats
 * Expression similar to the following evaluate 23.43.22 + 0 = 23.43. This is
   caused by the way str2float() converts 23.34.22 into 23.34
 
 ==============================================================================
-6. *CONTRIBUTE*                                                 *CrunchContribute*
+6. *CONTRIBUTE*                                             *CrunchContribute*
 
 Repository and Bug Tracker:
 https://github.com/arecarn/crunch
 
 ==============================================================================
-7. *CHANGE_LOG*                                                  *CrunchChangeLog*
+7. *CHANGE_LOG*                                              *CrunchChangeLog*
 
 29 Aug  2013 * Add CrunchBlock mapping
 
-27 Aug  2013 * Allow expressions to be inputed as an argument to :Crunch command
-               e.g. ':Crunch 5*5'
+27 Aug  2013 * Allow expressions to be inputed as an argument to :Crunch 
+               command  e.g. ':Crunch 5*5'
 
 08 July 2013 * Improved Map handling
 
@@ -254,7 +254,7 @@ see http://github.com/arecarn/crunch/issues
 
 
 ==============================================================================
-8. *CREDITS*                                                       *CrunchCredits*
+8. *CREDITS*                                                   *CrunchCredits*
 
 The core maintainers of crunch are:
 
@@ -278,7 +278,7 @@ Sources inspiration and credits for this plugin
 - hrsh7th wrote Neco-calc, and inspired the int to float conversion method
 
 ==============================================================================
-9. *LICENSE*                                                      *CrunchLicenece*
+9. *LICENSE*                                                  *CrunchLicenece*
                  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                             Version 2, December 2004
 
