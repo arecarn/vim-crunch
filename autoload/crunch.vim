@@ -259,9 +259,9 @@ function! s:GetVariableValue(variable)
     if idx == -1 
         throw "Calc error: line with variable ".a:variable." doesn't contain the '='" 
     endif
-    let variableValue= strpart( line, idx+1 )
+    let variableValue = strpart( line, idx+1 )
     call s:PrintDebugMsg("[" . variableValue . "] = the variable value") 
-    return variablevalue
+    return variableValue
 endfunction
 
 
