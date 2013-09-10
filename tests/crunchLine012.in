@@ -1,2 +1,8 @@
-a = 3*4 
+" tag testing
+a = 3*4
 1+a
+" test tag multiplication
+x = 2
+y = 5
+x2-5y
+

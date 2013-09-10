@@ -111,9 +111,9 @@ function! crunch#CrunchLine(line)
     let OriginalExpression = getline(a:line)
     if s:ValidLine(OriginalExpression) == 0 | return | endif
     let OriginalExpression = s:RemoveOldResult(OriginalExpression)
-    let expression = s:ReplaceVariable(OriginalExpression)
     call s:PrintDebugMsg('['.OriginalExpression.'] is the OriginalExpression')
-    let expression = s:Core(expression)
+    let expression = s:Core(OriginalExpression)
+    let expression = s:ReplaceVariable(expression)
     let resultStr = s:EvaluateExpression(expression)
     call setline(a:line, OriginalExpression.' = '.resultStr)
     call s:PrintDebugMsg('['. resultStr.'] is the result' )
@@ -335,8 +335,12 @@ function! s:FixMultiplication(expression)
     let e = substitute(a:expression,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
     call s:PrintDebugMsg('[' . e . ']= fixed multiplication 1') 
 
-    "deal with '5sin( -> 5*sin(' and '5( -> 5*('
+    "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
     let e = substitute(e,'\v([0-9.]+)\s*([([:alpha:]])', '\1\*\2','g')
+    call s:PrintDebugMsg('[' . e . ']= fixed multiplication 2') 
+
+    "deal with 'x5 -> x*5'
+    let e = substitute(e,'\v([[:alpha:]])\s*([0-9.]+)', '\1\*\2','g')
     call s:PrintDebugMsg('[' . e . ']= fixed multiplication 3') 
 
     return e
@@ -350,7 +354,7 @@ endfunction
 "=============================================================================
 function! s:EvaluateExpression(expression)
     call s:PrintDebugHeader('Evaluate Expression')
-    call s:PrintDebugMsg(']' . a:expression . "]= the final expression") 
+    call s:PrintDebugMsg('[' . a:expression . "]= the final expression") 
 
     if s:crunch_using_octave == 1
         let result = s:OctaveEval(a:expression)
