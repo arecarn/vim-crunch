@@ -81,25 +81,37 @@ endfunction
 "s:CrunchBlock                                                             {{{
 " The Top Level Function that determines program flow
 "=============================================================================
-function! crunch#CrunchBlock() range
-    let top = a:firstline
-    let bot = a:lastline
-    if s:crunch_debug_cb | echo "range: " . top . ", " . bot | endif
-    if top == bot
-        " when no range is given (or a sigle line, as it is not possible to
-        " detect the difference), use the set of lines separed by blank lines
-        let emptyLinePat = '\v^\s*$'
-        while top > 1 && getline(top-1) !~ emptyLinePat
-            let top -= 1
-        endwhile
-        while bot < line('$') && getline(bot+1) !~ emptyLinePat
-            let bot += 1
-        endwhile
-        if s:crunch_debug_cb | echo "new range: " . top . ", " . bot | endif
-    endif
-    for line in range(top, bot)
-        call crunch#CrunchLine(line)
-    endfor
+" function! crunch#CrunchBlock() range
+"     let top = a:firstline
+"     let bot = a:lastline
+"     if s:crunch_debug_cb | echo "range: " . top . ", " . bot | endif
+"     if top == bot
+"         " when no range is given (or a sigle line, as it is not possible to
+"         " detect the difference), use the set of lines separed by blank lines
+"         let emptyLinePat = '\v^\s*$'
+"         while top > 1 && getline(top-1) !~ emptyLinePat
+"             let top -= 1
+"         endwhile
+"         while bot < line('$') && getline(bot+1) !~ emptyLinePat
+"             let bot += 1
+"         endwhile
+"         if s:crunch_debug_cb | echo "new range: " . top . ", " . bot | endif
+"     endif
+"     for line in range(top, bot)
+"         call crunch#CrunchLine(line)
+"     endfor
+" endfunction
+
+"==========================================================================}}}
+"s:CrunchBlock                                                             {{{
+"Temporary fix for #12: CrunchBlock command calculatesusing tags incorrectly
+"depending on cursor position
+"=============================================================================
+function! crunch#CrunchBlock()
+    execute "normal! vip\<ESC>"
+    let topline = line("'<")
+    let bottomline = line("'>")
+    execute topline . "," bottomline . "call " . "crunch#CrunchLine('.')"
 endfunction
 
 "==========================================================================}}}
