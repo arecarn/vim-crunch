@@ -203,8 +203,9 @@ function! s:ValidLine(expression)
         return 0 
     endif 
 
+    "TODID remove var
     " checks for lines that don't need evaluation
-    if a:expression =~ '\v\C^\s*var\s+\a+\s*\=\s*[0-9.]+$'
+    if a:expression =~ '\v\C^\s*\a+\s*\=\s*[0-9.]+$'
         return 0 
     endif 
 
@@ -224,8 +225,9 @@ function! s:ReplaceVariable(expression)
     let e = a:expression
     call s:PrintDebugMsg("[" . e . "] = expression before variable replacement " )
 
+    "TODID remove var
     " strip the variable marker, if any
-    let e = substitute( e, '\v\C^\s*var\s+\a+\s*\=\s*', "", "" )
+    let e = substitute( e, '\v\C^\s*\a+\s*\=\s*', "", "" )
     call s:PrintDebugMsg("[" . e . "] = expression striped of variable") 
 
     " replace values by the variable
@@ -246,7 +248,9 @@ function! s:GetVariableValue(variable)
     call s:PrintDebugHeader('Get Variable Value')
 
     call s:PrintDebugMsg("[" . a:variable . "] = the variable") 
-    let s = search('\v\C^\s*var\s+\V' . a:variable . '\v\s*\=\s*' , "bnW")
+
+    "TODID remove var
+    let s = search('\v\C^\s*\V' . a:variable . '\v\s*\=\s*' , "bnW")
     call s:PrintDebugMsg("[" . s . "] = result of search for variable") 
     if s == 0 
         throw "Calc error: variable ".a:variable." not found" 

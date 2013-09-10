@@ -1,9 +1,9 @@
-var a = 3
-var b = 8
-var c = 1
+a = 3
+b = 8
+c = 1
 " -0.131483
-var x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
+x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
 " -2.535184
-var x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
+x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
 " 10.68468
 5.34234*2

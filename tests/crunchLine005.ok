@@ -1,5 +1,5 @@
-var radius = 3
+radius = 3
 " radius = 5
-var pi = 3.1415
-var area = pow(radius,2)*pi = 28.2735
-var volume = pow(radius,3)*pi*4/3 = 113.094
+pi = 3.1415
+area = pow(radius,2)*pi = 28.2735
+volume = pow(radius,3)*pi*4/3 = 113.094
