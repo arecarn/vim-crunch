@@ -25,7 +25,6 @@ set cpo&vim
 
 "==========================================================================}}}
 "Globals                                                                   {{{
-" The Top Level Function that determines program flow
 "=============================================================================
 if !exists("g:crunch_calc_prompt")
     let g:crunch_calc_prompt = 'Calc >> '
@@ -41,6 +40,9 @@ if !exists("s:crunch_using_vimscript")
     let s:crunch_using_vimscript = 1
 endif
 
+
+"Valid Variable Regex
+let s:validVariable = '\v[a-zA-Z_]+[0-9]*'
 
 "==========================================================================}}}
 "DEBUG                                                                     {{{
@@ -74,8 +76,6 @@ endfunction
 "==========================================================================}}}
 "MAIN                                                                      {{{
 "=============================================================================
-
-"=========================================================================}}}2
 "crunch#Crunch                                                            {{{2
 " The Top Level Function that determines program flow
 "=============================================================================
@@ -203,9 +203,9 @@ function! s:ValidLine(expression)
         return 0 
     endif 
 
-    "TODID remove var
+    "TODO change variable
     " checks for lines that don't need evaluation
-    if a:expression =~ '\v\C^\s*\a+\s*\=\s*[0-9.]+$'
+    if a:expression =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*[0-9.]+$'
         return 0 
     endif 
 
@@ -225,13 +225,13 @@ function! s:ReplaceVariable(expression)
     let e = a:expression
     call s:PrintDebugMsg("[" . e . "] = expression before variable replacement " )
 
-    "TODID remove var
+    "TODO change var
     " strip the variable marker, if any
-    let e = substitute( e, '\v\C^\s*\a+\s*\=\s*', "", "" )
+    let e = substitute( e, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "" )
     call s:PrintDebugMsg("[" . e . "] = expression striped of variable") 
 
-    " replace values by the variable
-    let e = substitute( e, '\v(\a+)\ze([^(a-zA-z]|$)', 
+    "TODO change var
+    let e = substitute( e, '\v('.s:validVariable.')\ze([^(a-zA-z]|$)', 
                 \ '\=s:GetVariableValue(submatch(1))', 'g' )
 
     call s:PrintDebugMsg("[" . e . "] = expression after variable replacement ") 
@@ -249,7 +249,7 @@ function! s:GetVariableValue(variable)
 
     call s:PrintDebugMsg("[" . a:variable . "] = the variable") 
 
-    "TODID remove var
+    
     let s = search('\v\C^\s*\V' . a:variable . '\v\s*\=\s*' , "bnW")
     call s:PrintDebugMsg("[" . s . "] = result of search for variable") 
     if s == 0 
@@ -338,10 +338,6 @@ function! s:FixMultiplication(expression)
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
     let e = substitute(e,'\v([0-9.]+)\s*([([:alpha:]])', '\1\*\2','g')
     call s:PrintDebugMsg('[' . e . ']= fixed multiplication 2') 
-
-    "deal with 'x5 -> x*5'
-    let e = substitute(e,'\v([[:alpha:]])\s*([0-9.]+)', '\1\*\2','g')
-    call s:PrintDebugMsg('[' . e . ']= fixed multiplication 3') 
 
     return e
 endfunction
@@ -434,8 +430,8 @@ function! crunch#ChooseEval(EvalSource)
             throw 'Calc error: Octave not avaiable'
         endif 
     else
-        Throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation 
-                    \ source, Defaulting to VimScript"
+        throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation"
+                    \ "source, Defaulting to VimScript"
         let s:crunch_using_vimscript = 1
     endif
 

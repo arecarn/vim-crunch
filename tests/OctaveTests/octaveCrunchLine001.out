@@ -1,0 +1,16 @@
+" Multiplication Test
+sin(1)sin(1) = 0.70807
+2sin(1) = 1.6829
+sin(1)2 = 1.6829
+(2*3)(3*2) = 36
+(2*3)(3*2) = 36
+2(3*2) = 12
+
+" Integer Conversion Test
+1/2 = 0.5
+
+" Decimal w/o Leading Zeros Conversion
+.5/2 = 0.25
+" Remove Zeros In Result
+.25*4 = 1
+2^8 = 256
