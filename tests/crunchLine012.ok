@@ -1,8 +1,4 @@
 " tag testing
 a = 3*4 = 12
 1+a = 13
-" test tag multiplication
-x = 2
-y = 5
-x2-5y = -21
 

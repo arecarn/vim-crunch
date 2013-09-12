@@ -44,8 +44,9 @@ endif
 "Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[0-9]*'
 
+
 "==========================================================================}}}
-"DEBUG                                                                     {{{
+"Debug Resources                                                           {{{
 "crunch_debug enables varies echoes throughout the code
 "=============================================================================
 let s:debug = 0
@@ -74,7 +75,7 @@ endfunction
 "=========================================================================}}}2
 
 "==========================================================================}}}
-"MAIN                                                                      {{{
+"Top Level Functions                                                                      {{{
 "=============================================================================
 "crunch#Crunch                                                            {{{2
 " The Top Level Function that determines program flow
@@ -86,8 +87,8 @@ function! crunch#Crunch(input)
         let OriginalExpression = s:GetInputString()
     endif
     if s:ValidLine(OriginalExpression) == 0 | return | endif
-    let expression = s:RemoveOldResult(OriginalExpression)
-    let expression = s:Core(expression)
+    let expression = s:FixMultiplication(OriginalExpression)
+    let expression = s:IntegerToFloat(expression)
     let result = s:EvaluateExpression(expression)
 
     echo expression
@@ -112,8 +113,9 @@ function! crunch#CrunchLine(line)
     if s:ValidLine(OriginalExpression) == 0 | return | endif
     let OriginalExpression = s:RemoveOldResult(OriginalExpression)
     call s:PrintDebugMsg('['.OriginalExpression.'] is the OriginalExpression')
-    let expression = s:Core(OriginalExpression)
+    let expression = s:FixMultiplication(OriginalExpression)
     let expression = s:ReplaceVariable(expression)
+    let expression = s:IntegerToFloat(expression)
     let resultStr = s:EvaluateExpression(expression)
     call setline(a:line, OriginalExpression.' = '.resultStr)
     call s:PrintDebugMsg('['. resultStr.'] is the result' )
@@ -165,11 +167,10 @@ function! s:Int2Float(number)
 endfunction
 
 "==========================================================================}}}
-"s:Core                                                                    {{{
-"the main functionality of crunch
+"s:IntegerToFloat                                                          {{{
 "=============================================================================
-function! s:Core(e) 
-    let expression = a:e
+function! s:IntegerToFloat(expression) 
+    let expression = a:expression
 
     "convert Ints to floats
     if s:crunch_using_vimscript
@@ -177,8 +178,6 @@ function! s:Core(e)
         let expression = substitute(expression, 
                     \ '\v(\d*\.=\d+)', '\=s:Int2Float(submatch(0))' , 'g')
     endif
-    " convert implied multiplication to explicit multipication
-    let expression = s:FixMultiplication(expression)
 
     return expression
 endfunction
@@ -203,12 +202,10 @@ function! s:ValidLine(expression)
         return 0 
     endif 
 
-    "TODO change variable
     " checks for lines that don't need evaluation
-    if a:expression =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*[0-9.]+$'
+    if a:expression =~ '\v\C^\s*\V'.s:validVariable.'\v\s*\=\s*[0-9.]+\s*$'
         return 0 
     endif 
-
     call s:PrintDebugMsg('It is a valid line!')
     return 1
 endfunction
@@ -222,20 +219,19 @@ endfunction
 function! s:ReplaceVariable(expression) 
     call s:PrintDebugHeader('Replace Variable')
 
-    let e = a:expression
-    call s:PrintDebugMsg("[" . e . "] = expression before variable replacement " )
+    let expression = a:expression
+    call s:PrintDebugMsg("[".expression."] = expression before variable replacement " )
 
-    "TODO change var
     " strip the variable marker, if any
-    let e = substitute( e, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "" )
-    call s:PrintDebugMsg("[" . e . "] = expression striped of variable") 
+    let expression = substitute( expression, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "" )
+    call s:PrintDebugMsg("[".expression."] = expression striped of variable") 
 
-    "TODO change var
-    let e = substitute( e, '\v('.s:validVariable.')\ze([^(a-zA-z]|$)', 
+    let expression = substitute( expression, '\v(\V'.s:validVariable.
+                \'\v)\ze([^(a-zA-Z0-9_]|$)', 
                 \ '\=s:GetVariableValue(submatch(1))', 'g' )
 
-    call s:PrintDebugMsg("[" . e . "] = expression after variable replacement ") 
-    return e
+    call s:PrintDebugMsg("[" . expression . "] = expression after variable replacement ") 
+    return expression
 endfunction
 
 "==========================================================================}}}
@@ -246,6 +242,7 @@ endfunction
 function! s:GetVariableValue(variable)
 
     call s:PrintDebugHeader('Get Variable Value')
+    call s:PrintDebugMsg("[".getline('.')."] = the current line") 
 
     call s:PrintDebugMsg("[" . a:variable . "] = the variable") 
 
@@ -259,36 +256,39 @@ function! s:GetVariableValue(variable)
     " avoid substitute() as we are called from inside substitute()
     let line = getline(s)
     call s:PrintDebugMsg("[" . line . "] = line with variable value after") 
-    let idx = strridx( line, "=" )
-    if idx == -1 
-        throw "Calc error: line with variable ".a:variable." doesn't contain the '='" 
-    endif
-    let variableValue = strpart( line, idx+1 )
+    " let idx = strridx( line, "=" )
+    " if idx == -1 
+    "     throw "Calc error: line with variable ".a:variable." doesn't contain the '='" 
+    " endif
+    " 
+    " let variableValue = strpart( line, idx+1 )
+    let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.=\d+)\ze\s*$')
     call s:PrintDebugMsg("[" . variableValue . "] = the variable value") 
     return variableValue
 endfunction
 
-
 "==========================================================================}}}
 "s:RemoveOldResult                                                         {{{
-"Remove old result if any eg '5+5 = 10' becomes '5+5'
+"Remove old result if any 
+"eg '5+5 = 10' becomes '5+5'
+"eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
 "inspired by Ihar Filipau's inline calculator
 "=============================================================================
 function! s:RemoveOldResult(expression)
     call s:PrintDebugHeader('Remove Old Result')
 
-    let e = a:expression
+    let expression = a:expression
     "if it's a variable with an expression ignore the first = sign
     "else if it's just a normal expression just remove it
-    call s:PrintDebugMsg('[' . e . ']= expression before removed result')
+    call s:PrintDebugMsg('[' . expression . ']= expression before removed result')
 
-    let e = substitute(e, '\v\s+$', "", "")
-    call s:PrintDebugMsg('[' . e . ']= expression after removed trailing space')
+    let expression = substitute(expression, '\v\s+$', "", "")
+    call s:PrintDebugMsg('[' . expression . ']= expression after removed trailing space')
 
-    let e = substitute(e, '\v\s*\=\s*[-0-9e.]*\s*$', "", "")
-    call s:PrintDebugMsg('[' . e . ']= expression after removed old result')
+    let expression = substitute(expression, '\v\s*\=\s*[-0-9e.]*\s*$', "", "")
+    call s:PrintDebugMsg('[' . expression . ']= expression after removed old result')
 
-    return e
+    return expression
 endfunction
 
 "==========================================================================}}}
@@ -313,15 +313,15 @@ endfunction
 " NOTE: this is not implemented and is a work in progress/failure
 "=============================================================================
 function! s:HandleCarrot(expression)
-    let s:e = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)', 
+    let s:expression = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)', 
                 \ 'pow(\1,\2)','g') " good
-    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\([0-9.]\+\)', 
+    let s:expression = substitute(s:expression, '\(\a\+(.\{-})\)\^\([0-9.]\+\)', 
                 \ 'pow(\1,\2)','g') "questionable 
-    let s:e = substitute(s:e, '\([0-9.]\+\)\^\(\a\+(.\{-})\)', 
+    let s:expression = substitute(s:expression, '\([0-9.]\+\)\^\(\a\+(.\{-})\)', 
                 \ 'pow(\1,\2)','g') "good 
-    let s:e = substitute(s:e, '\(\a\+(.\{-})\)\^\(\a\+(.\{-})\)',
+    let s:expression = substitute(s:expression, '\(\a\+(.\{-})\)\^\(\a\+(.\{-})\)',
                 \ 'pow(\1,\2)','g') "bad
-    return s:e
+    return s:expression
 endfunction
 
 "==========================================================================}}}
@@ -332,14 +332,14 @@ function! s:FixMultiplication(expression)
     call s:PrintDebugHeader('Fix Multiplication')
 
     "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
-    let e = substitute(a:expression,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
-    call s:PrintDebugMsg('[' . e . ']= fixed multiplication 1') 
+    let expression = substitute(a:expression,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
+    call s:PrintDebugMsg('[' . expression . ']= fixed multiplication 1') 
 
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
-    let e = substitute(e,'\v([0-9.]+)\s*([([:alpha:]])', '\1\*\2','g')
-    call s:PrintDebugMsg('[' . e . ']= fixed multiplication 2') 
+    let expression = substitute(expression,'\v([0-9.]+)\s*([([:alpha:]])', '\1\*\2','g')
+    call s:PrintDebugMsg('[' . expression . ']= fixed multiplication 2') 
 
-    return e
+    return expression
 endfunction
 
 "==========================================================================}}}
