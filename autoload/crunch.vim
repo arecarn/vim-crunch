@@ -42,7 +42,7 @@ endif
 
 
 "Valid Variable Regex
-let s:validVariable = '\v[a-zA-Z_]+[0-9]*'
+let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 
 
 "==========================================================================}}}
@@ -71,11 +71,10 @@ function! s:PrintDebugMsg(text)
         echom a:text
     endif
 endfunction
-
 "=========================================================================}}}2
 
 "==========================================================================}}}
-"Top Level Functions                                                                      {{{
+"Top Level Functions                                                       {{{
 "=============================================================================
 "crunch#Crunch                                                            {{{2
 " The Top Level Function that determines program flow
@@ -145,6 +144,41 @@ function! crunch#CrunchBlock() range
     for line in range(top, bot)
         call crunch#CrunchLine(line)
     endfor
+endfunction
+
+"=========================================================================}}}2
+" crunch#EvalTypes "                                                      {{{2
+" returns the possible evaluation types for Crunch 
+"=============================================================================
+function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
+    let s:evalTypes = [ 'Octave',  'VimScript' ]
+    return s:evalTypes
+endfunction
+
+"=========================================================================}}}2
+" crunch#ChooseEval()                                                     {{{2
+" returns the possible evaluation types for Crunch 
+"=============================================================================
+function! crunch#ChooseEval(EvalSource)
+
+    let s:crunch_using_octave = 0
+    let s:crunch_using_vimscript = 0
+
+    if a:EvalSource == 'VimScript'
+        let s:crunch_using_vimscript = 1
+    elseif a:EvalSource == 'Octave' 
+        if s:OctaveEval('1+1')  == 2
+            let s:crunch_using_octave = 1
+        else 
+            let s:crunch_using_vimscript = 1
+            throw 'Calc error: Octave not avaiable'
+        endif 
+    else
+        throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation"
+                    \ "source, Defaulting to VimScript"
+        let s:crunch_using_vimscript = 1
+    endif
+
 endfunction
 
 "=========================================================================}}}2
@@ -253,17 +287,15 @@ function! s:GetVariableValue(variable)
         throw "Calc error: variable ".a:variable." not found" 
     endif
 
-    " avoid substitute() as we are called from inside substitute()
     let line = getline(s)
     call s:PrintDebugMsg("[" . line . "] = line with variable value after") 
-    " let idx = strridx( line, "=" )
-    " if idx == -1 
-    "     throw "Calc error: line with variable ".a:variable." doesn't contain the '='" 
-    " endif
-    " 
-    " let variableValue = strpart( line, idx+1 )
+
     let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.=\d+)\ze\s*$')
     call s:PrintDebugMsg("[" . variableValue . "] = the variable value") 
+    if variableValue = ''
+        throw 'value for '.a:variable.' not found.'
+    endif 
+
     return variableValue
 endfunction
 
@@ -400,41 +432,6 @@ function! s:OctaveEval(expression)
     call s:PrintDebugMsg('['.result.']= expression after ans removed')
 
     return result
-endfunction
-
-"==========================================================================}}}
-" crunch#EvalTypes "                                                       {{{
-" returns the possible evaluation types for Crunch 
-"=============================================================================
-function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
-    let s:evalTypes = [ 'Octave',  'VimScript' ]
-    return s:evalTypes
-endfunction
-
-"==========================================================================}}}
-" crunch#ChooseEval()                                                      {{{
-" returns the possible evaluation types for Crunch 
-"=============================================================================
-function! crunch#ChooseEval(EvalSource)
-
-    let s:crunch_using_octave = 0
-    let s:crunch_using_vimscript = 0
-
-    if a:EvalSource == 'VimScript'
-        let s:crunch_using_vimscript = 1
-    elseif a:EvalSource == 'Octave' 
-        if s:OctaveEval('1+1')  == 2
-            let s:crunch_using_octave = 1
-        else 
-            let s:crunch_using_vimscript = 1
-            throw 'Calc error: Octave not avaiable'
-        endif 
-    else
-        throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation"
-                    \ "source, Defaulting to VimScript"
-        let s:crunch_using_vimscript = 1
-    endif
-
 endfunction
 
 "==========================================================================}}}
