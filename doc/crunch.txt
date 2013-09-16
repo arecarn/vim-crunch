@@ -16,8 +16,8 @@
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
 
-        A Vim plugin that provides a calculator with tag support
-                                                                              
+        A Vim plugin that provides a calculator with variable support
+
 ==============================================================================
 *CONTENTS*
 
@@ -34,6 +34,7 @@
      5. Known Issues ................................ |CrunchKnownIssues|
      6. Contribute .................................. |CrunchContribute|
      7. Change Log .................................. |CrunchChangeLog|
+         7.1 Todo ................................... |CrunchTodo|
      8. Credits ..................................... |CrunchCredits|
      9. License ..................................... |CrunchLicenece|
 
@@ -41,8 +42,10 @@
 1. *OVERVIEW*                                                 *CrunchOverview*
 
 Crunch makes calculations in Vim more accessible and loosens Vim's math
-syntax. Most of Crunch's syntax loosening is accomplished by extensive search
-and replace. Crunch also Forces floating point to be used. 
+syntax, allowing more Implied multiplication. This plugin can access your
+systems Octave installation allowing it to be used instead of, the default Vim
+Script evaluation. When using Vim Script evaluation  crunch forces floating
+point to be used when evaluating.
 
 If you want to do math in Vim without Crunch the process goes as follows.
 From insert mode or command line more:
@@ -52,15 +55,19 @@ Or just from command line mode:
     :echo 5+5<CR>
 
 One Problem with this method is when you expect a floating point result from
-integer division
+integer division:
                                      e.g.
                                    5/2 = 2
+
 You can see that the result is the truncated version of the actual result.
 When what you actually wanted was:
+
                                 5.0/2.0 = 2.5
 
-Or when you enter a floating point number like this
+Or when you enter a floating point number like this:
+
                                      .5/2
+
 A decimal without a leading zero produces an error when you actually wanted
 was this 0.5/2 = 0.25
 
@@ -69,7 +76,7 @@ Crunch solves these trivial problems and many more.
 1.1 *FEATURE_CHART*                                       *CrunchFeatureChart*
 
 The following chart summarizes the features that make using math with Crunch a
-better experience than vanilla Vim when just considering syntax. 
+better experience than vanilla Vim when just considering syntax.
 
 ==============================================================================
          Feature           |      With Crunch      |      Without Crunch
@@ -80,10 +87,9 @@ Implied Multiplication     |                       |
                            |sin(1)2 = 1.682942     |sin(1)*2 = 1.682942
                            |(2*3)(3*2) = 36        |(2*3)*(3*2) = 36
                            |2(3*2) = 12            |2*(3*2) = 12
-                           |.25*4 = 1              |0.25*4 = 1.0
 ---------------------------+-----------------------+--------------------------
 Integer to Float Conversion|                       |
-(for VimScript Evaluation) |1/2 = 0.5              |1.0/2.0 = 0.5
+(for Vim Script eval)      |1/2 = 0.5              |1.0/2.0 = 0.5
                            |.25*4 = 1              |0.25*4 = 1.0
 ---------------------------+-----------------------+--------------------------
 Decimals w/o Leading Zeros |                       |
@@ -91,18 +97,18 @@ Decimals w/o Leading Zeros |                       |
                            |.25*4 = 1              |0.25*4 = 1.0
 ---------------------------+-----------------------+--------------------------
 Removed Zeros In Result    |                       |
-                           |.25*4 = 1              |0.25*4 = 1.0
+                           |0.25*4 = 1             |0.25*4 = 1.0
                            |pow(2,8) = 256         |pow(2,8)= 256.0
 ------------------------------------------------------------------------------
 Note: all the examples 'Without Crunch' work fine with Crunch as well.
 
 Crunch Allows you to just type in mathematical expressions without having to
-worry about the syntax as much, and getting the answer you expect. 
+worry about the syntax as much, and getting the answer you expect.
 
 ==============================================================================
 2. *USAGE*                                                       *CrunchUsage*
 
-*   :Crunch <args> 
+*   :Crunch <args>
 
     Where <args> is some mathematical expression to be evaluated. The result
     is then available to be pasted from the default register.
@@ -131,33 +137,33 @@ worry about the syntax as much, and getting the answer you expect.
 2.1 *VARIABLES*                                              *CrunchVariables*
 
 When using :CrunchLine or :CrunchBlock (and their mappings) you can use
-variables of a sort to define values and store results. 
+variables of a sort to define values and store results.
 
-Variable names can contain characters [a-z, A-Z]. 
+A variable name consists of ASCII letters, digits and the underscore. It
+cannot start with a digit.  Valid variable names are:
 
-When declaring a variable the Tag marker comes after the variable name. So if
-you wanted the variable 'cat' to equal '5' you would use 'var cat = 5' as your
-line.
+	counter
+	_aa3p
+	very_long_variable_name_with_underscores
+	FuncLength2
+	LENGTH
 
-To use the variable in an expression you reverse the order of the marker and
-the variable name. So if we wanted to use the variable 'cat' in an expression
-we would it would look like this 'cat + 10'
-
+Invalid names are "foo+bar" and "6var".
 
 ------------------------------------------------------------------------------
-Example: calculate area and volume given the radius. 
+Example: calculate area and volume given the radius.
 
-var radius = 5
-var pi = 3.1415
-var area = pow(radius,2)*pi
-var volume = pow(radius,3)*pi*4/3
+radius = 5
+pi = 3.1415
+area = pow(radius,2)*pi
+volume = pow(radius,3)*pi*4/3
 
 First two lines work like constants denoting Pi and the radius.  You can then
 visually select the next two lines and use either :CrunchLine, or <leader>cl
 to evaluate the expressions and see the results.
 
-var area = pow(radius,2)*pi = 78.5375
-var volume = pow(radius,3)*pi*4/3 = 523.583333
+area = pow(radius,2)*pi = 78.5375
+volume = pow(radius,3)*pi*4/3 = 523.583333
 
 If invalid expressions are used Vim will report it's errors, and may give a
 result of zero.
@@ -168,11 +174,11 @@ result of zero.
 If you don't want a line evaluated but want to leave some text there crunch
 has support for ignoring lines with comments. By default the string to start a
 comment it '"' just like Vim, but this can be configured |CrunchCalcComment|
-global variable. 
+global variable.
 
 ==============================================================================
 3. *Mappings*                                                 *CrunchMappings*
-        
+
 By default CrunchLine is mapped to '<leader>cl'. To use a different map:
 
         map <silent> <leader>cr <plug>CrunchCrunchLine
@@ -200,12 +206,12 @@ Default '"'
 This command allows you to choose what evaluation method you would like to use
 so far Crunch supports the following.
 
-* VimScript
+* Vim Script
 * Octave (must have Octave installed)
 
 Usage:
 :CrunchEval Octave
-or 
+or
 :CrunchEval VimScript
 
 ==============================================================================
@@ -224,9 +230,11 @@ https://github.com/arecarn/crunch
 ==============================================================================
 7. *CHANGE_LOG*                                              *CrunchChangeLog*
 
+12 Sept 2013 * Improved Variable Flexibility
+
 29 Aug  2013 * Add CrunchBlock mapping
 
-27 Aug  2013 * Allow expressions to be inputed as an argument to :Crunch 
+27 Aug  2013 * Allow expressions to be input as an argument to :Crunch
                command  e.g. ':Crunch 5*5'
 
 08 July 2013 * Improved Map handling
@@ -248,34 +256,33 @@ https://github.com/arecarn/crunch
 19 Jun  2013 first version
 
 ------------------------------------------------------------------------------
-TODO:
+7.1 *TODO*                                                     *CrunchTodo*
 
-see http://github.com/arecarn/crunch/issues
+http://github.com/arecarn/crunch/issues
 
 
 ==============================================================================
 8. *CREDITS*                                                   *CrunchCredits*
 
 The core maintainers of crunch are:
-
--    Ryan Carney (github: arecarn)
--    github: mMontu
+- Ryan Carney (github: arecarn)
+- Marcelo Montu (github: mMontu)
 
 
 Sources inspiration and credits for this plugin
 
 - http://patorjk.com/
-  ASCII font courtesy of Patrick Gillespie 
+  ASCII font courtesy of Patrick Gillespie
 
 - https://github.com/gregsexton/VimCalc
   Greg Sexton Wrote  Vimcalc
 
 - http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.html
-  Ihar Filipau wrote most of the tagging code as well as VIM incline
-  calculator 
+  Ihar Filipau inspired variable code, in his inline calculator
+  calculator
 
 - https://github.com/hrsh7th/vim-neco-calc
-- hrsh7th wrote Neco-calc, and inspired the int to float conversion method
+  hrsh7th wrote Neco-calc, and inspired the int to float conversion method
 
 ==============================================================================
 9. *LICENSE*                                                  *CrunchLicenece*
