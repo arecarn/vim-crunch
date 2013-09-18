@@ -1,6 +1,6 @@
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Header                                                                    {{{
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Last Change: 09 Sept 2013
 "Maintainer: Ryan Carney arecarn@gmail.com
 "License:        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
@@ -17,15 +17,15 @@
 "
 "                   0. You just DO WHAT THE FUCK YOU WANT TO
 
-"==========================================================================}}}
-"Script settings                                                           {{{
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Script settings                                                          {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let save_cpo = &cpo   " allow line continuation
 set cpo&vim
 
-"==========================================================================}}}
-"Globals                                                                   {{{
-"=============================================================================
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" Globals                                                                  {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 if !exists("g:crunch_calc_prompt")
     let g:crunch_calc_prompt = 'Calc >> '
 endif
@@ -44,15 +44,15 @@ endif
 "Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 
-"==========================================================================}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Debug Resources                                                           {{{
 "crunch_debug enables varies echoes throughout the code
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:debug = 0
 
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " PrintDebugHeader()                                                      {{{2
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! PrintDebugHeader(text)
     if s:debug
         echom repeat(' ', 80)
@@ -62,22 +62,26 @@ function! PrintDebugHeader(text)
     endif
 endfunction
 
-"=========================================================================}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " PrintDebugMsg()                                                         {{{2
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! PrintDebugMsg(text)
     if s:debug
         echom a:text
     endif
 endfunction
-"=========================================================================}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 
-"==========================================================================}}}
+ 
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Top Level Functions                                                       {{{
-"=============================================================================
+"
+"
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "crunch#Crunch                                                            {{{2
 " The Top Level Function that determines program flow
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Crunch(input)
     if a:input != ''
         let OriginalExpression = a:input
@@ -104,10 +108,10 @@ function! crunch#Crunch(input)
     endif
 endfunction
 
-"=========================================================================}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#CrunchLine                                                        {{{2
 " The Top Level Function that determines program flow
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CrunchLine(line)
     let OriginalExpression = getline(a:line)
 
@@ -127,10 +131,10 @@ function! crunch#CrunchLine(line)
     return resultStr
 endfunction
 
-"=========================================================================}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#CrunchBlock                                                       {{{2
 " The Top Level Function that determines program flow
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CrunchBlock() range
     let top = a:firstline
     let bot = a:lastline
@@ -152,19 +156,19 @@ function! crunch#CrunchBlock() range
     endfor
 endfunction
 
-"=========================================================================}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " crunch#EvalTypes                                                        {{{2
 " returns the possible evaluation types for Crunch
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
     let s:evalTypes = [ 'Octave',  'VimScript' ]
     return s:evalTypes
 endfunction
 
-"=========================================================================}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " crunch#ChooseEval()                                                     {{{2
 " returns the possible evaluation types for Crunch
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#ChooseEval(EvalSource)
 
     let s:crunch_using_octave = 0
@@ -187,12 +191,12 @@ function! crunch#ChooseEval(EvalSource)
 
 endfunction
 
-"=========================================================================}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 
-"==========================================================================}}}
-"s:Int2Float                                                               {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" Int2Float()                                                              {{{
 "Convert Integers to floats
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! Int2Float(number)
     let num = a:number
     call PrintDebugMsg('['.num.'] = number before converted to floats')
@@ -206,9 +210,9 @@ function! Int2Float(number)
     return  result
 endfunction
 
-"==========================================================================}}}
-"s:IntegerToFloat                                                          {{{
-"=============================================================================
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" IntegerToFloat()                                                         {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! IntegerToFloat(expression)
     let expression = a:expression
 
@@ -222,13 +226,13 @@ function! IntegerToFloat(expression)
     return expression
 endfunction
 
-"==========================================================================}}}
-"ValidLine                                                                 {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+"ValidLine                                                                {{{
 "Checks the line to see if it is a variable definition, or a blank line that
 "may or may not contain whitespace.
 
 "If the line is invalid this function returns false
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! ValidLine(expression)
     call PrintDebugHeader('Valid Line')
     call PrintDebugMsg('[' . a:expression . '] = the tested string' )
@@ -255,11 +259,11 @@ function! ValidLine(expression)
 endfunction
 
 
-"==========================================================================}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "ReplaceVariable                                                           {{{
 "Replaces the variable within an expression with the value of that variable
 "inspired by Ihar Filipau's inline calculator
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! ReplaceVariable(expression)
     call PrintDebugHeader('Replace Variable')
 
@@ -278,11 +282,11 @@ function! ReplaceVariable(expression)
     return expression
 endfunction
 
-"==========================================================================}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "GetVariableValue                                                          {{{
 "Searches for the value of a variable and returns the value assigned to the
 "variable inspired by Ihar Filipau's inline calculator
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! GetVariableValue(variable)
 
     call PrintDebugHeader('Get Variable Value')
@@ -311,9 +315,9 @@ function! GetVariableValue(variable)
 endfunction
 
 
-"==========================================================================}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "BuildLinePrefix()                                                         {{{
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! BuildLinePrefix()
     call PrintDebugHeader('Build Line Prefix')
     " let commentEnd = matchstr(&commentstring, '\v.+\%s\zs.+')
@@ -343,9 +347,9 @@ function! BuildLinePrefix()
     return prefixRegex
 endfunction
 
-"==========================================================================}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "RemoveLinePrefix()                                                        {{{
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function!RemoveLinePrefix(e)
     call PrintDebugHeader('Remove Line Prefix')
     let expression = a:e
@@ -357,13 +361,13 @@ function!RemoveLinePrefix(e)
     return expression
 endfunction
 
-"==========================================================================}}}
-"s:RemoveOldResult                                                         {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+"RemoveOldResult                                                           {{{
 "Remove old result if any
 "eg '5+5 = 10' becomes '5+5'
 "eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
 "inspired by Ihar Filipau's inline calculator
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! RemoveOldResult(expression)
     call PrintDebugHeader('Remove Old Result')
 
@@ -381,10 +385,10 @@ function! RemoveOldResult(expression)
     return expression
 endfunction
 
-"==========================================================================}}}
-" s:GetInputString                                                         {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" GetInputString                                                           {{{
 " prompt the user for an expression
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! GetInputString()
     call inputsave()
     let Expression = input(g:crunch_calc_prompt)
@@ -392,8 +396,8 @@ function! GetInputString()
     return Expression
 endfunction
 
-"==========================================================================}}}
-" s:HandleCarrot                                                           {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" HandleCarrot                                                             {{{
 " changes '2^5' into 'pow(2,5)'
 " cases
 " fun()^fun() eg sin(1)^sin(1)
@@ -401,7 +405,7 @@ endfunction
 " num^fun() eg 2^sin(1)
 " num^num() eg 2^2
 " NOTE: this is not implemented and is a work in progress/failure
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! HandleCarrot(expression)
     let s:expression = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)',
                 \ 'pow(\1,\2)','g') " good
@@ -414,10 +418,10 @@ function! HandleCarrot(expression)
     return s:expression
 endfunction
 
-"==========================================================================}}}
-" s:FixMultiplication                                                      {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" FixMultiplication                                                        {{{
 " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! FixMultiplication(expression)
     call PrintDebugHeader('Fix Multiplication')
 
@@ -432,12 +436,12 @@ function! FixMultiplication(expression)
     return expression
 endfunction
 
-"==========================================================================}}}
-" s:EvaluateExpression                                                     {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" EvaluateExpression                                                       {{{
 " Evaluates the expression and checks for errors in the process. Also
 " if there is no error echo the result and save a copy of it to the default
 " paste register
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! EvaluateExpression(expression)
     call PrintDebugHeader('Evaluate Expression')
     call PrintDebugMsg('[' . a:expression . "]= the final expression")
@@ -466,12 +470,12 @@ function! EvaluateExpression(expression)
     return result
 endfunction
 
-"==========================================================================}}}
-" s:OctaveEval                                                             {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" OctaveEval                                                               {{{
 " Evaluates and expression using a systems Octave installation
 " removes 'ans =' and trailing newline
 " Errors in octave evaluation are thrown
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! OctaveEval(expression)
     let expression = a:expression
 
@@ -492,8 +496,8 @@ function! OctaveEval(expression)
     return result
 endfunction
 
-"==========================================================================}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Restore settings                                                          {{{
-"=============================================================================
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let &cpo = save_cpo
 " vim:set foldmethod=marker:
