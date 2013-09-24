@@ -94,26 +94,24 @@ function! crunch#Crunch(input)
         let expression = FixMultiplication(OriginalExpression)
         let expression = IntegerToFloat(expression)
         let result = EvaluateExpression(expression)
+
+        echo expression
+        echo "= ".result
+        echo "Yanked Result"
+        "yank the result into the correct register
+        if &cb == 'unnamed'
+            let @* = result
+        elseif &cb == 'unnamedplus'
+            let @+ = result
+        else
+            let @" = result
+        endif
     catch
         echohl ErrorMsg 
         echomsg g:errMsg
 
         echohl None
-        let result = g:errMsg
-
     endtry
-
-    echo expression
-    echo "= ".result
-    echo "Yanked Result"
-    "yank the result into the correct register
-    if &cb == 'unnamed'
-        let @* = result
-    elseif &cb == 'unnamedplus'
-        let @+ = result
-    else
-        let @" = result
-    endif
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
