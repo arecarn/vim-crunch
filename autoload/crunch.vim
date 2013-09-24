@@ -148,26 +148,39 @@ endfunction
 "crunch#CrunchBlock                                                       {{{2
 " The Top Level Function that determines program flow
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#CrunchBlock() range
-    let top = a:firstline
-    let bot = a:lastline
-    call PrintDebugMsg("range: " . top . ", " . bot)
-    if top == bot
-        " when no range is given (or a sigle line, as it is not possible to
-        " detect the difference), use the set of lines separed by blank lines
-        let emptyLinePat = '\v^\s*$'
-        while top > 1 && getline(top-1) !~ emptyLinePat
-            let top -= 1
-        endwhile
-        while bot < line('$') && getline(bot+1) !~ emptyLinePat
-            let bot += 1
-        endwhile
-        call PrintDebugMsg("new range: " . top . ", " . bot)
-    endif
-    for line in range(top, bot)
-        call crunch#CrunchLine(line)
-    endfor
+" function! crunch#CrunchBlock() range
+"     let top = a:firstline
+"     let bot = a:lastline
+"     call PrintDebugMsg("range: " . top . ", " . bot)
+"     if top == bot
+"         " when no range is given (or a sigle line, as it is not possible to
+"         " detect the difference), use the set of lines separed by blank lines
+"         let emptyLinePat = '\v^\s*$'
+"         while top > 1 && getline(top-1) !~ emptyLinePat
+"             let top -= 1
+"         endwhile
+"         while bot < line('$') && getline(bot+1) !~ emptyLinePat
+"             let bot += 1
+"         endwhile
+"         call PrintDebugMsg("new range: " . top . ", " . bot)
+"     endif
+"     for line in range(top, bot)
+"         call crunch#CrunchLine(line)
+"     endfor
+" endfunction
+
+"==========================================================================}}}
+"s:CrunchBlock                                                             {{{
+"Temporary fix for issue #12: CrunchBlock command calculates using variables
+"incorrectly depending on cursor position
+"=============================================================================
+function! crunch#CrunchBlock()
+    execute "normal! vip\<ESC>"
+    let topline = line("'<")
+    let bottomline = line("'>")
+    execute topline . "," bottomline . "call " . "crunch#CrunchLine('.')"
 endfunction
+ 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " crunch#EvalTypes                                                        {{{2
