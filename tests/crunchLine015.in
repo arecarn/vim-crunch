@@ -1,0 +1,12 @@
+"=============================================================================
+"Error Testing
+"=============================================================================
+453453454534534*453
+cat+5
+cat =
+cat + 5
+
+453453454534534*453 = Crunch error:453453454534534 is too large for VimScript evaluation
+cat+5 = Crunch error: value for cat not found.
+cat = Crunch error: value for cat not found.
+cat + 5 = Crunch error: value for cat not found.

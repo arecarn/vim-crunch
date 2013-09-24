@@ -1,4 +1,3 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Header                                                                    {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Last Change: 09 Sept 2013
@@ -43,6 +42,7 @@ endif
 
 "Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
+let g:errMsg = ''
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Debug Resources                                                           {{{
@@ -72,12 +72,11 @@ function! PrintDebugMsg(text)
 endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 
- 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Top Level Functions                                                       {{{
-"
-"
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "crunch#Crunch                                                            {{{2
 " The Top Level Function that determines program flow
@@ -90,10 +89,19 @@ function! crunch#Crunch(input)
     endif
 
     let s:prefixRegex = ''
-    if ValidLine(OriginalExpression) == 0 | return | endif
-    let expression = FixMultiplication(OriginalExpression)
-    let expression = IntegerToFloat(expression)
-    let result = EvaluateExpression(expression)
+    try
+        if ValidLine(OriginalExpression) == 0 | return | endif
+        let expression = FixMultiplication(OriginalExpression)
+        let expression = IntegerToFloat(expression)
+        let result = EvaluateExpression(expression)
+    catch
+        echohl ErrorMsg 
+        echomsg g:errMsg
+
+        echohl None
+        let result = g:errMsg
+
+    endtry
 
     echo expression
     echo "= ".result
@@ -118,14 +126,21 @@ function! crunch#CrunchLine(line)
     call PrintDebugMsg('['.OriginalExpression.'] is the OriginalExpression')
     let s:prefixRegex = BuildLinePrefix()
 
-    "check if valid
-    if ValidLine(OriginalExpression) == 0 | return | endif
-    let OriginalExpression = RemoveOldResult(OriginalExpression)
-    let expression = RemoveLinePrefix(OriginalExpression)
-    let expression = FixMultiplication(expression)
-    let expression = ReplaceVariable(expression)
-    let expression = IntegerToFloat(expression)
-    let resultStr = EvaluateExpression(expression)
+    try
+        "check if valid
+        if ValidLine(OriginalExpression) == 0 | return | endif
+        let OriginalExpression = RemoveOldResult(OriginalExpression)
+        let expression = RemoveLinePrefix(OriginalExpression)
+        let expression = FixMultiplication(expression)
+        let expression = ReplaceVariable(expression)
+        let expression = IntegerToFloat(expression)
+        let resultStr = EvaluateExpression(expression)
+    catch
+        echohl ErrorMsg 
+        echomsg g:errMsg
+        echohl None
+        let resultStr = g:errMsg
+    endtry
     call setline(a:line, OriginalExpression.' = '.resultStr)
     call PrintDebugMsg('['. resultStr.'] is the result' )
     return resultStr
@@ -181,9 +196,12 @@ function! crunch#ChooseEval(EvalSource)
             let s:crunch_using_octave = 1
         else
             let s:crunch_using_vimscript = 1
-            throw 'Calc error: Octave not avaiable'
+            let g:errMsg = 'Crunch error: Octave not avaiable'
+            throw 'Crunch error: Octave not avaiable'
         endif
     else
+        let g:errMsg = 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation"
+                    \ "source, Defaulting to VimScript"
         throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation"
                     \ "source, Defaulting to VimScript"
         let s:crunch_using_vimscript = 1
@@ -194,6 +212,9 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Int2Float()                                                              {{{
 "Convert Integers to floats
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -202,7 +223,8 @@ function! Int2Float(number)
     call PrintDebugMsg('['.num.'] = number before converted to floats')
 
     if num =~ '\v^\d{8,}$'
-        throw 'Calc error:' . num .' is too large for VimScript evaluation'
+        let g:errMsg = 'Crunch error:' . num .' is too large for VimScript evaluation'
+        throw 'Crunch error:' . num .' is too large for VimScript evaluation'
     endif
 
     let result = str2float(num)
@@ -298,7 +320,8 @@ function! GetVariableValue(variable)
     let s = search('\v\C^\s*('.s:prefixRegex.')=\s*\V'.a:variable.'\v\s*\=\s*' , "bnW")
     call PrintDebugMsg("[".s."] = result of search for variable")
     if s == 0
-        throw "Calc error: variable ".a:variable." not found"
+        let g:errMsg = "Crunch error: variable ".a:variable." not found"
+        throw "Crunch error: variable ".a:variable." not found"
     endif
 
     let line = getline(s)
@@ -308,7 +331,8 @@ function! GetVariableValue(variable)
     let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.=\d+)\ze\s*$')
     call PrintDebugMsg("[" . variableValue . "] = the variable value")
     if variableValue == ''
-        throw 'value for '.a:variable.' not found.'
+        let g:errMsg = 'Crunch error: value for '.a:variable.' not found.'
+        throw 'Crunch error: value for '.a:variable.' not found.'
     endif
 
     return variableValue
@@ -377,10 +401,13 @@ function! RemoveOldResult(expression)
     call PrintDebugMsg('[' . expression . ']= expression before removed result')
 
     let expression = substitute(expression, '\v\s+$', "", "")
-    call PrintDebugMsg('[' . expression . ']= expression after removed trailing space')
+    call PrintDebugMsg('[' . expression . ']= after removed trailing space')
 
-    let expression = substitute(expression, '\v\s*\=\s*[-0-9e.]*\s*$', "", "")
-    call PrintDebugMsg('[' . expression . ']= expression after removed old result')
+    let expression = substitute(expression, '\v\s*\=\s*[-0-9e.+]*\s*$', "", "")
+    call PrintDebugMsg('[' . expression . ']= after removed old result')
+
+    let expression = substitute(expression, '\v\s*\=\s*Crunch error:.*\s*$', "", "")
+    call PrintDebugMsg('[' . expression . ']= after removed old error')
 
     return expression
 endfunction
@@ -486,7 +513,8 @@ function! OctaveEval(expression)
 
     try
         if matchstr(result, '^error:') != ''
-            throw "Calc ".result
+            let g:errMsg = "Crunch ".result
+            throw "Crunch ".result
         endif
     endtry
 
