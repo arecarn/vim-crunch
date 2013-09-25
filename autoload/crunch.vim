@@ -518,7 +518,7 @@ function! OctaveEval(expression)
 
     try
         if matchstr(result, '^error:') != ''
-            throw s:ErrorTag . result
+            throw 'Crunch ' . result
         endif
     endtry
 
