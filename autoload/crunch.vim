@@ -42,7 +42,7 @@ endif
 
 "Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
-let g:errMsg = ''
+let s:ErrorTag = 'Crunch error: '
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Debug Resources                                                           {{{
@@ -106,9 +106,9 @@ function! crunch#Crunch(input)
         else
             let @" = result
         endif
-    catch
+    catch /Crunch error: /
         echohl ErrorMsg 
-        echomsg g:errMsg
+        echomsg v:exception
 
         echohl None
     endtry
@@ -133,11 +133,11 @@ function! crunch#CrunchLine(line)
         let expression = ReplaceVariable(expression)
         let expression = IntegerToFloat(expression)
         let resultStr = EvaluateExpression(expression)
-    catch
+    catch /Crunch error: /
         echohl ErrorMsg 
-        echomsg g:errMsg
+        echomsg v:exception
         echohl None
-        let resultStr = g:errMsg
+        let resultStr = v:exception
     endtry
     call setline(a:line, OriginalExpression.' = '.resultStr)
     call PrintDebugMsg('['. resultStr.'] is the result' )
@@ -207,13 +207,10 @@ function! crunch#ChooseEval(EvalSource)
             let s:crunch_using_octave = 1
         else
             let s:crunch_using_vimscript = 1
-            let g:errMsg = 'Crunch error: Octave not avaiable'
-            throw 'Crunch error: Octave not avaiable'
+            throw s:ErrorTag . 'Octave not avaiable'
         endif
     else
-        let g:errMsg = 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation"
-                    \ "source, Defaulting to VimScript"
-        throw 'Crunch error: "'. a:EvalSource.'" is an invalid evaluation"
+        throw s:ErrorTag .'"'. a:EvalSource.'" is an invalid evaluation"
                     \ "source, Defaulting to VimScript"
         let s:crunch_using_vimscript = 1
     endif
@@ -234,8 +231,7 @@ function! Int2Float(number)
     call PrintDebugMsg('['.num.'] = number before converted to floats')
 
     if num =~ '\v^\d{8,}$'
-        let g:errMsg = 'Crunch error:' . num .' is too large for VimScript evaluation'
-        throw 'Crunch error:' . num .' is too large for VimScript evaluation'
+        throw s:ErrorTag . num .' is too large for VimScript evaluation'
     endif
 
     let result = str2float(num)
@@ -331,8 +327,7 @@ function! GetVariableValue(variable)
     let s = search('\v\C^\s*('.s:prefixRegex.')=\s*\V'.a:variable.'\v\s*\=\s*' , "bnW")
     call PrintDebugMsg("[".s."] = result of search for variable")
     if s == 0
-        let g:errMsg = "Crunch error: variable ".a:variable." not found"
-        throw "Crunch error: variable ".a:variable." not found"
+        throw s:ErrorTag."variable ".a:variable." not found"
     endif
 
     let line = getline(s)
@@ -342,8 +337,7 @@ function! GetVariableValue(variable)
     let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.=\d+)\ze\s*$')
     call PrintDebugMsg("[" . variableValue . "] = the variable value")
     if variableValue == ''
-        let g:errMsg = 'Crunch error: value for '.a:variable.' not found.'
-        throw 'Crunch error: value for '.a:variable.' not found.'
+        throw s:ErrorTag.'value for '.a:variable.' not found.'
     endif
 
     return variableValue
@@ -524,8 +518,7 @@ function! OctaveEval(expression)
 
     try
         if matchstr(result, '^error:') != ''
-            let g:errMsg = "Crunch ".result
-            throw "Crunch ".result
+            throw s:ErrorTag . result
         endif
     endtry
 
