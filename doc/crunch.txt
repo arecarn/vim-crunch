@@ -26,6 +26,7 @@
      2. Usage ....................................... |CrunchUsage|
         2.1 Variables ............................... |CrunchVariables|
         2.2 Comments ................................ |CrunchComment|
+        2.3 Ignore Prefix ........................... |CrunchIgnoredPrefix|
      3. Mappings  ................................... |CrunchMappings|
      4. Configuration ............................... |CrunchConfiguration|
          4.1 g:crunch_calc_prompt ................... |CrunchCalcPrompt|
@@ -81,29 +82,30 @@ better experience than vanilla Vim when just considering syntax.
 ==============================================================================
          Feature           |      With Crunch      |      Without Crunch
 ==============================================================================
-Implied Multiplication     |                       |
-                           |cos(0)cos(0) = 1       |cos(0)*cos(0) = 1.0
-                           |2sin(1) = 1.682942     |2*sin(1) = 1.682942
-                           |sin(1)2 = 1.682942     |sin(1)*2 = 1.682942
-                           |(2*3)(3*2) = 36        |(2*3)*(3*2) = 36
-                           |2(3*2) = 12            |2*(3*2) = 12
----------------------------+-----------------------+--------------------------
-Integer to Float Conversion|                       |
-(for Vim Script eval)      |1/2 = 0.5              |1.0/2.0 = 0.5
-                           |.25*4 = 1              |0.25*4 = 1.0
----------------------------+-----------------------+--------------------------
-Decimals w/o Leading Zeros |                       |
-                           |.5/2 = 0.25            |0.5/2 = 0.25
-                           |.25*4 = 1              |0.25*4 = 1.0
----------------------------+-----------------------+--------------------------
-Removed Zeros In Result    |                       |
-                           |0.25*4 = 1             |0.25*4 = 1.0
-                           |pow(2,8) = 256         |pow(2,8)= 256.0
-------------------------------------------------------------------------------
+Implied Multiplication     |                       |                          
+                           |cos(0)cos(0) = 1       |cos(0)*cos(0) = 1.0       
+                           |2sin(1) = 1.682942     |2*sin(1) = 1.682942       
+                           |sin(1)2 = 1.682942     |sin(1)*2 = 1.682942       
+                           |(2*3)(3*2) = 36        |(2*3)*(3*2) = 36          
+                           |2(3*2) = 12            |2*(3*2) = 12              
+ --------------------------+-----------------------+------------------------- 
+Integer to Float Conversion|                       |                          
+(for Vim Script eval)      |1/2 = 0.5              |1.0/2.0 = 0.5             
+                           |.25*4 = 1              |0.25*4 = 1.0              
+ --------------------------+-----------------------+------------------------- 
+Decimals w/o Leading Zeros |                       |                          
+                           |.5/2 = 0.25            |0.5/2 = 0.25              
+                           |.25*4 = 1              |0.25*4 = 1.0              
+ --------------------------+-----------------------+------------------------- 
+Removed Zeros In Result    |                       |                          
+                           |0.25*4 = 1             |0.25*4 = 1.0              
+                           |pow(2,8) = 256         |pow(2,8)= 256.0           
+ ---------------------------------------------------------------------------- 
 Note: all the examples 'Without Crunch' work fine with Crunch as well.
 
 Crunch Allows you to just type in mathematical expressions without having to
 worry about the syntax as much, and getting the answer you expect.
+
 
 ==============================================================================
 2. *USAGE*                                                       *CrunchUsage*
@@ -176,8 +178,58 @@ has support for ignoring lines with comments. By default the string to start a
 comment it '"' just like Vim, but this can be configured |CrunchCalcComment|
 global variable.
 
+------------------------------------------------------------------------------
+2.3 *IGNORE* *PREFIX*                                      *CrunchIgnoredPrefix*
+
+The ignore prefix allows the comments and in a file to be ignored by crunch
+when en evaluating lines or selections with :CrunchLine or :CrunchBlock.
+There is only one constant prefix '*' that can be used before an expression.
+The other prefix is set by the 'commentstring' variable in Vim. Bellow is a
+table summarizing some prefixes for different file types. For more info on
+commentstring see ":help 'commentstring'"
+
 ==============================================================================
-3. *Mappings*                                                 *CrunchMappings*
+    File Type    |      Valid Expression      |       Invalid Expression
+==============================================================================
+ C               |/*                          |/*5*5*/     
+ Java            | * 5*5                      |            
+ JavaScrip       | *                          |            
+                 | */                         |            
+                 +----------------------------+
+                 |/* 5*5                      |            
+                 | */                         |            
+                 +----------------------------+
+                 |/*                          |            
+                 |  5*5                       |            
+                 |*/                          |            
+ ----------------+----------------------------+------------------------------
+ HTML            |<!-- 5*5                    |<!-- 5*5 -->
+                 |-->                         |            
+                 +----------------------------+            
+                 |<!--                        |            
+                 |* 5*5                       |            
+                 |-->                         |            
+ ----------------+----------------------------+------------------------------
+ Python          |#5*5                        |#5*5#       
+                 |*5*5                        |            
+ ----------------+----------------------------+------------------------------
+
+If your language's commentstrig is unspotted by vim or you would like to use
+single line instead of multi line comments prefixes, don't worry. All you have
+to do is add an autocmd to update commentstring for the desired language 
+you vimrc. 
+
+Below is an example for adding support for apache file type.(spaces escaped)
+
+autocmd FileType apache set commentstring=#\ %s
+
+Below is an example changing Prefix to use single line comments.(slashes
+escaped)
+
+autocmd FileType C set commentstring=\/\/%s
+
+==============================================================================
+3. *MAPPINGS*                                                 *CrunchMappings*
 
 By default CrunchLine is mapped to '<leader>cl'. To use a different map:
 
@@ -246,7 +298,7 @@ https://github.com/arecarn/crunch
                 - )(, n(
              * Added visual selection
 
-27 Jun  2013 * Added tags
+27 Jun  2013 * Added Variables
              * Clearing of previous result
              * Made Crunch and CrunchLine two different functions
              * Removed visual selection in favor of whole line evaluation.
