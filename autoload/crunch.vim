@@ -48,7 +48,7 @@ let s:ErrorTag = 'Crunch error: '
 "Debug Resources                                                           {{{
 "crunch_debug enables varies echoes throughout the code
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let s:debug = 1
+let s:debug = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " s:PrintDebugHeader()                                                    {{{2
@@ -131,7 +131,6 @@ function! crunch#CrunchLine(line)
     try
         "check if valid
         if s:ValidLine(OriginalExpression) == 0 | return | endif
-
         let suffix = matchstr(OriginalExpression, s:suffixRegex,)
         let OriginalExpression = substitute(OriginalExpression, s:suffixRegex, '', '')
         call s:PrintDebugMsg('['.suffix.'] is the matched suffix')
