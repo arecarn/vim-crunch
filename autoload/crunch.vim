@@ -43,6 +43,8 @@ endif
 "Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
+let s:prefixRegex = {}
+let s:suffixRegex = {}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Debug Resources                                                           {{{
@@ -88,8 +90,6 @@ function! crunch#Crunch(input)
         let origExpression = s:GetInputString()
     endif
 
-    let s:prefixRegex = '^\s*'
-    let s:suffixRegex = '\s*$'
     try
         if s:ValidLine(origExpression) == 0 | return | endif
         let expression = s:FixMultiplication(origExpression)
@@ -120,15 +120,7 @@ endfunction
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CrunchLine(line)
-    let origExpression = getline(a:line)
-
-    let s:prefixRegex = s:BuildLinePrefix()
-    let s:suffixRegex = s:BuildLineSuffix()
-
-    let suffix = matchstr(origExpression, s:suffixRegex)
-    let prefix = matchstr(origExpression, s:prefixRegex)
-
-    let origExpression = s:RemovePrefixNSuffix(origExpression)
+    let origExpression = s:RemovePrefixNSuffix(a:line, 'save')
 
     try
         if s:ValidLine(origExpression) == 0 | return | endif
@@ -144,7 +136,7 @@ function! crunch#CrunchLine(line)
         let resultStr = v:exception
     endtry
 
-    call setline(a:line, prefix.origExpression.' = '.resultStr.suffix)
+    call setline(a:line, s:prefix.origExpression.' = '.resultStr.s:suffix)
     call s:PrintDebugMsg('['. resultStr.'] is the result' )
     return resultStr
 endfunction
@@ -308,18 +300,18 @@ function! s:GetVariableValue(variable)
     call s:PrintDebugMsg("[" . a:variable . "] = the variable")
 
 
-    let s = search('\v\C^('.s:prefixRegex.')=\V'.a:variable.'\v\s*\=\s*' , "bnW")
+    let s = search('\v\C^('.s:prefixRegex[s:ft].
+                \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
     call s:PrintDebugMsg("[".s."] = result of search for variable")
     if s == 0
         throw s:ErrorTag."variable ".a:variable." not found"
     endif
 
-    let line = getline(s)
-    call s:PrintDebugMsg("[" . line . "] = line with variable value after")
-    let line = s:RemovePrefixNSuffix(line)
+    call s:PrintDebugMsg("[" .getline(s). "] = line with variable value after")
+    let line = s:RemovePrefixNSuffix(s)
     call s:PrintDebugHeader('Get Variable Value Contiuned')
 
-    let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.=\d+)\ze\s*$')
+    let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.?\d+)\ze\s*$')
     call s:PrintDebugMsg("[" . variableValue . "] = the variable value")
     if variableValue == ''
         throw s:ErrorTag.'value for '.a:variable.' not found.'
@@ -335,7 +327,10 @@ endfunction
 "list
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildLineSuffix()
-    call s:PrintDebugHeader('Build Line Srefix')
+    if has_key(s:suffixRegex, s:ft)
+        return
+    endif
+    call s:PrintDebugHeader('Build Line Suffix')
     let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
 
     "Build the suffix
@@ -360,7 +355,7 @@ function! s:BuildLineSuffix()
     "NOTE: this regex is very non magic see :h \V
     call s:PrintDebugMsg("[".suffixRegex."] = the REGEX for all the suffixes")
 
-    return suffixRegex
+    let s:suffixRegex[s:ft] = suffixRegex
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -369,6 +364,10 @@ endfunction
 "list
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildLinePrefix()
+    if has_key(s:prefixRegex, s:ft)
+        return
+    endif
+
     call s:PrintDebugHeader('Build Line Prefix')
     let s:commentStart = matchstr(&commentstring, '\v.+\ze\%s')
 
@@ -394,23 +393,31 @@ function! s:BuildLinePrefix()
     "NOTE: this regex is very non magic see :h \V
     call s:PrintDebugMsg("[".prefixRegex."] = the REGEX for all the prefixes")
 
-    return prefixRegex
+    let s:prefixRegex[s:ft] = prefixRegex
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:RemovePrefixNSuffix()                                                  {{{2
 "Removes the prefix and suffix from a string
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function!s:RemovePrefixNSuffix(expression)
+function! s:RemovePrefixNSuffix(line, ...)
     call s:PrintDebugHeader('Remove Line Prefix and Suffix')
-    let expression = a:expression
+    let expression = getline(a:line)
+    if a:0 == 1 && a:1 ==# 'save'
+        let s:ft = '_'.&ft
+        call s:BuildLinePrefix()
+        call s:BuildLineSuffix()
 
-    call s:PrintDebugMsg('['.s:prefixRegex.']= the REGEX of the prefix and suffix')
-    call s:PrintDebugMsg('['.s:suffixRegex.']= the REGEX of the suffix and suffix')
+        let s:suffix = matchstr(expression, s:suffixRegex[s:ft])
+        let s:prefix = matchstr(expression, s:prefixRegex[s:ft])
+    endif
+
+    call s:PrintDebugMsg('['.s:prefixRegex[s:ft].']= the REGEX of the prefix and suffix')
+    call s:PrintDebugMsg('['.s:suffixRegex[s:ft].']= the REGEX of the suffix and suffix')
     call s:PrintDebugMsg('['.expression.']= expr BEFORE removing prefix and suffix')
-    let expression = substitute(expression, s:prefixRegex, '', '')
+    let expression = substitute(expression, s:prefixRegex[s:ft], '', '')
     call s:PrintDebugMsg('['.expression.']= expr AFTER removing prefix')
-    let expression = substitute(expression, s:suffixRegex, '', '')
+    let expression = substitute(expression, s:suffixRegex[s:ft], '', '')
     call s:PrintDebugMsg('['.expression.']= expr AFTER removing suffix')
     return expression
 endfunction
