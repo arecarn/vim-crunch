@@ -75,24 +75,24 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"TODO remove line prefix and suffix then do validity checks, then add them on in the end
 "Top Level Functions                                                       {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "crunch#Crunch                                                            {{{2
-" The Top Level Function that determines program flow
+"When called opens a command window prompt for an equation to be evaluated
+"Optionally can take input as a argument before opening a prompt 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Crunch(input)
     if a:input != ''
-        let OriginalExpression = a:input
+        let origExpression = a:input
     else
-        let OriginalExpression = s:GetInputString()
+        let origExpression = s:GetInputString()
     endif
 
     let s:prefixRegex = '^\s*'
     let s:suffixRegex = '\s*$'
     try
-        if s:ValidLine(OriginalExpression) == 0 | return | endif
-        let expression = s:FixMultiplication(OriginalExpression)
+        if s:ValidLine(origExpression) == 0 | return | endif
+        let expression = s:FixMultiplication(origExpression)
         let expression = s:IntegerToFloat(expression)
         let result = s:EvaluateExpression(expression)
 
@@ -117,27 +117,23 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#CrunchLine                                                        {{{2
-" The Top Level Function that determines program flow
+" evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CrunchLine(line)
-    let OriginalExpression = getline(a:line)
+    let origExpression = getline(a:line)
 
-    call s:PrintDebugMsg('['.OriginalExpression.'] is the OriginalExpression')
+    let s:prefixRegex = s:BuildLinePrefix()
+    let s:suffixRegex = s:BuildLineSuffix()
 
-    let prefixNSuffixRegex = s:BuildLinePrefixNSuffix()
-    let s:prefixRegex = prefixNSuffixRegex[0]
-    let s:suffixRegex = prefixNSuffixRegex[1]
+    let suffix = matchstr(origExpression, s:suffixRegex)
+    let prefix = matchstr(origExpression, s:prefixRegex)
+
+    let origExpression = s:RemovePrefixNSuffix(origExpression)
 
     try
-        "check if valid
-        if s:ValidLine(OriginalExpression) == 0 | return | endif
-        let suffix = matchstr(OriginalExpression, s:suffixRegex,)
-        let OriginalExpression = substitute(OriginalExpression, s:suffixRegex, '', '')
-        call s:PrintDebugMsg('['.suffix.'] is the matched suffix')
-        
-        let OriginalExpression = s:RemoveOldResult(OriginalExpression)
-        let expression = s:RemoveLinePrefix(OriginalExpression)
-        let expression = s:FixMultiplication(expression)
+        if s:ValidLine(origExpression) == 0 | return | endif
+        let origExpression = s:RemoveOldResult(origExpression)
+        let expression = s:FixMultiplication(origExpression)
         let expression = s:ReplaceVariable(expression)
         let expression = s:IntegerToFloat(expression)
         let resultStr = s:EvaluateExpression(expression)
@@ -148,40 +144,15 @@ function! crunch#CrunchLine(line)
         let resultStr = v:exception
     endtry
 
-    call setline(a:line, OriginalExpression.' = '.resultStr.suffix)
+    call setline(a:line, prefix.origExpression.' = '.resultStr.suffix)
     call s:PrintDebugMsg('['. resultStr.'] is the result' )
     return resultStr
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#CrunchBlock                                                       {{{2
-" The Top Level Function that determines program flow
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" function! crunch#CrunchBlock() range
-"     let top = a:firstline
-"     let bot = a:lastline
-"     call s:PrintDebugMsg("range: " . top . ", " . bot)
-"     if top == bot
-"         " when no range is given (or a sigle line, as it is not possible to
-"         " detect the difference), use the set of lines separed by blank lines
-"         let emptyLinePat = '\v^\s*$'
-"         while top > 1 && getline(top-1) !~ emptyLinePat
-"             let top -= 1
-"         endwhile
-"         while bot < line('$') && getline(bot+1) !~ emptyLinePat
-"             let bot += 1
-"         endwhile
-"         call s:PrintDebugMsg("new range: " . top . ", " . bot)
-"     endif
-"     for line in range(top, bot)
-"         call crunch#CrunchLine(line)
-"     endfor
-" endfunction
-
 "=========================================================================}}}2
-"s:CrunchBlock                                                            {{{2
-"Temporary fix for issue #12: CrunchBlock command calculates using variables
-"incorrectly depending on cursor position
+"crunch#CrunchBlock                                                       {{{2
+"Evaluates a paragraph, equivalent to vip<leader>cl
 "=============================================================================
 function! crunch#CrunchBlock()
     execute "normal! vip\<ESC>"
@@ -202,7 +173,8 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " crunch#ChooseEval()                                                     {{{2
-" returns the possible evaluation types for Crunch
+" determines if the provided evaluation source is valid and activates the
+" corresponding evaluation method
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#ChooseEval(EvalSource)
 
@@ -231,10 +203,11 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Helper Functions                                                          {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" s:Int2Float()                                                           {{{2
-"Convert Integers to floats
+" s:ConvertInt2Float()                                                    {{{2
+" Called by the substitute command in s:IntegerToFloat() convert integers to
+" floats, and checks for digits that are too large for Vim script to evaluate
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:Int2Float(number)
+function! s:ConvertInt2Float(number)
     let num = a:number
     call s:PrintDebugMsg('['.num.'] = number before converted to floats')
 
@@ -249,6 +222,8 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " s:IntegerToFloat()                                                      {{{2
+" Convert Integers in the expressions to floats by calling a substitute
+" command 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:IntegerToFloat(expression)
     let expression = a:expression
@@ -257,7 +232,7 @@ function! s:IntegerToFloat(expression)
     if s:crunch_using_vimscript
         call s:PrintDebugHeader('Integer To Floats')
         let expression = substitute(expression,
-                    \ '\v(\d*\.=\d+)', '\=s:Int2Float(submatch(0))' , 'g')
+                    \ '\v(\d*\.=\d+)', '\=s:ConvertInt2Float(submatch(0))', 'g')
     endif
 
     return expression
@@ -275,19 +250,19 @@ function! s:ValidLine(expression)
     call s:PrintDebugMsg('[' . a:expression . '] = the tested string' )
 
     "checks for commented lines
-    if a:expression =~ '\v'.s:prefixRegex. g:crunch_calc_comment
+    if a:expression =~ '\v^\s*'.g:crunch_calc_comment
         call s:PrintDebugMsg('test1 failed')
         return 0
     endif
 
     " checks for empty/blank lines
-    if a:expression =~ '\v'.s:prefixRegex.s:suffixRegex
+    if a:expression =~ '\v^\s*$'
         call s:PrintDebugMsg('test2 failed')
         return 0
     endif
 
     " checks for lines that don't need evaluation
-    if a:expression =~ '\v\C'.s:prefixRegex.s:validVariable.'\s*\=\s*[0-9.]+'.s:suffixRegex
+    if a:expression =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*[0-9.]+\s*$'
         call s:PrintDebugMsg('test3 failed')
         return 0
     endif
@@ -311,6 +286,7 @@ function! s:ReplaceVariable(expression)
     let expression = substitute( expression, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "" )
     call s:PrintDebugMsg("[".expression."] = expression striped of variable")
 
+    " replace variable with it's value
     let expression = substitute( expression, '\v('.s:validVariable.
                 \'\v)\ze([^(a-zA-Z0-9_]|$)',
                 \ '\=s:GetVariableValue(submatch(1))', 'g' )
@@ -340,9 +316,10 @@ function! s:GetVariableValue(variable)
 
     let line = getline(s)
     call s:PrintDebugMsg("[" . line . "] = line with variable value after")
-    let line = s:RemoveLinePrefix(line)
+    let line = s:RemovePrefixNSuffix(line)
+    call s:PrintDebugHeader('Get Variable Value Contiuned')
 
-    let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.=\d+)\ze'.s:suffixRegex)
+    let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.=\d+)\ze\s*$')
     call s:PrintDebugMsg("[" . variableValue . "] = the variable value")
     if variableValue == ''
         throw s:ErrorTag.'value for '.a:variable.' not found.'
@@ -353,12 +330,47 @@ endfunction
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:BuildLinePrefixNSuffix()                                               {{{2
+"s:BuildLineSuffix()                                                      {{{2
+"from a list of suffixes builds a regex expression for all suffixes in the
+"list
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:BuildLinePrefixNSuffix()
+function! s:BuildLineSuffix()
+    call s:PrintDebugHeader('Build Line Srefix')
+    let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
+
+    "Build the suffix
+
+    "Valid Line suffix list
+    let s:Linesuffixs = ["*","//", s:commentEnd]
+    let suffixRegex = ''
+    let NumberOfsuffixes = len(s:Linesuffixs)
+
+    for suffix in s:Linesuffixs
+        " call s:PrintDebugMsg( "[".suffix."] = the suffix to be added to regex")
+        let suffixRegex = suffixRegex.escape(suffix,'\/')
+        if NumberOfsuffixes !=1
+            let suffixRegex = suffixRegex.'\|'
+        endif
+
+        call s:PrintDebugMsg( "[".suffixRegex."] = the REGEX for all the suffixes")
+        let NumberOfsuffixes -= 1
+    endfor
+    let suffixRegex= '\V\s\*\('.suffixRegex.'\)\=\s\*\$\v'
+
+    "NOTE: this regex is very non magic see :h \V
+    call s:PrintDebugMsg("[".suffixRegex."] = the REGEX for all the suffixes")
+
+    return suffixRegex
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:BuildLinePrefix()                                                      {{{2
+"from a list of prefixes builds a regex expression for all prefixes in the
+"list
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:BuildLinePrefix()
     call s:PrintDebugHeader('Build Line Prefix')
     let s:commentStart = matchstr(&commentstring, '\v.+\ze\%s')
-    let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
 
     "Build the prefix
 
@@ -377,49 +389,24 @@ function! s:BuildLinePrefixNSuffix()
         call s:PrintDebugMsg( "[".prefixRegex."] = the REGEX for all the prefixes")
         let NumberOfPrefixes -= 1
     endfor
-    let prefixRegex= '^\V\s\*\('.prefixRegex.'\)\=\s\*\v'
+    let prefixRegex= '\V\^\s\*\('.prefixRegex.'\)\=\s\*\v'
 
     "NOTE: this regex is very non magic see :h \V
     call s:PrintDebugMsg("[".prefixRegex."] = the REGEX for all the prefixes")
 
-    "Build the suffix
-
-    "Valid Line suffix list
-    let s:LineSuffixs = ["*","//", s:commentEnd]
-    let suffixRegex = ''
-    let NumberOfSuffixes = len(s:LineSuffixs)
-
-    for suffix in s:LineSuffixs
-        call s:PrintDebugMsg( "[".suffix."] = the suffix to be added to regex")
-        let suffixRegex = suffixRegex.escape(suffix,'\/')
-        if NumberOfSuffixes !=1
-            let suffixRegex = suffixRegex.'\|'
-        endif
-
-        let NumberOfSuffixes -= 1
-    endfor
-
-    let suffixRegex = '\V\s\*\('.suffixRegex.'\)\=\s\*\v$'
-
-    "NOTE: this regex is very non magic see :h \V
-    call s:PrintDebugMsg( "[".suffixRegex."] = the REGEX for all the suffixes")
-
-
-    let PrefixNSuffix = []
-    let prefixNSuffix = [prefixRegex, suffixRegex]
-    call s:PrintDebugMsg( string(prefixNSuffix)."= the REGEX for all the suffixes")
-
-    return prefixNSuffix
+    return prefixRegex
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:RemoveLinePrefixNSuffix()                                                     {{{2
+"s:RemovePrefixNSuffix()                                                  {{{2
+"Removes the prefix and suffix from a string
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function!s:RemoveLinePrefix(e)
-    call s:PrintDebugHeader('Remove Line Prefix')
-    let expression = a:e
+function!s:RemovePrefixNSuffix(expression)
+    call s:PrintDebugHeader('Remove Line Prefix and Suffix')
+    let expression = a:expression
 
     call s:PrintDebugMsg('['.s:prefixRegex.']= the REGEX of the prefix and suffix')
+    call s:PrintDebugMsg('['.s:suffixRegex.']= the REGEX of the suffix and suffix')
     call s:PrintDebugMsg('['.expression.']= expr BEFORE removing prefix and suffix')
     let expression = substitute(expression, s:prefixRegex, '', '')
     call s:PrintDebugMsg('['.expression.']= expr AFTER removing prefix')
@@ -464,28 +451,6 @@ function! s:GetInputString()
     let Expression = input(g:crunch_calc_prompt)
     call inputrestore()
     return Expression
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:HandleCarrot                                                          {{{2
-" changes '2^5' into 'pow(2,5)'
-" cases
-" fun()^fun() eg sin(1)^sin(1)
-" fun()^num() eg sin(1)^2
-" num^fun() eg 2^sin(1)
-" num^num() eg 2^2
-" NOTE: this is not implemented and is a work in progress/failure
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:HandleCarrot(expression)
-    let s:expression = substitute(a:expression,'\([0-9.]\+\)\^\([0-9.]\+\)',
-                \ 'pow(\1,\2)','g') " good
-    let s:expression = substitute(s:expression, '\(\a\+(.\{-})\)\^\([0-9.]\+\)',
-                \ 'pow(\1,\2)','g') "questionable
-    let s:expression = substitute(s:expression, '\([0-9.]\+\)\^\(\a\+(.\{-})\)',
-                \ 'pow(\1,\2)','g') "good
-    let s:expression = substitute(s:expression, '\(\a\+(.\{-})\)\^\(\a\+(.\{-})\)',
-                \ 'pow(\1,\2)','g') "bad
-    return s:expression
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -573,4 +538,3 @@ let &cpo = save_cpo
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 " vim:set foldmethod=marker:
-
