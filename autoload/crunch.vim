@@ -43,8 +43,6 @@ endif
 "Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
-let s:prefixRegex = {}
-let s:suffixRegex = {}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Debug Resources                                                           {{{
@@ -300,7 +298,7 @@ function! s:GetVariableValue(variable)
     call s:PrintDebugMsg("[" . a:variable . "] = the variable")
 
 
-    let s = search('\v\C^('.s:prefixRegex[s:ft].
+    let s = search('\v\C^('.b:prefixRegex.
                 \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
     call s:PrintDebugMsg("[".s."] = result of search for variable")
     if s == 0
@@ -327,7 +325,7 @@ endfunction
 "list
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildLineSuffix()
-    if has_key(s:suffixRegex, s:ft)
+    if exists('b:suffixRegex')
         return
     endif
     call s:PrintDebugHeader('Build Line Suffix')
@@ -337,25 +335,23 @@ function! s:BuildLineSuffix()
 
     "Valid Line suffix list
     let s:Linesuffixs = ["*","//", s:commentEnd]
-    let suffixRegex = ''
+    let b:suffixRegex = ''
     let NumberOfsuffixes = len(s:Linesuffixs)
 
     for suffix in s:Linesuffixs
         " call s:PrintDebugMsg( "[".suffix."] = the suffix to be added to regex")
-        let suffixRegex = suffixRegex.escape(suffix,'\/')
+        let b:suffixRegex = b:suffixRegex.escape(suffix,'\/')
         if NumberOfsuffixes !=1
-            let suffixRegex = suffixRegex.'\|'
+            let b:suffixRegex = b:suffixRegex.'\|'
         endif
 
-        call s:PrintDebugMsg( "[".suffixRegex."] = the REGEX for all the suffixes")
+        call s:PrintDebugMsg( "[".b:suffixRegex."] = the REGEX for all the suffixes")
         let NumberOfsuffixes -= 1
     endfor
-    let suffixRegex= '\V\s\*\('.suffixRegex.'\)\=\s\*\$\v'
+    let b:suffixRegex= '\V\s\*\('.b:suffixRegex.'\)\=\s\*\$\v'
 
     "NOTE: this regex is very non magic see :h \V
-    call s:PrintDebugMsg("[".suffixRegex."] = the REGEX for all the suffixes")
-
-    let s:suffixRegex[s:ft] = suffixRegex
+    call s:PrintDebugMsg("[".b:suffixRegex."] = the REGEX for all the suffixes")
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -364,7 +360,7 @@ endfunction
 "list
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildLinePrefix()
-    if has_key(s:prefixRegex, s:ft)
+    if exists('b:prefixRegex')
         return
     endif
 
@@ -375,25 +371,23 @@ function! s:BuildLinePrefix()
 
     "Valid Line Prefix list
     let s:LinePrefixs = ["*","//", s:commentStart]
-    let prefixRegex = ''
+    let b:prefixRegex = ''
     let NumberOfPrefixes = len(s:LinePrefixs)
 
     for prefix in s:LinePrefixs
         " call s:PrintDebugMsg( "[".prefix."] = the prefix to be added to regex")
-        let prefixRegex = prefixRegex.escape(prefix,'\/')
+        let b:prefixRegex = b:prefixRegex.escape(prefix,'\/')
         if NumberOfPrefixes !=1
-            let prefixRegex = prefixRegex.'\|'
+            let b:prefixRegex = b:prefixRegex.'\|'
         endif
 
-        call s:PrintDebugMsg( "[".prefixRegex."] = the REGEX for all the prefixes")
+        call s:PrintDebugMsg( "[".b:prefixRegex."] = the REGEX for all the prefixes")
         let NumberOfPrefixes -= 1
     endfor
-    let prefixRegex= '\V\^\s\*\('.prefixRegex.'\)\=\s\*\v'
+    let b:prefixRegex= '\V\^\s\*\('.b:prefixRegex.'\)\=\s\*\v'
 
     "NOTE: this regex is very non magic see :h \V
-    call s:PrintDebugMsg("[".prefixRegex."] = the REGEX for all the prefixes")
-
-    let s:prefixRegex[s:ft] = prefixRegex
+    call s:PrintDebugMsg("[".b:prefixRegex."] = the REGEX for all the prefixes")
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -408,16 +402,16 @@ function! s:RemovePrefixNSuffix(line, ...)
         call s:BuildLinePrefix()
         call s:BuildLineSuffix()
 
-        let s:suffix = matchstr(expression, s:suffixRegex[s:ft])
-        let s:prefix = matchstr(expression, s:prefixRegex[s:ft])
+        let s:suffix = matchstr(expression, b:suffixRegex)
+        let s:prefix = matchstr(expression, b:prefixRegex)
     endif
 
-    call s:PrintDebugMsg('['.s:prefixRegex[s:ft].']= the REGEX of the prefix and suffix')
-    call s:PrintDebugMsg('['.s:suffixRegex[s:ft].']= the REGEX of the suffix and suffix')
+    call s:PrintDebugMsg('['.b:prefixRegex.']= the REGEX of the prefix and suffix')
+    call s:PrintDebugMsg('['.b:suffixRegex.']= the REGEX of the suffix and suffix')
     call s:PrintDebugMsg('['.expression.']= expr BEFORE removing prefix and suffix')
-    let expression = substitute(expression, s:prefixRegex[s:ft], '', '')
+    let expression = substitute(expression, b:prefixRegex, '', '')
     call s:PrintDebugMsg('['.expression.']= expr AFTER removing prefix')
-    let expression = substitute(expression, s:suffixRegex[s:ft], '', '')
+    let expression = substitute(expression, b:suffixRegex, '', '')
     call s:PrintDebugMsg('['.expression.']= expr AFTER removing suffix')
     return expression
 endfunction
