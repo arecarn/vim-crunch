@@ -48,7 +48,7 @@ let s:ErrorTag = 'Crunch error: '
 "Debug Resources                                                           {{{
 "crunch_debug enables varies echoes throughout the code
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let s:debug = 1
+let s:debug = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " s:PrintDebugHeader()                                                    {{{2
