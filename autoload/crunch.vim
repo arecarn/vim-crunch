@@ -48,7 +48,7 @@ let s:ErrorTag = 'Crunch error: '
 "Debug Resources                                                           {{{
 "crunch_debug enables varies echoes throughout the code
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let s:debug = 0
+let s:debug = 1
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " s:PrintDebugHeader()                                                    {{{2
@@ -70,9 +70,8 @@ function! s:PrintDebugMsg(text)
         echom a:text
     endif
 endfunction
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Top Level Functions                                                       {{{
@@ -123,8 +122,8 @@ function! crunch#CrunchLine(line)
     try
         if s:ValidLine(origExpression) == 0 | return | endif
         let origExpression = s:RemoveOldResult(origExpression)
-        let expression = s:FixMultiplication(origExpression)
-        let expression = s:ReplaceVariable(expression)
+        let expression = s:ReplaceVariable(origExpression)
+        let expression = s:FixMultiplication(expression)
         let expression = s:IntegerToFloat(expression)
         let resultStr = s:EvaluateExpression(expression)
     catch /Crunch error: /
@@ -315,7 +314,7 @@ function! s:GetVariableValue(variable)
         throw s:ErrorTag.'value for '.a:variable.' not found.'
     endif
 
-    return variableValue
+    return '('.variableValue.')'
 endfunction
 
 
