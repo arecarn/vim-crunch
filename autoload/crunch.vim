@@ -179,8 +179,8 @@ function! crunch#ChooseEval(EvalSource)
             throw s:ErrorTag . 'Octave not avaiable'
         endif
     else
-        throw s:ErrorTag .'"'. a:EvalSource.'" is an invalid evaluation"
-                    \ "source, Defaulting to VimScript"
+        throw s:ErrorTag ."'". a:EvalSource."'". 'is an invalid evaluation '.
+                    \ 'source, Defaulting to VimScript'
         let s:crunch_using_vimscript = 1
     endif
 
