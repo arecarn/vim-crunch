@@ -43,6 +43,7 @@ endif
 "Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
+let s:isExclusive = 0
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Debug Resources                                                           {{{
@@ -116,9 +117,10 @@ endfunction
 "crunch#CrunchLine()                                                      {{{2
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#CrunchLine(line)
+function! crunch#CrunchLine(line, ...)
+    call s:PrintDebugMsg(string(a:000). 'is the Arguments' )
+    if exists('a:1') | call s:HandleArgs(a:1) | endif
     let origExpr = s:CrunchInit()
-
     try
         if s:ValidLine(origExpr) == 0 | return | endif
         let origExpr = s:RemoveOldResult(origExpr)
@@ -142,11 +144,18 @@ endfunction
 "crunch#CrunchBlock()                                                     {{{2
 "Evaluates a paragraph, equivalent to vip<leader>cl
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#CrunchBlock()
+function! crunch#CrunchBlock(args)
+    call s:PrintDebugHeader('Crunch Block Debug')
     execute "normal! vip\<ESC>"
     let topline = line("'<")
     let bottomline = line("'>")
-    execute topline . "," bottomline . "call " . "crunch#CrunchLine('.')"
+
+    if a:args !=# ''
+        call s:PrintDebugMsg('['.a:1.'] is the variable' )
+        execute topline."," bottomline."call "."crunch#CrunchLine('.', args)"
+    else
+        execute topline."," bottomline."call "."crunch#CrunchLine('.')"
+    endif
 endfunction
 
 
@@ -191,6 +200,19 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Helper Functions                                                          {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"s:HandleArgs()                                                           {{{2
+"Interpret arguments to set flags accordingly
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:HandleArgs(args)
+    call s:PrintDebugHeader('Handle Arguments Debug')
+    call s:PrintDebugMsg('['.a:args.']= the arguments')
+    if a:args ==# '-exclusive' || a:args ==# '-exc'
+        call s:PrintDebugMsg('Exclusive set')
+        let s:isExclusive = 1
+    else 
+    endif
+endfunction
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:CrunchInit()                                                           {{{2
 " Gets the expression from current line, builds the suffix/prefix regex if
 " need , and  removes the suffix and prefix from the expression
@@ -295,6 +317,7 @@ function! s:ReplaceVariable(expr)
                 \ '\=s:GetVariableValue(submatch(1))', 'g' )
 
     call s:PrintDebugMsg("[".expr."]= expression after variable replacement")
+    let s:isExclusive = 0
     return expr
 endfunction
 
@@ -310,9 +333,16 @@ function! s:GetVariableValue(variable)
 
     call s:PrintDebugMsg("[" . a:variable . "]= the variable")
 
+    if s:isExclusive == 1
+        call s:PrintDebugMsg("Searching with Stopline")
+        call s:PrintDebugMsg("[".line("'<")."]= Stopline")
+        let sline =search('\v\C^('.b:prefixRegex.
+                    \ ')?\V'.a:variable.'\v\s*\=\s*', "bnW", line("'<"))
+    else
+        let sline = search('\v\C^('.b:prefixRegex.
+                    \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
+    endif
 
-    let sline = search('\v\C^('.b:prefixRegex.
-                \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
     call s:PrintDebugMsg("[".sline."]= result of search for variable")
     if sline == 0
         throw s:ErrorTag."variable ".a:variable." not found"
@@ -472,7 +502,7 @@ function! s:BuildLinePrefix()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:GetInputString()                                                       {{{2
+" s:GetInputString()                                                      {{{2
 " prompt the user for an expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetInputString()
