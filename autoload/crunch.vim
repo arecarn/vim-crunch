@@ -312,7 +312,7 @@ function! s:GetVariableValue(variable)
     if variableValue == ''
         throw s:ErrorTag.'value for '.a:variable.' not found.'
     endif
-    
+
     return '('.variableValue.')'
 endfunction
 
@@ -323,10 +323,8 @@ endfunction
 "list
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildLineSuffix()
-    if exists('b:suffixRegex')
-        return
-    endif
     call s:PrintDebugHeader('Build Line Suffix')
+    call s:PrintDebugMsg( "[".&commentstring."]=  the comment string ")
     let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
 
     "Build the suffix
@@ -358,11 +356,9 @@ endfunction
 "list
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildLinePrefix()
-    if exists('b:prefixRegex')
-        return
-    endif
 
     call s:PrintDebugHeader('Build Line Prefix')
+    call s:PrintDebugMsg( "[".&commentstring."]=  the comment string ")
     let s:commentStart = matchstr(&commentstring, '\v.+\ze\%s')
 
     "Build the prefix
@@ -400,10 +396,11 @@ function! s:CrunchInit()
 
     if !exists('b:filetype') || &filetype !=# b:filetype
         let b:filetype = &filetype
-        call s:PrintDebugMsg('Newfiletype, rebuilding prefix/suffix regex')
+        call s:PrintDebugMsg('filetype set, rebuilding prefix/suffix regex')
+        call s:PrintDebugMsg('['.&filetype.']= filetype')
         call s:BuildLinePrefix()
         call s:BuildLineSuffix()
-    endif
+    endif 
 
     let s:suffix = matchstr(expr, b:suffixRegex)
     let s:prefix = matchstr(expr, b:prefixRegex)
