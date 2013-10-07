@@ -76,7 +76,7 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Top Level Functions                                                       {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"crunch#Crunch                                                            {{{2
+"crunch#Crunch()                                                          {{{2
 "When called opens a command window prompt for an equation to be evaluated
 "Optionally can take input as a argument before opening a prompt 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -113,7 +113,7 @@ function! crunch#Crunch(input)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#CrunchLine                                                        {{{2
+"crunch#CrunchLine()                                                      {{{2
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CrunchLine(line)
@@ -139,7 +139,7 @@ function! crunch#CrunchLine(line)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#CrunchBlock                                                       {{{2
+"crunch#CrunchBlock()                                                     {{{2
 "Evaluates a paragraph, equivalent to vip<leader>cl
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CrunchBlock()
@@ -151,7 +151,7 @@ endfunction
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" crunch#EvalTypes                                                        {{{2
+" crunch#EvalTypes()                                                      {{{2
 " returns the possible evaluation types for Crunch
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
@@ -472,7 +472,7 @@ function! s:BuildLinePrefix()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:GetInputString                                                        {{{2
+" s:GetInputString()                                                       {{{2
 " prompt the user for an expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetInputString()
@@ -483,7 +483,7 @@ function! s:GetInputString()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:EvaluateExpression                                                    {{{2
+" s:EvaluateExpression()                                                  {{{2
 " Evaluates the expression and checks for errors in the process. Also
 " if there is no error echo the result and save a copy of it to the default
 " paste register
@@ -518,7 +518,7 @@ function! s:EvaluateExpression(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:OctaveEval                                                            {{{2
+" s:OctaveEval()                                                          {{{2
 " Evaluates and expression using a systems Octave installation
 " removes 'ans =' and trailing newline
 " Errors in octave evaluation are thrown
