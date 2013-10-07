@@ -191,43 +191,31 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Helper Functions                                                          {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" s:ConvertInt2Float()                                                    {{{2
-" Called by the substitute command in s:IntegerToFloat() convert integers to
-" floats, and checks for digits that are too large for Vim script to evaluate
+"s:CrunchInit()                                                           {{{2
+" Gets the expression from current line, builds the suffix/prefix regex if
+" need , and  removes the suffix and prefix from the expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:ConvertInt2Float(number)
-    let num = a:number
-    call s:PrintDebugMsg('['.num.']= number before converted to floats')
+function! s:CrunchInit()
+    call s:PrintDebugHeader('Crunch Inizilation Debug')
 
-    if num =~ '\v^\d{8,}$'
-        throw s:ErrorTag . num .' is too large for VimScript evaluation'
-    endif
+    let expr = getline('.')
 
-    let result = str2float(num)
-    call s:PrintDebugMsg('['.string(result).']= number converted to floats 1')
-    return  result
-endfunction
+    if !exists('b:filetype') || &filetype !=# b:filetype
+        let b:filetype = &filetype
+        call s:PrintDebugMsg('filetype set, rebuilding prefix/suffix regex')
+        call s:PrintDebugMsg('['.&filetype.']= filetype')
+        call s:BuildLinePrefix()
+        call s:BuildLineSuffix()
+    endif 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:IntegerToFloat()                                                      {{{2
-" Convert Integers in the exprs to floats by calling a substitute
-" command 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:IntegerToFloat(expr)
-    let expr = a:expr
-
-    "convert Ints to floats
-    if s:crunch_using_vimscript
-        call s:PrintDebugHeader('Integer To Floats')
-        let expr = substitute(expr,
-                    \ '\v(\d*\.=\d+)', '\=s:ConvertInt2Float(submatch(0))', 'g')
-    endif
+    let s:suffix = matchstr(expr, b:suffixRegex)
+    let s:prefix = matchstr(expr, b:prefixRegex)
+    let expr = s:RemovePrefixNSuffix(expr)
 
     return expr
 endfunction
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:ValidLine                                                              {{{2
+"s:ValidLine()                                                            {{{2
 "Checks the line to see if it is a variable definition, or a blank line that
 "may or may not contain whitespace.
 
@@ -260,7 +248,34 @@ endfunction
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:ReplaceVariable                                                        {{{2
+"s:RemoveOldResult()                                                      {{{2
+"Remove old result if any
+"eg '5+5 = 10' becomes '5+5'
+"eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
+"inspired by Ihar Filipau's inline calculator
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:RemoveOldResult(expr)
+    call s:PrintDebugHeader('Remove Old Result')
+
+    let expr = a:expr
+    "if it's a variable with an expression ignore the first = sign
+    "else if it's just a normal expression just remove it
+    call s:PrintDebugMsg('[' . expr . ']= expression before removed result')
+
+    let expr = substitute(expr, '\v\s+$', "", "")
+    call s:PrintDebugMsg('[' . expr . ']= after removed trailing space')
+
+    let expr = substitute(expr, '\v\s*\=\s*[-0-9e.+]*\s*$', "", "")
+    call s:PrintDebugMsg('[' . expr . ']= after removed old result')
+
+    let expr = substitute(expr, '\v\s*\=\s*Crunch error:.*\s*$', "", "")
+    call s:PrintDebugMsg('[' . expr . ']= after removed old error')
+
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:ReplaceVariable()                                                      {{{2
 "Replaces the variable within an expression with the value of that variable
 "inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -284,7 +299,7 @@ function! s:ReplaceVariable(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:GetVariableValue                                                       {{{2
+"s:GetVariableValue()                                                     {{{2
 "Searches for the value of a variable and returns the value assigned to the
 "variable inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -316,6 +331,78 @@ function! s:GetVariableValue(variable)
     return '('.variableValue.')'
 endfunction
 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:FixMultiplication()                                                   {{{2
+" turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:FixMultiplication(expr)
+    call s:PrintDebugHeader('Fix Multiplication')
+
+    "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
+    let expr = substitute(a:expr,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
+    call s:PrintDebugMsg('[' . expr . ']= fixed multiplication 1')
+
+    "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
+    let expr = substitute(expr,'\v([0-9.]+)\s*([([:alpha:]])', '\1\*\2','g')
+    call s:PrintDebugMsg('[' . expr . ']= fixed multiplication 2')
+
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:IntegerToFloat()                                                      {{{2
+" Convert Integers in the exprs to floats by calling a substitute
+" command 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:IntegerToFloat(expr)
+    let expr = a:expr
+
+    "convert Ints to floats
+    if s:crunch_using_vimscript
+        call s:PrintDebugHeader('Integer To Floats')
+        let expr = substitute(expr,
+                    \ '\v(\d*\.=\d+)', '\=s:ConvertInt2Float(submatch(0))', 'g')
+    endif
+
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:ConvertInt2Float()                                                    {{{2
+" Called by the substitute command in s:IntegerToFloat() convert integers to
+" floats, and checks for digits that are too large for Vim script to evaluate
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:ConvertInt2Float(number)
+    let num = a:number
+    call s:PrintDebugMsg('['.num.']= number before converted to floats')
+
+    if num =~ '\v^\d{8,}$'
+        throw s:ErrorTag . num .' is too large for VimScript evaluation'
+    endif
+
+    let result = str2float(num)
+    call s:PrintDebugMsg('['.string(result).']= number converted to floats 1')
+    return  result
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:RemovePrefixNSuffix()                                                  {{{2
+"Removes the prefix and suffix from a string
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:RemovePrefixNSuffix(expr)
+    let expr = a:expr
+    call s:PrintDebugHeader('Remove Line Prefix and Suffix')
+
+    call s:PrintDebugMsg('['.b:prefixRegex.']= the REGEX of the prefix/suffix')
+    call s:PrintDebugMsg('['.b:suffixRegex.']= the REGEX of the suffix/suffix')
+    call s:PrintDebugMsg('['.expr.']= expression BEFORE removing prefix/suffix')
+    let expr = substitute(expr, b:prefixRegex, '', '')
+    call s:PrintDebugMsg('['.expr.']= expression AFTER removing prefix')
+    let expr = substitute(expr, b:suffixRegex, '', '')
+    call s:PrintDebugMsg('['.expr.']= expression AFTER removing suffix')
+    return expr
+endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:BuildLineSuffix()                                                      {{{2
@@ -385,75 +472,6 @@ function! s:BuildLinePrefix()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:CrunchInit()                                                           {{{2
-" Gets the expression from current line, builds the suffix/prefix regex if
-" need , and  removes the suffix and prefix from the expression
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:CrunchInit()
-    call s:PrintDebugHeader('Crunch Inizilation Debug')
-
-    let expr = getline('.')
-
-    if !exists('b:filetype') || &filetype !=# b:filetype
-        let b:filetype = &filetype
-        call s:PrintDebugMsg('filetype set, rebuilding prefix/suffix regex')
-        call s:PrintDebugMsg('['.&filetype.']= filetype')
-        call s:BuildLinePrefix()
-        call s:BuildLineSuffix()
-    endif 
-
-    let s:suffix = matchstr(expr, b:suffixRegex)
-    let s:prefix = matchstr(expr, b:prefixRegex)
-    let expr = s:RemovePrefixNSuffix(expr)
-
-    return expr
-endfunction
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:RemovePrefixNSuffix()                                                  {{{2
-"Removes the prefix and suffix from a string
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:RemovePrefixNSuffix(expr)
-    let expr = a:expr
-    call s:PrintDebugHeader('Remove Line Prefix and Suffix')
-
-    call s:PrintDebugMsg('['.b:prefixRegex.']= the REGEX of the prefix/suffix')
-    call s:PrintDebugMsg('['.b:suffixRegex.']= the REGEX of the suffix/suffix')
-    call s:PrintDebugMsg('['.expr.']= expression BEFORE removing prefix/suffix')
-    let expr = substitute(expr, b:prefixRegex, '', '')
-    call s:PrintDebugMsg('['.expr.']= expression AFTER removing prefix')
-    let expr = substitute(expr, b:suffixRegex, '', '')
-    call s:PrintDebugMsg('['.expr.']= expression AFTER removing suffix')
-    return expr
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:RemoveOldResult                                                        {{{2
-"Remove old result if any
-"eg '5+5 = 10' becomes '5+5'
-"eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
-"inspired by Ihar Filipau's inline calculator
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:RemoveOldResult(expr)
-    call s:PrintDebugHeader('Remove Old Result')
-
-    let expr = a:expr
-    "if it's a variable with an expression ignore the first = sign
-    "else if it's just a normal expression just remove it
-    call s:PrintDebugMsg('[' . expr . ']= expression before removed result')
-
-    let expr = substitute(expr, '\v\s+$', "", "")
-    call s:PrintDebugMsg('[' . expr . ']= after removed trailing space')
-
-    let expr = substitute(expr, '\v\s*\=\s*[-0-9e.+]*\s*$', "", "")
-    call s:PrintDebugMsg('[' . expr . ']= after removed old result')
-
-    let expr = substitute(expr, '\v\s*\=\s*Crunch error:.*\s*$', "", "")
-    call s:PrintDebugMsg('[' . expr . ']= after removed old error')
-
-    return expr
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " s:GetInputString                                                        {{{2
 " prompt the user for an expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -461,24 +479,6 @@ function! s:GetInputString()
     call inputsave()
     let expr = input(g:crunch_calc_prompt)
     call inputrestore()
-    return expr
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:FixMultiplication                                                     {{{2
-" turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:FixMultiplication(expr)
-    call s:PrintDebugHeader('Fix Multiplication')
-
-    "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
-    let expr = substitute(a:expr,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
-    call s:PrintDebugMsg('[' . expr . ']= fixed multiplication 1')
-
-    "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
-    let expr = substitute(expr,'\v([0-9.]+)\s*([([:alpha:]])', '\1\*\2','g')
-    call s:PrintDebugMsg('[' . expr . ']= fixed multiplication 2')
-
     return expr
 endfunction
 
