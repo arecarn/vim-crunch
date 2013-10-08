@@ -260,7 +260,7 @@ function! s:ValidLine(expr)
     endif
 
     " checks for lines that don't need evaluation
-    if a:expr =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*[0-9.]+\s*$'
+    if a:expr =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*-?\s*[0-9.]+\s*$'
         call s:PrintDebugMsg('test3 failed')
         return 0
     endif
@@ -352,7 +352,7 @@ function! s:GetVariableValue(variable)
     let line = s:RemovePrefixNSuffix(getline(sline))
     call s:PrintDebugHeader('Get Variable Value Contiuned')
 
-    let variableValue = matchstr(line,'\v\=\s*\zs(\d*\.?\d+)\ze\s*$')
+    let variableValue = matchstr(line,'\v\=\s*\zs-?\s*(\d*\.?\d+)\ze\s*$')
     call s:PrintDebugMsg("[" . variableValue . "]= the variable value")
     if variableValue == ''
         throw s:ErrorTag.'value for '.a:variable.' not found.'
