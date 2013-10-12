@@ -32,7 +32,7 @@ let g:loaded_crunch = 1
 
 command! -nargs=* Crunch call crunch#Crunch('<args>')
 command! -nargs=? -range CrunchLine 
-            \ <line1>,<line2>call crunch#CrunchLine('.', '<args>')
+            \ <line1>,<line2>call crunch#CaptureArgs('<args>')
 command! -nargs=? CrunchBlock call crunch#CrunchBlock('<args>')
 command! -nargs=1 -complete=customlist,crunch#EvalTypes CrunchEval 
             \ call crunch#ChooseEval('<args>')
@@ -59,3 +59,5 @@ endif
 
 noremap <unique> <script> <Plug>CrunchCrunchBlock <SID>CrunchBlock
 noremap <SID>CrunchBlock :CrunchBlock<CR>
+
+" vim:set foldmethod=marker

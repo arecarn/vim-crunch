@@ -49,7 +49,7 @@ let s:isExclusive = 0
 "Debug Resources                                                           {{{
 "crunch_debug enables varies echoes throughout the code
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let s:debug = 0
+let s:debug = 1
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " s:PrintDebugHeader()                                                    {{{2
@@ -72,7 +72,6 @@ function! s:PrintDebugMsg(text)
     endif
 endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}}
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Top Level Functions                                                       {{{
@@ -114,12 +113,23 @@ function! crunch#Crunch(input)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#CaptureArgs()                                                    {{{2
+" evaluates a line in a buffer, allowing for prefixes and suffixes
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#CaptureArgs(args) range
+    call s:PrintDebugMsg(a:args. 'is the Argument(s)')
+    call s:HandleArgs(a:args)
+    let s:firstline = a:firstline
+    let s:lastline = a:lastline
+    execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
+endfunction
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#CrunchLine()                                                      {{{2
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#CrunchLine(line, ...)
-    call s:PrintDebugMsg(string(a:000). 'is the Arguments' )
-    if exists('a:1') | call s:HandleArgs(a:1) | endif
+function! crunch#CrunchLine()
     let origExpr = s:CrunchInit()
     try
         if s:ValidLine(origExpr) == 0 | return | endif
@@ -135,7 +145,7 @@ function! crunch#CrunchLine(line, ...)
         let resultStr = v:exception
     endtry
 
-    call setline(a:line, s:prefix.origExpr.' = '.resultStr.s:suffix)
+    call setline('.', s:prefix.origExpr.' = '.resultStr.s:suffix)
     call s:PrintDebugMsg('['. resultStr.'] is the result' )
     return resultStr
 endfunction
@@ -151,10 +161,10 @@ function! crunch#CrunchBlock(args)
     let bottomline = line("'>")
 
     if a:args !=# ''
-        call s:PrintDebugMsg('['.a:1.'] is the variable' )
-        execute topline."," bottomline."call "."crunch#CrunchLine('.', args)"
+        call s:PrintDebugMsg('['.a:args.'] is the variable' )
+        execute topline."," bottomline."call "."crunch#CaptureArgs(a:args)"
     else
-        execute topline."," bottomline."call "."crunch#CrunchLine('.')"
+        execute topline."," bottomline."call "."crunch#CaptureArgs()"
     endif
 endfunction
 
@@ -335,9 +345,9 @@ function! s:GetVariableValue(variable)
 
     if s:isExclusive == 1
         call s:PrintDebugMsg("Searching with Stopline")
-        call s:PrintDebugMsg("[".line("'<")."]= Stopline")
+        call s:PrintDebugMsg("[".s:firstline."]= Stopline")
         let sline =search('\v\C^('.b:prefixRegex.
-                    \ ')?\V'.a:variable.'\v\s*\=\s*', "bnW", line("'<"))
+                    \ ')?\V'.a:variable.'\v\s*\=\s*', "bnW", (s:firstline -1))
     else
         let sline = search('\v\C^('.b:prefixRegex.
                     \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
@@ -579,4 +589,4 @@ endfunction
 let &cpo = save_cpo
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
-" vim:set foldmethod=marker:
+" vim:set foldmethod=marker
