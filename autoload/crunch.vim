@@ -113,8 +113,9 @@ function! crunch#Crunch(input)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#CaptureArgs()                                                    {{{2
-" evaluates a line in a buffer, allowing for prefixes and suffixes
+"crunch#CaptureArgs()                                                     {{{2
+" Captures the range for later use, Handles arguments, and then calls 
+" CrunchLine
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CaptureArgs(args) range
     call s:PrintDebugMsg(a:args. 'is the Argument(s)')
@@ -123,7 +124,6 @@ function! crunch#CaptureArgs(args) range
     let s:lastline = a:lastline
     execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
 endfunction
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#CrunchLine()                                                      {{{2
