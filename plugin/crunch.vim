@@ -1,5 +1,5 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Header                                                                    {{{
+"HEADER                                                                    {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Last Change: 29 Aug 2013
 "Maintainer: Ryan Carney arecarn@gmail.com
@@ -27,7 +27,7 @@ endif
 let g:loaded_crunch = 1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-" Commands                                                                 {{{
+" COMMANDS                                                                 {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 command! -nargs=* Crunch call crunch#Crunch('<args>')
@@ -60,4 +60,4 @@ endif
 noremap <unique> <script> <Plug>CrunchCrunchBlock <SID>CrunchBlock
 noremap <SID>CrunchBlock :CrunchBlock<CR>
 
-" vim:set foldmethod=marker
+" vim:foldmethod=marker

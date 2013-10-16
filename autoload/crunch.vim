@@ -1,4 +1,4 @@
-"Header                                                                    {{{
+"HEADER                                                                    {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Last Change: 26 Sept 2013
 "Maintainer: Ryan Carney arecarn@gmail.com
@@ -40,7 +40,6 @@ if !exists("s:crunch_using_vimscript")
 endif
 
 
-"Valid Variable Regex
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
@@ -49,7 +48,7 @@ let s:isExclusive = 0
 "Debug Resources                                                           {{{
 "crunch_debug enables varies echoes throughout the code
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let s:debug = 1
+let s:debug = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " s:PrintDebugHeader()                                                    {{{2
@@ -74,7 +73,7 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Top Level Functions                                                       {{{
+"MAIN FUNCTIONS                                                            {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "crunch#Crunch()                                                          {{{2
 "When called opens a command window prompt for an equation to be evaluated
@@ -119,10 +118,12 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CaptureArgs(args) range
     call s:PrintDebugMsg(a:args. 'is the Argument(s)')
-    call s:HandleArgs(a:args)
-    let s:firstline = a:firstline
-    let s:lastline = a:lastline
-    execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
+    if a:args !=# ''
+        call s:HandleArgs(a:args)
+        let s:firstline = a:firstline
+        let s:lastline = a:lastline
+    endif
+        execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -160,12 +161,8 @@ function! crunch#CrunchBlock(args)
     let topline = line("'<")
     let bottomline = line("'>")
 
-    if a:args !=# ''
-        call s:PrintDebugMsg('['.a:args.'] is the variable' )
-        execute topline."," bottomline."call "."crunch#CaptureArgs(a:args)"
-    else
-        execute topline."," bottomline."call "."crunch#CaptureArgs()"
-    endif
+    call s:PrintDebugMsg('['.a:args.'] is the variable' )
+    execute topline."," bottomline."call "."crunch#CaptureArgs(a:args)"
 endfunction
 
 
@@ -208,7 +205,7 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Helper Functions                                                          {{{
+"HELPER FUNCTIONS                                                          {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "s:HandleArgs()                                                           {{{2
 "Interpret arguments to set flags accordingly
@@ -589,4 +586,4 @@ endfunction
 let &cpo = save_cpo
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
-" vim:set foldmethod=marker
+" vim:foldmethod=marker
