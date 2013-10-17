@@ -11,7 +11,33 @@ Crunch also forces floating point to be used.
 Crunch allows you to just type in mathematical expressions without having to
 worry about the syntax as much.
 
-##Demo
+##Usage
+*   :Crunch <args>
+
+    Where <args> is some mathematical expression to be evaluated. The result
+    is then available to be pasted from the default register.
+
+*  :Crunch
+
+    Crunch then gives you the following prompt in the command line:
+    Calc >>
+    for you to enter you mathematical expression. The result is then available
+    to be pasted from the default register.
+
+*  :CrunchLine, :'<'>CrunchLine, or <leader>cl
+
+    Crunch Uses the current line or the visually selected lines as the
+    expression(s) and adds the result to the end of the line(s). When the
+    expression(s) changes using :CrunchLine again will reevaluate the line(s)
+
+*  :CrunchBlock, or <leader>cb
+
+    Crunch Uses the current paragraph (block of text starting and ending with
+    an empty line) as the expressions and adds the result to the end of the
+    lines. When a expressions in a paragraph changes using :CrunchBlock again
+    will reevaluate them
+
+##Demos
 
 ![Command Line Mode](http://i.imgur.com/Fu0j3OE.gif) 
 
@@ -39,31 +65,6 @@ back in. The ignored comments are variable based file type using the
 Paragraphs can be evaluated using the CrunchBlock command or the default
 mapping 
 
-##Usage
-*   :Crunch <args>
-
-    Where <args> is some mathematical expression to be evaluated. The result
-    is then available to be pasted from the default register.
-
-*  :Crunch
-
-    Crunch then gives you the following prompt in the command line:
-    Calc >>
-    for you to enter you mathematical expression. The result is then available
-    to be pasted from the default register.
-
-*  :CrunchLine, :'<'>CrunchLine, or <leader>cl
-
-    Crunch Uses the current line or the visually selected lines as the
-    expression(s) and adds the result to the end of the line(s). When the
-    expression(s) changes using :CrunchLine again will reevaluate the line(s)
-
-*  :CrunchBlock, or <leader>cb
-
-    Crunch Uses the current paragraph (block of text starting and ending with
-    an empty line) as the expressions and adds the result to the end of the
-    lines. When a expressions in a paragraph changes using :CrunchBlock again
-    will reevaluate them
 
 ###Variables
 
