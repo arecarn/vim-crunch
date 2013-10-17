@@ -27,6 +27,7 @@
         2.1 Variables ............................... |CrunchVariables|
         2.2 Comments ................................ |CrunchComment|
         2.3 Prefix & Suffix ......................... |CrunchPrefixNSuffix||
+        2.4 Command Arguments ....................... |CrunchArguments|
      3. Mappings  ................................... |CrunchMappings|
      4. Configuration ............................... |CrunchConfiguration|
          4.1 g:crunch_calc_prompt ................... |CrunchCalcPrompt|
@@ -107,9 +108,10 @@ worry about the syntax as much, and getting the answer you expect.
 ==============================================================================
 2. *USAGE*                                                       *CrunchUsage*
 
-*   :Crunch <args>
 
-    Where <args> is some mathematical expression to be evaluated. The result
+*   :Crunch [expr]                                             *:Crunch*
+
+    Where [expr] is some mathematical expression to be evaluated. The result
     is then available to be pasted from the default register.
 
 *  :Crunch
@@ -119,18 +121,19 @@ worry about the syntax as much, and getting the answer you expect.
     for you to enter you mathematical expression. The result is then available
     to be pasted from the default register.
 
-*  :CrunchLine, :'<'>CrunchLine, or <leader>cl
+*  :CrunchLine [args] [, :'<'>CrunchLine, or <leader>cl      *:CrunchLine* 
 
     Crunch Uses the current line or the visually selected lines as the
     expression(s) and adds the result to the end of the line(s). When the
     expression(s) changes using :CrunchLine again will reevaluate the line(s)
+    For information about [args] see |CrunchArguments|
 
-*  :CrunchBlock, or <leader>cb
+*  :CrunchBlock [args], or <leader>cb
 
     Crunch Uses the current paragraph (block of text starting and ending with
     an empty line) as the expressions and adds the result to the end of the
     lines. When a expressions in a paragraph changes using :CrunchBlock again
-    will reevaluate them
+    will reevaluate them. For information about [args] see |CrunchArguments|
 
 ------------------------------------------------------------------------------
 2.1 *VARIABLES*                                              *CrunchVariables*
@@ -181,9 +184,8 @@ global variable.
 The :CrunchLine and :CrunchBlock commands  automatically ignores certain
 prefixes and suffixes in a line. There are currently two patterns that are
 used as suffixes and prefixes in all file types '*' and '//' the third pattern
-is varies by file type and is based of the 'commentstring' variable in Vim.
-Bellow is a table summarizing some prefixes for different file types. For more
-info on commentstring see ":help 'commentstring'"
+is varies by file type and is based of the '|commentstring|' variable in Vim.
+Bellow is a table summarizing some prefixes for different file types. 
 
 ==============================================
     File Type    |      Valid Expression      
@@ -234,6 +236,19 @@ e.g. changing the commentstring for Python to use the multi-line version of a
 comment
 
 autocmd FileType python set commentstring='''%s'''
+
+------------------------------------------------------------------------------
+2.4 *COMMAND* *ARGUMENTS*                                   *CrunchSPrefixNSuffix*
+
+Currently there is only one argument for both the :CrunchLine and :CrunchBlock
+commands. The argument is '-exclusive' or '-exc' for short. this argument
+causes only the selected lines (or paragraph when using |:CrunchBlock| to be
+considered when evaluating.
+
+e.g. 
+:CrunchLine -exc 
+or 
+:CrunchLine -exclusive
 
 ==============================================================================
 3. *MAPPINGS*                                                 *CrunchMappings*
