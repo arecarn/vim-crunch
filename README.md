@@ -65,31 +65,42 @@ When using :CrunchLine or :CrunchBlock (and their mappings) you can use
 variables of a sort to define values and store results.
 
 A variable name consists of ASCII letters, digits and the underscore. It
-cannot start with a digit.  Valid variable names are:
+cannot start with a digit.  
 
-	counter
-	_aa3p
-	very_long_variable_name_with_underscores
-	FuncLength2
-	LENGTH
+Valid variable names are:
+```
+counter
+_aa3p
+very_long_variable_name_with_underscores
+FuncLength2
+LENGTH
+```
 
-Invalid names are "foo+bar" and "6var".
+Invalid names are:
+```
+foo+bar
+6var
+```
 
 ###Example 
 
 Calculate area and volume given the radius:
 
+```
 radius = 5
 pi = 3.1415
 area = pow(radius,2)*pi
 volume = pow(radius,3)*pi*4/3
+```
 
 First two lines work like constants denoting Pi and the radius.  You can then
 visually select the next two lines and use either :CrunchLine, or <leader>cl
 to evaluate the expressions and see the results.
 
+```
 area = pow(radius,2)*pi = 78.5375
 volume = pow(radius,3)*pi*4/3 = 523.583333
+```
 
 If invalid expressions are used Crunch will report errors, and append that 
 error as a result.
@@ -120,7 +131,7 @@ better experience than vanilla Vim when just considering syntax.
 |                           |`(2*3)(3*2) = 36`        |`(2*3)*(3*2) = 36`   |
 |                           |`2(3*2) = 12`            |`2*(3*2) = 12`       |
 |Integer to Float Conversion|                         |                     |
-|(for Vim Script eval)      |`1/2 = 0.5`              |`1.0/2.0 = 0.5`      |
+|                           |`1/2 = 0.5`              |`1.0/2.0 = 0.5`      |
 |                           |`.25*4 = 1`              |`0.25*4 = 1.0`       |
 |Decimals w/o Leading Zeros |                         |                     |
 |                           |`.5/2 = 0.25`            |`0.5/2 = 0.25`       |
