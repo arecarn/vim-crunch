@@ -34,8 +34,6 @@ command! -nargs=* Crunch call crunch#Crunch('<args>')
 command! -nargs=? -range CrunchLine 
             \ <line1>,<line2>call crunch#CaptureArgs('<args>')
 command! -nargs=? CrunchBlock call crunch#CrunchBlock('<args>')
-command! -nargs=1 -complete=customlist,crunch#EvalTypes CrunchEval 
-            \ call crunch#ChooseEval('<args>')
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

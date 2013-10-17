@@ -31,7 +31,6 @@
      4. Configuration ............................... |CrunchConfiguration|
          4.1 g:crunch_calc_prompt ................... |CrunchCalcPrompt|
          4.2 g:crunch_calc_comment .................. |CrunchCalcComment|
-         4.3 CrunchEval ............................. |CrunchEvaluation|
      5. Known Issues ................................ |CrunchKnownIssues|
      6. Contribute .................................. |CrunchContribute|
      7. Change Log .................................. |CrunchChangeLog|
@@ -43,10 +42,8 @@
 1. *OVERVIEW*                                                 *CrunchOverview*
 
 Crunch makes calculations in Vim more accessible and loosens Vim's math
-syntax, allowing more Implied multiplication. This plugin can access your
-systems Octave installation allowing it to be used instead of, the default Vim
-Script evaluation. When using Vim Script evaluation  crunch forces floating
-point to be used when evaluating.
+syntax, allowing Implied multiplication. Crunch also forces floating point to
+be used when evaluating.
 
 If you want to do math in Vim without Crunch the process goes as follows.
 From insert mode or command line more:
@@ -90,7 +87,7 @@ Implied Multiplication     |                       |
                            |2(3*2) = 12            |2*(3*2) = 12              
  --------------------------+-----------------------+------------------------- 
 Integer to Float Conversion|                       |                          
-(for Vim Script eval)      |1/2 = 0.5              |1.0/2.0 = 0.5             
+                           |1/2 = 0.5              |1.0/2.0 = 0.5             
                            |.25*4 = 1              |0.25*4 = 1.0              
  --------------------------+-----------------------+------------------------- 
 Decimals w/o Leading Zeros |                       |                          
@@ -167,8 +164,8 @@ to evaluate the expressions and see the results.
 area = pow(radius,2)*pi = 78.5375
 volume = pow(radius,3)*pi*4/3 = 523.583333
 
-If invalid expressions are used Vim will report it's errors, and may give a
-result of zero.
+If invalid expressions are used Crunch will report errors, and append that 
+error as a result.
 
 ------------------------------------------------------------------------------
 2.2 *COMMENTS*                                                 *CrunchComment*
@@ -262,20 +259,6 @@ Default 'Calc >> '
 
 Default '"'
 
-------------------------------------------------------------------------------
-4.3 CrunchEval                                            *CrunchEvaluation*
-
-This command allows you to choose what evaluation method you would like to use
-so far Crunch supports the following.
-
-* Vim Script
-* Octave (must have Octave installed)
-
-Usage:
-:CrunchEval Octave
-or
-:CrunchEval VimScript
-
 ==============================================================================
 5. *KNOWN_ISSUES*                                          *CrunchKnownIssues*
 
@@ -331,7 +314,6 @@ http://github.com/arecarn/crunch/issues
 The core maintainers of crunch are:
 - Ryan Carney (github: arecarn)
 - Marcelo Montu (github: mMontu)
-
 
 Sources inspiration and credits for this plugin
 

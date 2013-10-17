@@ -32,14 +32,7 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
-if !exists("s:crunch_using_octave")
-    let s:crunch_using_octave = 0
-endif
-if !exists("s:crunch_using_vimscript")
-    let s:crunch_using_vimscript = 1
-endif
-
-
+let s:number = '\v((-\s*)?\d*\.?\d+)'
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
@@ -123,7 +116,7 @@ function! crunch#CaptureArgs(args) range
         let s:firstline = a:firstline
         let s:lastline = a:lastline
     endif
-        execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
+    execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -166,41 +159,7 @@ function! crunch#CrunchBlock(args)
 endfunction
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" crunch#EvalTypes()                                                      {{{2
-" returns the possible evaluation types for Crunch
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#EvalTypes(ArgLead, CmdLine, CursorPos)
-    let s:evalTypes = [ 'Octave',  'VimScript' ]
-    return s:evalTypes
-endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" crunch#ChooseEval()                                                     {{{2
-" determines if the provided evaluation source is valid and activates the
-" corresponding evaluation method
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#ChooseEval(EvalSource)
-
-    let s:crunch_using_octave = 0
-    let s:crunch_using_vimscript = 0
-
-    if a:EvalSource == 'VimScript'
-        let s:crunch_using_vimscript = 1
-    elseif a:EvalSource == 'Octave'
-        if s:OctaveEval('1+1')  == 2
-            let s:crunch_using_octave = 1
-        else
-            let s:crunch_using_vimscript = 1
-            throw s:ErrorTag . 'Octave not avaiable'
-        endif
-    else
-        throw s:ErrorTag ."'". a:EvalSource."'". 'is an invalid evaluation '.
-                    \ 'source, Defaulting to VimScript'
-        let s:crunch_using_vimscript = 1
-    endif
-
-endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
@@ -396,11 +355,9 @@ function! s:IntegerToFloat(expr)
     let expr = a:expr
 
     "convert Ints to floats
-    if s:crunch_using_vimscript
-        call s:PrintDebugHeader('Integer To Floats')
-        let expr = substitute(expr,
-                    \ '\v(\d*\.=\d+)', '\=s:ConvertInt2Float(submatch(0))', 'g')
-    endif
+    call s:PrintDebugHeader('Integer To Floats')
+    let expr = substitute(expr,
+                \ '\v(\d*\.=\d+)', '\=s:ConvertInt2Float(submatch(0))', 'g')
 
     return expr
 endfunction
@@ -529,15 +486,8 @@ function! s:EvaluateExpression(expr)
     call s:PrintDebugHeader('Evaluate Expression')
     call s:PrintDebugMsg('[' . a:expr . "]= the final expression")
 
-    if s:crunch_using_octave == 1
-        let result = s:OctaveEval(a:expr)
-    elseif s:crunch_using_vimscript == 1
-        let result = string(eval(a:expr))
-    else
-        let s:crunch_using_vimscript
-        let result = string(eval(a:expr))
-    endif
 
+    let result = string(eval(a:expr))
     call s:PrintDebugMsg('['.result.']= before trailing ".0" removed')
     call s:PrintDebugMsg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
     "check for trailing '.0' in result and remove it (occurs with vim eval)
@@ -548,37 +498,10 @@ function! s:EvaluateExpression(expr)
     call s:PrintDebugMsg('['.result.']= before trailing "0" removed')
     call s:PrintDebugMsg('['.matchstr(result,'\v\.\d{-1,}\zs0+$').
                 \ ']= trailing "0"')
-    "check for trailing '0' in result ex .250 -> .25 (occurs with octave "eval)
-    let result = substitute( result, '\v\.\d{-1,}\zs0+$', '', 'g')
 
     return result
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:OctaveEval()                                                          {{{2
-" Evaluates and expression using a systems Octave installation
-" removes 'ans =' and trailing newline
-" Errors in octave evaluation are thrown
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:OctaveEval(expr)
-    let expr = a:expr
-
-    let result = system('octave --quiet --norc', expr)
-
-    let result = substitute(result, "\s*\n$", '' , 'g')
-    call s:PrintDebugMsg('['.result.']= expression after newline removed')
-
-    try
-        if matchstr(result, '^error:') != ''
-            throw 'Crunch ' . result
-        endif
-    endtry
-
-    let result = substitute(result, 'ans =\s*', '' , 'g')
-    call s:PrintDebugMsg('['.result.']= expression after ans removed')
-
-    return result
-endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "Restore settings                                                         {{{2
