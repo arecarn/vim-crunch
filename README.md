@@ -28,6 +28,12 @@ Variables can be used to save expressions so they can be used later.
 Multiple lines can be evaluated/reevaluated , with visual selections.
 Optionally single lines can be evaluated/reevaluated.
 
+![Ignores Comments](http://i.imgur.com/yu2xGWk.gif)
+
+Crunch ignores Comments, by removing them evaluating lines then putting them
+back in. The ignored comments are variable based file type using the
+`conmmentstring` variable 
+
 ![CrunchBlock](http://i.imgur.com/i3IDNIR.gif) 
 
 Paragraphs can be evaluated using the CrunchBlock command or the default
