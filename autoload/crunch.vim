@@ -1,20 +1,8 @@
-"HEADER                                                                    {{{
+"HEADER{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Last Change: 26 Sept 2013
 "Maintainer: Ryan Carney arecarn@gmail.com
-"License:        DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-"                           Version 2, December 2004
-"
-"               Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
-"
-"      Everyone is permitted to copy and distribute verbatim or modified
-"     copies of this license document, and changing it is allowed as long
-"                           as the name is changed.
-"
-"                 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-"       TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-"
-"                   0. You just DO WHAT THE FUCK YOU WANT TO
+"Repository: https://github.com/arecarn/crunch
+"License: WTFPL
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Script settings                                                          {{{
@@ -65,8 +53,7 @@ function! s:PrintDebugMsg(text)
 endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"MAIN FUNCTIONS                                                            {{{
+"MAIN FUNCTIONS{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "crunch#Crunch()                                                          {{{2
 "When called opens a command window prompt for an equation to be evaluated
@@ -158,13 +145,10 @@ function! crunch#CrunchBlock(args)
     execute topline."," bottomline."call "."crunch#CaptureArgs(a:args)"
 endfunction
 
-
-
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"HELPER FUNCTIONS                                                          {{{
+
+"HELPER FUNCTIONS{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "s:HandleArgs()                                                           {{{2
 "Interpret arguments to set flags accordingly
@@ -178,10 +162,11 @@ function! s:HandleArgs(args)
     else 
     endif
 endfunction
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:CrunchInit()                                                           {{{2
-" Gets the expression from current line, builds the suffix/prefix regex if
-" need , and  removes the suffix and prefix from the expression
+"Gets the expression from current line, builds the suffix/prefix regex if
+"need, and  removes the suffix and prefix from the expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:CrunchInit()
     call s:PrintDebugHeader('Crunch Inizilation Debug')
@@ -202,6 +187,7 @@ function! s:CrunchInit()
 
     return expr
 endfunction
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:ValidLine()                                                            {{{2
 "Checks the line to see if it is a variable definition, or a blank line that
@@ -233,7 +219,6 @@ function! s:ValidLine(expr)
     call s:PrintDebugMsg('It is a valid line!')
     return 1
 endfunction
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:RemoveOldResult()                                                      {{{2
@@ -293,7 +278,6 @@ endfunction
 "variable inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetVariableValue(variable)
-
     call s:PrintDebugHeader('Get Variable Value')
     call s:PrintDebugMsg("[".getline('.')."]= the current line")
 
@@ -326,7 +310,6 @@ function! s:GetVariableValue(variable)
 
     return '('.variableValue.')'
 endfunction
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " s:FixMultiplication()                                                   {{{2
@@ -415,6 +398,7 @@ function! s:BuildLineSuffix()
     let b:suffixRegex = ''
     let NumberOfsuffixes = len(s:Linesuffixs)
 
+    "TODO replace with Join
     for suffix in s:Linesuffixs
         " call s:PrintDebugMsg( "[".suffix."]= suffix to be added to regex")
         let b:suffixRegex = b:suffixRegex.escape(suffix,'\/')
@@ -449,6 +433,8 @@ function! s:BuildLinePrefix()
     let b:prefixRegex = ''
     let NumberOfPrefixes = len(s:LinePrefixs)
 
+
+    "TODO replace with join() command
     for prefix in s:LinePrefixs
         " call s:PrintDebugMsg( "[".prefix."]= prefix to be added to regex")
         let b:prefixRegex = b:prefixRegex.escape(prefix,'\/')
@@ -486,7 +472,6 @@ function! s:EvaluateExpression(expr)
     call s:PrintDebugHeader('Evaluate Expression')
     call s:PrintDebugMsg('[' . a:expr . "]= the final expression")
 
-
     let result = string(eval(a:expr))
     call s:PrintDebugMsg('['.result.']= before trailing ".0" removed')
     call s:PrintDebugMsg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
@@ -509,4 +494,4 @@ endfunction
 let &cpo = save_cpo
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
-" vim:foldmethod=marker
+"vim:foldmethod=marker
