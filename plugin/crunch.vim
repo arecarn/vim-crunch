@@ -1,5 +1,4 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"HEADER                                                                    {{{
+"HEADER{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Maintainer: Ryan Carney arecarn@gmail.com
 "Repository: https://github.com/arecarn/crunch
@@ -14,8 +13,7 @@ if exists("g:loaded_crunch")
 endif
 let g:loaded_crunch = 1
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-" COMMANDS                                                                 {{{
+"COMMANDS{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 command! -nargs=* Crunch call crunch#Crunch('<args>')
