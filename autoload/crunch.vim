@@ -467,4 +467,4 @@ endfunction
 let &cpo = save_cpo
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
-"vim:foldmethod=marker
+" vim:foldmethod=marker
