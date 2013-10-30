@@ -71,13 +71,15 @@ endfunction
 " CrunchLine
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#CaptureArgs(args) range
-    call crunch#debug#PrintMsg(a:args. 'is the Argument(s)')
+    call crunch#debug#PrintMsg(a:args. ' is the Argument(s)')
     if a:args !=# ''
         call s:HandleArgs(a:args)
         let s:firstline = a:firstline
         let s:lastline = a:lastline
     endif
     execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
+    call crunch#debug#PrintMsg('Exclusive cleared')
+    let s:isExclusive = 0
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -241,7 +243,6 @@ function! s:ReplaceVariable(expr)
                 \ '\=s:GetVariableValue(submatch(1))', 'g' )
 
     call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
-    let s:isExclusive = 0
     return expr
 endfunction
 
