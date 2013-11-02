@@ -261,6 +261,12 @@ If you don't want this mapping to be loaded set
 
         map <silent> <plug>NoCrunchCrunchLine <plug>CrunchCrunchLine
 
+To map the '-exclusive' version, use the following:
+
+        map <silent> <leader>cl <plug>CrunchCrunchLineExc
+        map <silent> <leader>cr <plug>CrunchCrunchBlockExc
+
+
 ==============================================================================
 4. CONFIGURATION                                       *crunch-configuration*
 

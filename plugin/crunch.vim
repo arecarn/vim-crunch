@@ -33,6 +33,9 @@ endif
 noremap <unique> <script> <Plug>CrunchCrunchLine <SID>CrunchLine
 noremap <SID>CrunchLine :CrunchLine<CR>
 
+noremap <unique> <script> <Plug>CrunchCrunchLineExc <SID>CrunchLineExc
+noremap <SID>CrunchLineExc :CrunchLine -exclusive<CR>
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "CrunchBlock mapping
 "Allows for users to define their own mappings. 
@@ -43,5 +46,8 @@ endif
 
 noremap <unique> <script> <Plug>CrunchCrunchBlock <SID>CrunchBlock
 noremap <SID>CrunchBlock :CrunchBlock<CR>
+
+noremap <unique> <script> <Plug>CrunchCrunchBlockExc <SID>CrunchBlockExc
+noremap <SID>CrunchBlockExc :CrunchBlock -exclusive<CR>
 
 " vim:foldmethod=marker
