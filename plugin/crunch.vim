@@ -16,10 +16,10 @@ let g:loaded_crunch = 1
 "COMMANDS{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-command! -nargs=* Crunch call crunch#Crunch('<args>')
+command! -nargs=* Crunch call crunch#Crunch(<q-args>)
 command! -nargs=? -range CrunchLine 
-            \ <line1>,<line2>call crunch#CaptureArgs('<args>')
-command! -nargs=? CrunchBlock call crunch#CrunchBlock('<args>')
+            \ <line1>,<line2>call crunch#Main(<q-args>)
+command! -nargs=? CrunchBlock call crunch#CrunchBlock(<q-args>)
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

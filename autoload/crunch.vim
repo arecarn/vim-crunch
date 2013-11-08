@@ -58,25 +58,20 @@ function! crunch#Crunch(input)
             let @" = result
         endif
     catch /Crunch error: /
-        echohl ErrorMsg 
-        echomsg v:exception
-
-        echohl None
+        call s:EchoError(v:exception)
     endtry
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#CaptureArgs()                                                     {{{2
+"crunch#Main()                                                     {{{2
 " Captures the range for later use, Handles arguments, and then calls 
 " CrunchLine
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#CaptureArgs(args) range
-    call crunch#debug#PrintMsg(a:args. ' is the Argument(s)')
-    if a:args !=# ''
-        call s:HandleArgs(a:args)
-        let s:firstline = a:firstline
-        let s:lastline = a:lastline
-    endif
+function! crunch#Main(args) range
+    call crunch#debug#PrintMsg(a:args. ' = the Argument(s)')
+
+    call s:HandleArgs(a:args, a:firstline, a:lastline)
+
     execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
     call crunch#debug#PrintMsg('Exclusive cleared')
     let s:isExclusive = 0
@@ -96,9 +91,7 @@ function! crunch#CrunchLine()
         let expr = s:IntegerToFloat(expr)
         let resultStr = s:EvaluateExpression(expr)
     catch /Crunch error: /
-        echohl ErrorMsg 
-        echomsg v:exception
-        echohl None
+        call s:EchoError(v:exception)
         let resultStr = v:exception
     endtry
 
@@ -118,7 +111,7 @@ function! crunch#CrunchBlock(args)
     let bottomline = line("'>")
 
     call crunch#debug#PrintMsg('['.a:args.'] is the variable' )
-    execute topline."," bottomline."call "."crunch#CaptureArgs(a:args)"
+    execute topline."," bottomline."call "."crunch#Main(a:args)"
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
@@ -128,13 +121,19 @@ endfunction
 "s:HandleArgs()                                                           {{{2
 "Interpret arguments to set flags accordingly
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:HandleArgs(args)
+function! s:HandleArgs(args, fline, lline)
     call crunch#debug#PrintHeader('Handle Arguments Debug')
     call crunch#debug#PrintMsg('['.a:args.']= the arguments')
-    if a:args ==# '-exclusive' || a:args ==# '-exc'
-        call crunch#debug#PrintMsg('Exclusive set')
-        let s:isExclusive = 1
-    else 
+
+    if a:args !=# ''
+        let  s:firstline = a:fline
+        let  s:lastline  = a:lline
+        if a:args ==# '-exclusive' || a:args ==# '-exc'
+            call crunch#debug#PrintMsg('Exclusive set')
+            let s:isExclusive = 1
+        else
+            call s:EchoError(s:ErrorTag ."'".a:args."' is not a valid argument")
+        endif
     endif
 endfunction
 
@@ -461,6 +460,14 @@ function! s:EvaluateExpression(expr)
     return result
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:EchoError()                                                            {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:EchoError(errorString)
+    echohl WarningMsg 
+    echomsg a:errorString
+    echohl None
+endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "Restore settings                                                         {{{2
