@@ -19,18 +19,18 @@ let g:loaded_crunch = 1
 command! -nargs=* Crunch call crunch#Crunch(<q-args>)
 command! -nargs=? -range CrunchLine 
             \ <line1>,<line2>call crunch#Main(<q-args>)
-command! -nargs=? CrunchBlock call crunch#CrunchBlock(<q-args>)
+command! -nargs=? CrunchBlock call crunch#EvalBlock(<q-args>)
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "CrunchLine mapping
 "Allows for users to define their own mappings. 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if !hasmapto('<Plug>CrunchCrunchLine')
-    map <unique> <leader>cl <Plug>CrunchCrunchLine
+if !hasmapto('<Plug>CrunchEvalLine')
+    map <unique> <leader>cl <Plug>CrunchEvalLine
 endif
 
-noremap <unique> <script> <Plug>CrunchCrunchLine <SID>CrunchLine
+noremap <unique> <script> <Plug>CrunchEvalLine <SID>CrunchLine
 noremap <SID>CrunchLine :CrunchLine<CR>
 
 noremap <unique> <script> <Plug>CrunchCrunchLineExc <SID>CrunchLineExc
@@ -40,11 +40,11 @@ noremap <SID>CrunchLineExc :CrunchLine -exclusive<CR>
 "CrunchBlock mapping
 "Allows for users to define their own mappings. 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if !hasmapto('<Plug>CrunchCrunchBlock')
-    map <unique> <leader>cb <Plug>CrunchCrunchBlock
+if !hasmapto('<Plug>CrunchEvalBlock')
+    map <unique> <leader>cb <Plug>CrunchEvalBlock
 endif
 
-noremap <unique> <script> <Plug>CrunchCrunchBlock <SID>CrunchBlock
+noremap <unique> <script> <Plug>CrunchEvalBlock <SID>CrunchBlock
 noremap <SID>CrunchBlock :CrunchBlock<CR>
 
 noremap <unique> <script> <Plug>CrunchCrunchBlockExc <SID>CrunchBlockExc

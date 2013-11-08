@@ -65,23 +65,23 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#Main()                                                     {{{2
 " Captures the range for later use, Handles arguments, and then calls 
-" CrunchLine
+" EvalLine
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Main(args) range
     call crunch#debug#PrintMsg(a:args. ' = the Argument(s)')
 
     call s:HandleArgs(a:args, a:firstline, a:lastline)
 
-    execute a:firstline.','.a:lastline.'call crunch#CrunchLine()'
+    execute a:firstline.','.a:lastline.'call crunch#EvalLine()'
     call crunch#debug#PrintMsg('Exclusive cleared')
     let s:isExclusive = 0
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#CrunchLine()                                                      {{{2
+"crunch#EvalLine()                                                      {{{2
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#CrunchLine()
+function! crunch#EvalLine()
     let origExpr = s:CrunchInit()
     try
         if s:ValidLine(origExpr) == 0 | return | endif
@@ -101,10 +101,10 @@ function! crunch#CrunchLine()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#CrunchBlock()                                                     {{{2
+"crunch#EvalBlock()                                                     {{{2
 "Evaluates a paragraph, equivalent to vip<leader>cl
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#CrunchBlock(args)
+function! crunch#EvalBlock(args)
     call crunch#debug#PrintHeader('Crunch Block Debug')
     execute "normal! vip\<ESC>"
     let topline = line("'<")
