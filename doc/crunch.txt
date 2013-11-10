@@ -255,16 +255,16 @@ or
 
 By default CrunchLine is mapped to '<leader>cl'. To use a different map:
 
-        map <silent> <leader>cr <plug>CrunchCrunchLine
+        map <silent> <leader>cr <plug>CrunchEvalLine
 
 If you don't want this mapping to be loaded set
 
-        map <silent> <plug>NoCrunchCrunchLine <plug>CrunchCrunchLine
+        map <silent> <plug>NoCrunchEvalLine <plug>CrunchEvalLine
 
 To map the '-exclusive' version, use the following:
 
-        map <silent> <leader>cl <plug>CrunchCrunchLineExc
-        map <silent> <leader>cr <plug>CrunchCrunchBlockExc
+        map <silent> <leader>cl <plug>CrunchEvalLineExc
+        map <silent> <leader>cr <plug>CrunchEvalBlockExc
 
 
 ==============================================================================
