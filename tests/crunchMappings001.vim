@@ -1,4 +1,5 @@
-" Test default value of options
+" Test default mapping and that it only occurs if user doesn't has custom
+" mappings
 
 call vimtest#StartTap()
 call vimtap#Plan(7)
