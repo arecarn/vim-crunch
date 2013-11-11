@@ -22,7 +22,7 @@
 
 
      1. Overview .................................... |crunch-overview|
-         1.1 Feature Chart .......................... |crunch-feature-chart|
+         1.1 Feature Chart .......................... |crunch-looser-syntax|
      2. Usage ....................................... |crunch-usage|
         2.1 Variables ............................... |crunch-variables|
         2.2 Comments ................................ |crunch-comment|
@@ -72,10 +72,10 @@ was this 0.5/2 = 0.25
 
 Crunch solves these trivial problems and many more.
 ------------------------------------------------------------------------------
-1.1  FEATURE CHART                                     *crunch-feature-chart*
+1.1  LOOSER SYNTAX                                     *crunch-looser-syntax*
 
-The following chart summarizes the features that make using math with Crunch a
-better experience than vanilla Vim when just considering syntax.
+The following chart shows the looser math syntax provided with Crunch, compared 
+to the default math syntax.
 
 ==============================================================================
          Feature           |      With Crunch      |      Without Crunch
@@ -142,15 +142,18 @@ When using |:CrunchLine| or |:CrunchBlock| (and their mappings) you can use
 variables of a sort to define values and store results.
 
 A variable name consists of ASCII letters, digits and the underscore. It
-cannot start with a digit.  Valid variable names are:
+cannot start with a digit.  
 
-	counter
-	_aa3p
-	very_long_variable_name_with_underscores
-	FuncLength2
-	LENGTH
+Valid variable names:
+  counter
+  _aa3p
+  very_long_variable_name_with_underscores
+  FuncLength2
+  LENGTH
 
-Invalid names are "foo+bar" and "6var".
+Invalid names 
+  foo+bar
+  6var
 
 ------------------------------------------------------------------------------
 Example: calculate area and volume given the radius.
@@ -175,8 +178,8 @@ error as a result.
 
 If you don't want a line evaluated but want to leave some text there crunch
 has support for ignoring lines with comments. By default the string to start a
-comment it '"' just like Vim, but this can be configured |CrunchCalcComment|
-global variable.
+comment it '"' just like Vim Script, but this can be configured
+|g:crunch_calc_comment| global variable.
 
 ------------------------------------------------------------------------------
 2.3  PREFIX & SUFFIX                                   *crunch-prefix-suffix*
@@ -255,16 +258,16 @@ or
 
 By default CrunchLine is mapped to '<leader>cl'. To use a different map:
 
-        map <silent> <leader>cr <plug>CrunchCrunchLine
+        map <silent> <leader>cr <plug>CrunchEvalLine
 
 If you don't want this mapping to be loaded set
 
-        map <silent> <plug>NoCrunchCrunchLine <plug>CrunchCrunchLine
+        map <silent> <plug>NoCrunchEvalLine <plug>CrunchEvalLine
 
 To map the '-exclusive' version, use the following:
 
-        map <silent> <leader>cl <plug>CrunchCrunchLineExc
-        map <silent> <leader>cr <plug>CrunchCrunchBlockExc
+        map <silent> <leader>cl <plug>CrunchEvalLineExc
+        map <silent> <leader>cr <plug>CrunchEvalBlockExc
 
 
 ==============================================================================

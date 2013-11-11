@@ -44,31 +44,40 @@ worry about the syntax as much.
 Crunch works from the command line for quick off hand calculations. The result
 of these calculations are then available to be pasted.
 
+---
+
 
 ![Variables](http://i.imgur.com/fZw0B4S.gif)
 
 Variables can be used to save expressions so they can be used later.
+
+---
 
 ![Visual Selection](http://i.imgur.com/U4pkM6d.gif) 
 
 Multiple lines can be evaluated/reevaluated , with visual selections.
 Optionally single lines can be evaluated/reevaluated.
 
+---
+
 ![Ignores Comments](http://i.imgur.com/yu2xGWk.gif)
 
 Crunch ignores Comments, by removing them evaluating lines then putting them
 back in. The ignored comments are variable based file type using the
-`conmmentstring` variable 
+`conmmentstring` variable. Crunch also always ignores a leading or following
+`//` and `*` 
+
+---
 
 ![CrunchBlock](http://i.imgur.com/i3IDNIR.gif) 
 
-Paragraphs can be evaluated using the CrunchBlock command or the default
-mapping 
+Paragraphs can be evaluated using the `:CrunchBlock` command or the default
+mapping `<leader>cb`
 
 ##Looser Syntax
 
-The following chart summarizes the features that make using math with Crunch a
-better experience than vanilla Vim when just considering syntax. 
+The following chart shows the looser math syntax provided with Crunch, compared 
+to the default math syntax.
 
 |       **Feature**         |    **With Crunch**      |  **Without Crunch** |
 | ------------------------- | ---------------------   | ------------------- |
@@ -89,7 +98,8 @@ better experience than vanilla Vim when just considering syntax.
 |                           |`pow(2,8) = 256`         |`pow(2,8)= 256.0`    |
                                                                              
 ##Installation
-Use your favorite plugin manager.
+If you don't have an preferred method, I recommend one of the following plugin
+managers.
 * [Neobundle](https://github.com/Shougo/neobundle.vim)
 * [Vundle](https://github.com/gmarik/vundle)
 * [pathogen](https://github.com/tpope/vim-pathogen)
