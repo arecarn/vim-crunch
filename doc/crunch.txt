@@ -22,7 +22,7 @@
 
 
      1. Overview .................................... |crunch-overview|
-         1.1 Feature Chart .......................... |crunch-looser-syntax|
+         1.1 Looser Syntax .......................... |crunch-looser-syntax|
      2. Usage ....................................... |crunch-usage|
         2.1 Variables ............................... |crunch-variables|
         2.2 Comments ................................ |crunch-comment|
