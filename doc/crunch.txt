@@ -22,7 +22,7 @@
 
 
      1. Overview .................................... |crunch-overview|
-         1.1 Feature Chart .......................... |crunch-feature-chart|
+         1.1 Looser Syntax .......................... |crunch-looser-syntax|
      2. Usage ....................................... |crunch-usage|
         2.1 Variables ............................... |crunch-variables|
         2.2 Comments ................................ |crunch-comment|
@@ -72,10 +72,10 @@ was this 0.5/2 = 0.25
 
 Crunch solves these trivial problems and many more.
 ------------------------------------------------------------------------------
-1.1  FEATURE CHART                                     *crunch-feature-chart*
+1.1  LOOSER SYNTAX                                     *crunch-looser-syntax*
 
-The following chart summarizes the features that make using math with Crunch a
-better experience than vanilla Vim when just considering syntax.
+The following chart shows the looser math syntax provided with Crunch, compared 
+to the default math syntax.
 
 ==============================================================================
          Feature           |      With Crunch      |      Without Crunch
