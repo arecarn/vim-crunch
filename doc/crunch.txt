@@ -46,6 +46,8 @@ Crunch makes calculations in Vim more accessible and loosens Vim's math
 syntax, allowing Implied multiplication. Crunch also forces floating point to
 be used when evaluating.
 
+Requirements: Vim compiled with |+float| feature.
+
 If you want to do math in Vim without Crunch the process goes as follows.
 From insert mode or command line more:
     <CTRL-R>=5+5<CR>
