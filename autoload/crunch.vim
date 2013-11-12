@@ -63,7 +63,7 @@ function! crunch#Crunch(input)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#Main()                                                     {{{2
+"crunch#Main()                                                            {{{2
 " Captures the range for later use, Handles arguments, and then calls 
 " EvalLine
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -78,7 +78,7 @@ function! crunch#Main(args) range
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#EvalLine()                                                      {{{2
+"crunch#EvalLine()                                                        {{{2
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#EvalLine()
@@ -101,7 +101,7 @@ function! crunch#EvalLine()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#EvalBlock()                                                     {{{2
+"crunch#EvalBlock()                                                       {{{2
 "Evaluates a paragraph, equivalent to vip<leader>cl
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#EvalBlock(args)
