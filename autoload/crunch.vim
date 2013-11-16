@@ -209,9 +209,6 @@ function! s:RemoveOldResult(expr)
     "else if it's just a normal expression just remove it
     call crunch#debug#PrintMsg('[' . expr . ']= expression before removed result')
 
-    let expr = substitute(expr, '\v\s+$', "", "")
-    call crunch#debug#PrintMsg('[' . expr . ']= after removed trailing space')
-
     let expr = substitute(expr, '\v\s*\=\s*[-0-9e.+]*\s*$', "", "")
     call crunch#debug#PrintMsg('[' . expr . ']= after removed old result')
 
@@ -314,7 +311,6 @@ function! s:IntegerToFloat(expr)
     call crunch#debug#PrintHeader('Integer To Floats')
     let expr = substitute(expr,
                 \ '\v(\d*\.=\d+)', '\=s:ConvertInt2Float(submatch(0))', 'g')
-
     return expr
 endfunction
 
