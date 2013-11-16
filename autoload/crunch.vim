@@ -114,6 +114,29 @@ function! crunch#EvalBlock(args)
     execute topline."," bottomline."call "."crunch#Main(a:args)"
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#EvalVisual()                                                          {{{2
+" evaluates a line in a buffer, allowing for prefixes and suffixes
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#EvalLine()
+    let origExpr = s:CrunchInit()
+    try
+        if s:ValidLine(origExpr) == 0 | return | endif
+        let origExpr = s:RemoveOldResult(origExpr)
+        let expr = s:ReplaceVariable(origExpr)
+        let expr = s:FixMultiplication(expr)
+        let expr = s:IntegerToFloat(expr)
+        let resultStr = s:EvaluateExpression(expr)
+    catch /Crunch error: /
+        call s:EchoError(v:exception)
+        let resultStr = v:exception
+    endtry
+
+    call setline('.', s:prefix.origExpr.' = '.resultStr.s:suffix)
+    call crunch#debug#PrintMsg('['. resultStr.'] is the result' )
+    return resultStr
+endfunction
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 "HELPER FUNCTIONS{{{
@@ -135,6 +158,70 @@ function! s:HandleArgs(args, fline, lline)
             call s:EchoError(s:ErrorTag ."'".a:args."' is not a valid argument")
         endif
     endif
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:Init()                                                                 {{{2
+"Gets the expression from current line, builds the suffix/prefix regex if
+"need, and  removes the suffix and prefix from the expression
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#Visual()
+    call crunch#debug#PrintHeader('Inizilation')
+    let exprLines = s:GetVisualSelection()
+    let exprLinesList = split(exprLines, '\n')
+
+    for expr in exprLinesList
+        if s:ValidLine(expr) == 0 | continue | endif
+        let expr = s:RemoveOldResult(expr)
+        let orgExpr = expr
+        " let expr = s:ReplaceVariable(expr)
+        let expr = s:FixMultiplication(expr) 
+        let expr = s:IntegerToFloat(expr) " optionally executed
+        let result = s:EvalMath(expr)
+        call s:OutPutResult(orgExpr, result)
+    endfor
+
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:OutPutResult()                                                         {{{2
+"
+"Return Output
+" append result (option: Append)
+" replace result (option: Replace)
+" append result of Statistical operation (option: Statistic)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:OutPutResult(expr, result)
+    let output = a:result
+    let s:option_append = 1
+    let s:option_replace = 0
+
+    if s:option_append == 1 "append result
+        let output = a:expr .' = '. a:result
+    elseif s:option_replace == 1 "replace expr with result
+        let output = a:result
+    endif
+
+    "TODO: insert statistical expression
+    call s:OverWriteVisualSelection(output)
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:EvalMath()                                                         {{{2
+"
+"Return Output
+" append result (option: Append)
+" replace result (option: Replace)
+" append result of Statistical operation (option: Statistic)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:EvalMath(expr)
+
+    "if python
+    "if octave
+    "if vimscript
+    let result = s:EvaluateExpression(a:expr)
+
+    return result
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -163,6 +250,7 @@ function! s:CrunchInit()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+
 "s:ValidLine()                                                            {{{2
 "Checks the line to see if it is a variable definition, or a blank line that
 "may or may not contain whitespace.
@@ -195,6 +283,7 @@ function! s:ValidLine(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+
 "s:RemoveOldResult()                                                      {{{2
 "Remove old result if any
 "eg '5+5 = 10' becomes '5+5'
@@ -282,6 +371,7 @@ function! s:GetVariableValue(variable)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+
 " s:FixMultiplication()                                                   {{{2
 " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -332,7 +422,9 @@ function! s:ConvertInt2Float(number)
     return  result
 endfunction
 
+" dkfjd 5534*5 = 25 dkjfdskf
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+
 "s:RemovePrefixNSuffix()                                                  {{{2
 "Removes the prefix and suffix from a string
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -444,6 +536,7 @@ function! s:EvaluateExpression(expr)
     let result = string(eval(a:expr))
     call crunch#debug#PrintMsg('['.result.']= before trailing ".0" removed')
     call crunch#debug#PrintMsg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
+
     "check for trailing '.0' in result and remove it (occurs with vim eval)
     if result =~ '\v\.0+$'
         let result = string(str2nr(result))
@@ -465,7 +558,23 @@ function! s:EchoError(errorString)
     echohl None
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+function! s:GetVisualSelection()
+    try
+        let a_save = getreg('a')
+        normal! gv"ay
+        return @a
+    finally
+        call setreg('a', a_save)
+    endtry
+endfunction
+
+function! s:OverWriteVisualSelection(input)
+        let a_save = @a
+        call setreg('a', a:input, 'b')
+        normal! gv"ap
+        let @a = a_save
+endfunction
+
 "Restore settings                                                         {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let &cpo = save_cpo
