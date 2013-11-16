@@ -167,19 +167,25 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Visual()
     call crunch#debug#PrintHeader('Inizilation')
-    let exprLines = s:GetVisualSelection()
-    let exprLinesList = split(exprLines, '\n')
+    let exprs = s:GetVisualSelection()
+    let exprList = split(exprs, '\n')
 
-    for expr in exprLinesList
-        if s:ValidLine(expr) == 0 | continue | endif
-        let expr = s:RemoveOldResult(expr)
-        let orgExpr = expr
-        " let expr = s:ReplaceVariable(expr)
-        let expr = s:FixMultiplication(expr) 
-        let expr = s:IntegerToFloat(expr) " optionally executed
-        let result = s:EvalMath(expr)
-        call s:OutPutResult(orgExpr, result)
+    for i in range(len(exprList))
+        let j = i-1
+        if s:ValidLine(exprList[j]) == 0 | continue | endif
+        let exprList[j] = s:RemoveOldResult(exprList[j])
+        let orgExpr = exprList[j]
+        " let exprList[j] = s:ReplaceVariable(exprList[j])
+        let exprList[j] = s:FixMultiplication(exprList[j]) 
+        let exprList[j] = s:IntegerToFloat(exprList[j]) " optionally executed
+        let result = s:EvalMath(exprList[j])
+        let exprList[j] = s:BuildResult(orgExpr, result)
     endfor
+        call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
+        let exprLines = join(exprList, "\n")
+        call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
+        call s:OverWriteVisualSelection(exprLines)
+        
 
 endfunction
 
@@ -191,7 +197,7 @@ endfunction
 " replace result (option: Replace)
 " append result of Statistical operation (option: Statistic)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:OutPutResult(expr, result)
+function! s:BuildResult(expr, result)
     let output = a:result
     let s:option_append = 1
     let s:option_replace = 0
@@ -203,7 +209,7 @@ function! s:OutPutResult(expr, result)
     endif
 
     "TODO: insert statistical expression
-    call s:OverWriteVisualSelection(output)
+    return output
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -422,7 +428,6 @@ function! s:ConvertInt2Float(number)
     return  result
 endfunction
 
-" dkfjd 5534*5 = 25 dkjfdskf
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 
 "s:RemovePrefixNSuffix()                                                  {{{2
@@ -548,7 +553,6 @@ function! s:EvaluateExpression(expr)
 
     return result
 endfunction
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:EchoError()                                                            {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
