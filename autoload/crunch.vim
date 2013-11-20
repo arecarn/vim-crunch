@@ -31,7 +31,7 @@ let s:isExclusive = 0
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "crunch#Crunch()                                                          {{{2
 "When called opens a command window prompt for an equation to be evaluated
-"Optionally can take input as a argument before opening a prompt 
+"Optionally can take input as a argument before opening a prompt
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Crunch(input)
     if a:input != ''
@@ -64,7 +64,7 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#Main()                                                            {{{2
-" Captures the range for later use, Handles arguments, and then calls 
+" Captures the range for later use, Handles arguments, and then calls
 " EvalLine
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Main(args) range
@@ -176,22 +176,21 @@ function! crunch#Visual()
         let exprList[j] = s:RemoveOldResult(exprList[j])
         let orgExpr = exprList[j]
         " let exprList[j] = s:ReplaceVariable(exprList[j])
-        let exprList[j] = s:FixMultiplication(exprList[j]) 
+        let exprList[j] = s:FixMultiplication(exprList[j])
         let exprList[j] = s:IntegerToFloat(exprList[j]) " optionally executed
         let result = s:EvalMath(exprList[j])
         let exprList[j] = s:BuildResult(orgExpr, result)
     endfor
-        call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
-        let exprLines = join(exprList, "\n")
-        call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
-        call s:OverWriteVisualSelection(exprLines)
-        
+    call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
+    let exprLines = join(exprList, "\n")
+    call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
+    call s:OverWriteVisualSelection(exprLines)
+
 
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:OutPutResult()                                                         {{{2
-"
 "Return Output
 " append result (option: Append)
 " replace result (option: Replace)
@@ -246,7 +245,7 @@ function! s:CrunchInit()
         call crunch#debug#PrintMsg('['.&filetype.']= filetype')
         call s:BuildLinePrefix()
         call s:BuildLineSuffix()
-    endif 
+    endif
 
     let s:suffix = matchstr(expr, b:suffixRegex)
     let s:prefix = matchstr(expr, b:prefixRegex)
@@ -300,10 +299,11 @@ function! s:RemoveOldResult(expr)
     call crunch#debug#PrintHeader('Remove Old Result')
 
     let expr = a:expr
-    "if it's a variable with an expression ignore the first = sign
+    "if it's a variable declaration with an expression ignore the first = sign
     "else if it's just a normal expression just remove it
     call crunch#debug#PrintMsg('[' . expr . ']= expression before removed result')
 
+    "TODO: include number from Daimian Conways column calculator
     let expr = substitute(expr, '\v\s*\=\s*[-0-9e.+]*\s*$', "", "")
     call crunch#debug#PrintMsg('[' . expr . ']= after removed old result')
 
@@ -343,6 +343,13 @@ endfunction
 "variable inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetVariableValue(variable)
+
+    " TODO: make the E of e handling cleaner
+    " if variable is e or E don't do anything
+    if a:variable =~ '\c^e\d*$'
+        return a:variable
+    endif
+
     call crunch#debug#PrintHeader('Get Variable Value')
     call crunch#debug#PrintMsg("[".getline('.')."]= the current line")
 
@@ -389,7 +396,7 @@ function! s:FixMultiplication(expr)
     call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 1')
 
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
-    let expr = substitute(expr,'\v([0-9.]+)\s*([([:alpha:]])', '\1\*\2','g')
+    let expr = substitute(expr,'\v([0-9.]+)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
     call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 2')
 
     return expr
@@ -398,34 +405,19 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " s:IntegerToFloat()                                                      {{{2
 " Convert Integers in the exprs to floats by calling a substitute
-" command 
+" command
+" NOTE: from HowMuch.vim
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:IntegerToFloat(expr)
-    let expr = a:expr
+    call crunch#debug#PrintHeader('Remove Line Prefix and Suffix')
 
-    "convert Ints to floats
-    call crunch#debug#PrintHeader('Integer To Floats')
-    let expr = substitute(expr,
-                \ '\v(\d*\.=\d+)', '\=s:ConvertInt2Float(submatch(0))', 'g')
+    call crunch#debug#PrintMsg('['.a:expr.']= before int to float conversion')
+    let expr = a:expr 
+    let expr = substitute(expr,'\(^\|[^.0-9^eE]\)\zs\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
+    "TODO: wrap this into it's own function
+    let expr = substitute(expr,'\(^\|[^.0-9]\)\zs\.\ze\([0-9]\)', '0&', 'g')
+    call crunch#debug#PrintMsg('['.expr.']= after int to float conversion')
     return expr
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:ConvertInt2Float()                                                    {{{2
-" Called by the substitute command in s:IntegerToFloat() convert integers to
-" floats, and checks for digits that are too large for Vim script to evaluate
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:ConvertInt2Float(number)
-    let num = a:number
-    call crunch#debug#PrintMsg('['.num.']= number before converted to floats')
-
-    if num =~ '\v^\d{8,}$'
-        throw s:ErrorTag . num .' is too large for VimScript evaluation'
-    endif
-
-    let result = str2float(num)
-    call crunch#debug#PrintMsg('['.string(result).']= number converted to floats 1')
-    return  result
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -464,7 +456,7 @@ function! s:BuildLineSuffix()
     let b:suffixRegex = ''
     let NumberOfsuffixes = len(s:Linesuffixs)
 
-    "TODO replace with Join
+    "TODO replace with join() + map()
     for suffix in s:Linesuffixs
         " call crunch#debug#PrintMsg( "[".suffix."]= suffix to be added to regex")
         let b:suffixRegex = b:suffixRegex.escape(suffix,'\/')
@@ -500,7 +492,7 @@ function! s:BuildLinePrefix()
     let NumberOfPrefixes = len(s:LinePrefixs)
 
 
-    "TODO replace with join() command
+    "TODO replace with join() + map()
     for prefix in s:LinePrefixs
         " call crunch#debug#PrintMsg( "[".prefix."]= prefix to be added to regex")
         let b:prefixRegex = b:prefixRegex.escape(prefix,'\/')
@@ -553,11 +545,12 @@ function! s:EvaluateExpression(expr)
 
     return result
 endfunction
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:EchoError()                                                            {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:EchoError(errorString)
-    echohl WarningMsg 
+    echohl WarningMsg
     echomsg a:errorString
     echohl None
 endfunction
@@ -573,10 +566,10 @@ function! s:GetVisualSelection()
 endfunction
 
 function! s:OverWriteVisualSelection(input)
-        let a_save = @a
-        call setreg('a', a:input, 'b')
-        normal! gv"ap
-        let @a = a_save
+    let a_save = @a
+    call setreg('a', a:input, 'b')
+    normal! gv"ap
+    let @a = a_save
 endfunction
 
 "Restore settings                                                         {{{2
