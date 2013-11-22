@@ -20,6 +20,7 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
+let s:capturedVariables = {} "TODO: empty this after every execution
 let s:numPat = '\v[-+]?%(\.\d+|\d+%([.]\d+)?%([eE][+-]?\d+)?)'
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
@@ -105,27 +106,31 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#Visual()                                                          {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#Visual()
+function! crunch#Dev()
     call crunch#debug#PrintHeader('Inizilation')
     let exprs = s:GetVisualSelection()
     let exprList = split(exprs, '\n')
+    call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
 
     for i in range(len(exprList))
-        let j = i-1
-        if s:ValidLine(exprList[j]) == 0 | continue | endif
-        let exprList[j] = s:RemoveOldResult(exprList[j])
-        let orgExpr = exprList[j]
-        " let exprList[j] = s:ReplaceVariable(exprList[j])
-        let exprList[j] = s:FixMultiplication(exprList[j])
-        let exprList[j] = s:IntegerToFloat(exprList[j]) " optionally executed
-        let exprList[j] = s:AddLeadingZero(exprList[j])
-        let result = s:EvalMath(exprList[j])
-        let exprList[j] = s:BuildResult(orgExpr, result)
+        call s:CaptureVariable(exprList[i])
+        if s:ValidLine(exprList[i]) == 0 | continue | endif
+        let exprList[i] = s:RemoveOldResult(exprList[i])
+        let orgExpr = exprList[i]
+        "TODO also support 
+        let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
+        let exprList[i] = s:FixMultiplication(exprList[i])
+        let exprList[i] = s:IntegerToFloat(exprList[i]) " optionally executed
+        let exprList[i] = s:AddLeadingZero(exprList[i])
+        let result = s:EvalMath(exprList[i])
+        let exprList[i] = s:BuildResult(orgExpr, result)
+        call s:CaptureVariable(exprList[i])
     endfor
     call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
     let exprLines = join(exprList, "\n")
     call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
     call s:OverWriteVisualSelection(exprLines)
+    let s:CapturedVariables = {}
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -175,7 +180,6 @@ endfunction
 " append result of Statistical operation (option: Statistic)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildResult(expr, result)
-    let output = a:result
     let s:option_append = 1
     let s:option_replace = 0
 
@@ -288,6 +292,29 @@ function! s:RemoveOldResult(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:CaptureVariables()                                                     {{{2
+"TODO description
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:CaptureVariable(expr)
+    call crunch#debug#PrintHeader('Capture Variable')
+
+    let VarNamePat = '\v\C^\s*\zs'.s:validVariable.'\ze\s*\=\s*'
+    let VarValuePat = '\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$' 
+
+    let VarName = matchstr(a:expr, VarNamePat)
+    let VarValue = matchstr(a:expr, VarValuePat)
+
+    call crunch#debug#PrintVarMsg(VarName, 'the name of the variable')
+    call crunch#debug#PrintVarMsg(VarValue, 'the value of the variable')
+
+    if VarName != ''  && VarValue != ''
+        let s:capturedVariables[VarName] = VarValue
+        call crunch#debug#PrintVarMsg(string(s:capturedVariables), 'captured variables')
+    endif
+
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:ReplaceVariable()                                                      {{{2
 "Replaces the variable within an expression with the value of that variable
 "inspired by Ihar Filipau's inline calculator
@@ -312,15 +339,39 @@ function! s:ReplaceVariable(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:ReplaceCapturedVariableVariable()                                                      {{{2
+"Replaces the variable within an expression with the value of that variable
+"inspired by Ihar Filipau's inline calculator
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:ReplaceCapturedVariable(expr)
+    call crunch#debug#PrintHeader('Replace Captured Variable')
+
+    let expr = a:expr
+    call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
+
+    " strip the variable marker, if any
+    let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
+    call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
+
+    " replace variable with it's value
+    let expr = substitute( expr, '\v('.s:validVariable.
+                \'\v)\ze([^(a-zA-Z0-9_]|$)',
+                \ '\=s:capturedVariables[submatch(1)]', 'g' )
+
+    call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:GetVariableValue()                                                     {{{2
 "Searches for the value of a variable and returns the value assigned to the
 "variable inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetVariableValue(variable)
 
-    " TODO: make the E of e handling cleaner
-    " if variable is e or E don't do anything
     if a:variable =~ '\c^e\d*$'
+        " TODO: make the E of e handling cleaner
+        " if variable is e or E don't do anything
         return a:variable
     endif
 
