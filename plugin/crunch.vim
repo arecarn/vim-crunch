@@ -6,11 +6,16 @@
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-" Allows the user to disable the plugin
+augroup Mode
+    autocmd!
+    autocmd CursorMoved * let s:crunchMode = mode()
+augroup END
 
+" Allows the user to disable the plugin
 if exists("g:loaded_crunch")
     finish
 endif
+
 let g:loaded_crunch = 1
 
 "COMMANDS{{{
@@ -20,7 +25,7 @@ command! -nargs=* Crunch call crunch#Crunch(<q-args>)
 command! -nargs=? -range CrunchLine 
             \ <line1>,<line2>call crunch#Main(<q-args>)
 command! -nargs=? -range CrunchVisual 
-            \ <line1>,<line2>call crunch#Visual()
+            \ call crunch#Dev()
 command! -nargs=? CrunchBlock call crunch#EvalBlock(<q-args>)
 
 

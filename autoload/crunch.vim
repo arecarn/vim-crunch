@@ -20,7 +20,7 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
-let s:number = '\v((-\s*)?\d*\.?\d+)'
+let s:numPat = '\v[-+]?%(\.\d+|\d+%([.]\d+)?%([eE][+-]?\d+)?)'
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
@@ -44,6 +44,7 @@ function! crunch#Crunch(input)
         if s:ValidLine(origExpr) == 0 | return | endif
         let expr = s:FixMultiplication(origExpr)
         let expr = s:IntegerToFloat(expr)
+        let expr = s:AddLeadingZero(expr)
         let result = s:EvaluateExpression(expr)
 
         echo expr
@@ -89,6 +90,7 @@ function! crunch#EvalLine()
         let expr = s:ReplaceVariable(origExpr)
         let expr = s:FixMultiplication(expr)
         let expr = s:IntegerToFloat(expr)
+        let expr = s:AddLeadingZero(expr)
         let resultStr = s:EvaluateExpression(expr)
     catch /Crunch error: /
         call s:EchoError(v:exception)
@@ -98,6 +100,32 @@ function! crunch#EvalLine()
     call setline('.', s:prefix.origExpr.' = '.resultStr.s:suffix)
     call crunch#debug#PrintMsg('['. resultStr.'] is the result' )
     return resultStr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#Visual()                                                          {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#Visual()
+    call crunch#debug#PrintHeader('Inizilation')
+    let exprs = s:GetVisualSelection()
+    let exprList = split(exprs, '\n')
+
+    for i in range(len(exprList))
+        let j = i-1
+        if s:ValidLine(exprList[j]) == 0 | continue | endif
+        let exprList[j] = s:RemoveOldResult(exprList[j])
+        let orgExpr = exprList[j]
+        " let exprList[j] = s:ReplaceVariable(exprList[j])
+        let exprList[j] = s:FixMultiplication(exprList[j])
+        let exprList[j] = s:IntegerToFloat(exprList[j]) " optionally executed
+        let exprList[j] = s:AddLeadingZero(exprList[j])
+        let result = s:EvalMath(exprList[j])
+        let exprList[j] = s:BuildResult(orgExpr, result)
+    endfor
+    call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
+    let exprLines = join(exprList, "\n")
+    call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
+    call s:OverWriteVisualSelection(exprLines)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -114,28 +142,6 @@ function! crunch#EvalBlock(args)
     execute topline."," bottomline."call "."crunch#Main(a:args)"
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#EvalVisual()                                                          {{{2
-" evaluates a line in a buffer, allowing for prefixes and suffixes
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#EvalLine()
-    let origExpr = s:CrunchInit()
-    try
-        if s:ValidLine(origExpr) == 0 | return | endif
-        let origExpr = s:RemoveOldResult(origExpr)
-        let expr = s:ReplaceVariable(origExpr)
-        let expr = s:FixMultiplication(expr)
-        let expr = s:IntegerToFloat(expr)
-        let resultStr = s:EvaluateExpression(expr)
-    catch /Crunch error: /
-        call s:EchoError(v:exception)
-        let resultStr = v:exception
-    endtry
-
-    call setline('.', s:prefix.origExpr.' = '.resultStr.s:suffix)
-    call crunch#debug#PrintMsg('['. resultStr.'] is the result' )
-    return resultStr
-endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
@@ -161,36 +167,8 @@ function! s:HandleArgs(args, fline, lline)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:Init()                                                                 {{{2
-"Gets the expression from current line, builds the suffix/prefix regex if
-"need, and  removes the suffix and prefix from the expression
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#Visual()
-    call crunch#debug#PrintHeader('Inizilation')
-    let exprs = s:GetVisualSelection()
-    let exprList = split(exprs, '\n')
 
-    for i in range(len(exprList))
-        let j = i-1
-        if s:ValidLine(exprList[j]) == 0 | continue | endif
-        let exprList[j] = s:RemoveOldResult(exprList[j])
-        let orgExpr = exprList[j]
-        " let exprList[j] = s:ReplaceVariable(exprList[j])
-        let exprList[j] = s:FixMultiplication(exprList[j])
-        let exprList[j] = s:IntegerToFloat(exprList[j]) " optionally executed
-        let result = s:EvalMath(exprList[j])
-        let exprList[j] = s:BuildResult(orgExpr, result)
-    endfor
-    call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
-    let exprLines = join(exprList, "\n")
-    call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
-    call s:OverWriteVisualSelection(exprLines)
-
-
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:OutPutResult()                                                         {{{2
+"s:BuildResult()                                                          {{{2
 "Return Output
 " append result (option: Append)
 " replace result (option: Replace)
@@ -213,19 +191,17 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:EvalMath()                                                         {{{2
-"
 "Return Output
 " append result (option: Append)
 " replace result (option: Replace)
 " append result of Statistical operation (option: Statistic)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:EvalMath(expr)
-
+    "a function pointers to the eval method
     "if python
     "if octave
     "if vimscript
     let result = s:EvaluateExpression(a:expr)
-
     return result
 endfunction
 
@@ -255,7 +231,6 @@ function! s:CrunchInit()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-
 "s:ValidLine()                                                            {{{2
 "Checks the line to see if it is a variable definition, or a blank line that
 "may or may not contain whitespace.
@@ -268,19 +243,19 @@ function! s:ValidLine(expr)
 
     "checks for commented lines
     if a:expr =~ '\v^\s*'.g:crunch_calc_comment
-        call crunch#debug#PrintMsg('test1 failed')
+        call crunch#debug#PrintMsg('test1 failed comment')
         return 0
     endif
 
     " checks for empty/blank lines
     if a:expr =~ '\v^\s*$'
-        call crunch#debug#PrintMsg('test2 failed')
+        call crunch#debug#PrintMsg('test2 failed blank line')
         return 0
     endif
 
     " checks for lines that don't need evaluation
-    if a:expr =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*-?\s*[0-9.]+\s*$'
-        call crunch#debug#PrintMsg('test3 failed')
+    if a:expr =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*-?\s*'.s:numPat.'\s*$'
+        call crunch#debug#PrintMsg('test3 failed dosnt need evaluation')
         return 0
     endif
     call crunch#debug#PrintMsg('It is a valid line!')
@@ -303,8 +278,7 @@ function! s:RemoveOldResult(expr)
     "else if it's just a normal expression just remove it
     call crunch#debug#PrintMsg('[' . expr . ']= expression before removed result')
 
-    "TODO: include number from Daimian Conways column calculator
-    let expr = substitute(expr, '\v\s*\=\s*[-0-9e.+]*\s*$', "", "")
+    let expr = substitute(expr, '\v\s*\=\s*('.s:numPat.')?\s*$', "", "")
     call crunch#debug#PrintMsg('[' . expr . ']= after removed old result')
 
     let expr = substitute(expr, '\v\s*\=\s*Crunch error:.*\s*$', "", "")
@@ -374,7 +348,7 @@ function! s:GetVariableValue(variable)
     let line = s:RemovePrefixNSuffix(getline(sline))
     call crunch#debug#PrintHeader('Get Variable Value Contiuned')
 
-    let variableValue = matchstr(line,'\v\=\s*\zs-?\s*(\d*\.?\d+)\ze\s*$')
+    let variableValue = matchstr(line,'\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$')
     call crunch#debug#PrintMsg("[" . variableValue . "]= the variable value")
     if variableValue == ''
         throw s:ErrorTag.'value for '.a:variable.' not found.'
@@ -396,7 +370,7 @@ function! s:FixMultiplication(expr)
     call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 1')
 
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
-    let expr = substitute(expr,'\v([0-9.]+)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
+    let expr = substitute(expr,'\v(\d)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
     call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 2')
 
     return expr
@@ -409,14 +383,24 @@ endfunction
 " NOTE: from HowMuch.vim
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:IntegerToFloat(expr)
-    call crunch#debug#PrintHeader('Remove Line Prefix and Suffix')
-
+    call crunch#debug#PrintHeader('Integer to Float')
     call crunch#debug#PrintMsg('['.a:expr.']= before int to float conversion')
     let expr = a:expr 
     let expr = substitute(expr,'\(^\|[^.0-9^eE]\)\zs\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
-    "TODO: wrap this into it's own function
-    let expr = substitute(expr,'\(^\|[^.0-9]\)\zs\.\ze\([0-9]\)', '0&', 'g')
     call crunch#debug#PrintMsg('['.expr.']= after int to float conversion')
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:AddLeadingZero()                                                      {{{2
+" convert .5*.34 -> 0.5*0.34
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:AddLeadingZero(expr)
+    let expr = a:expr
+    call crunch#debug#PrintHeader('Add Leading Zero')
+    call crunch#debug#PrintMsg('['.expr.']= before adding leading zero')
+    let expr = substitute(expr,'\v(^|[^.0-9])\zs\.\ze([0-9])', '0&', 'g')
+    call crunch#debug#PrintMsg('['.expr.']= after adding leading zero')
     return expr
 endfunction
 
@@ -510,7 +494,6 @@ function! s:BuildLinePrefix()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:GetInputString()                                                      {{{2
 " prompt the user for an expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetInputString()
@@ -555,6 +538,9 @@ function! s:EchoError(errorString)
     echohl None
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:GetVisualSelection()                                                  {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetVisualSelection()
     try
         let a_save = getreg('a')
@@ -565,6 +551,9 @@ function! s:GetVisualSelection()
     endtry
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:OverWriteVisualSelection()                                            {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:OverWriteVisualSelection(input)
     let a_save = @a
     call setreg('a', a:input, 'b')
@@ -572,6 +561,7 @@ function! s:OverWriteVisualSelection(input)
     let @a = a_save
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "Restore settings                                                         {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let &cpo = save_cpo
