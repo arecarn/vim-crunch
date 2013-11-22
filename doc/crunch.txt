@@ -301,14 +301,20 @@ https://github.com/arecarn/crunch
 ==============================================================================
 7. CHANGE LOG                                             *crunch-change-log*
 
+------------------------------------------------------------------------------
+Version 2
+
 02 Oct  2013 - Prefix & Suffix Ignore added
 
-12 Sept 2013 - Improved Variable Flexibility
+12 Sept 2013 - Removed '#' from variable declaration and usage
 
 29 Aug  2013 - Add CrunchBlock mapping
 
 27 Aug  2013 - Allow expressions to be input as an argument to |:Crunch|
              - command  e.g. '|:Crunch| 5*5'
+
+------------------------------------------------------------------------------
+Version 1
 
 08 July 2013 - Improved Map handling
 
