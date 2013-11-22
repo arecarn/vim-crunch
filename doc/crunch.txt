@@ -243,7 +243,7 @@ comment
 autocmd FileType python set commentstring='''%s'''
 
 ------------------------------------------------------------------------------
-2.4  COMMAND  ARGUMENTS                            *crunch-command-arguments*
+2.4  COMMAND ARGUMENTS                              *crunch-command-arguments*
 
 Currently there is only one argument for both the |:CrunchLine| and
 |:CrunchBlock| commands. The argument is '-exclusive' or '-exc' for short.
@@ -301,29 +301,29 @@ https://github.com/arecarn/crunch
 ==============================================================================
 7. CHANGE LOG                                             *crunch-change-log*
 
-02 Oct  2013 * Prefix & Suffix Ignore added
+02 Oct  2013 - Prefix & Suffix Ignore added
 
-12 Sept 2013 * Improved Variable Flexibility
+12 Sept 2013 - Improved Variable Flexibility
 
-29 Aug  2013 * Add CrunchBlock mapping
+29 Aug  2013 - Add CrunchBlock mapping
 
-27 Aug  2013 * Allow expressions to be input as an argument to |:Crunch|
-               command  e.g. '|:Crunch| 5*5'
+27 Aug  2013 - Allow expressions to be input as an argument to |:Crunch|
+             - command  e.g. '|:Crunch| 5*5'
 
-08 July 2013 * Improved Map handling
+08 July 2013 - Improved Map handling
 
-07 July 2013 * Move most of plugin to autoload
+07 July 2013 - Move most of plugin to autoload
 
-04 July 2013 * Streamline code
-             * Add more multiplication fixes
-                - )(, n(
-             * Added visual selection
+04 July 2013 - Streamline code
+             - Add more multiplication fixes
+             -  - )(, n(
+             - Added visual selection
 
-27 Jun  2013 * Added Variables
-             * Clearing of previous result
-             * Made Crunch and CrunchLine two different functions
-             * Removed visual selection in favor of whole line evaluation.
-             * Made calculator prompt customizable
+27 Jun  2013 - Added Variables
+             - Clearing of previous result
+             - Made Crunch and CrunchLine two different functions
+             - Removed visual selection in favor of whole line evaluation.
+             - Made calculator prompt customizable
 
 24 Jun  2013 added multiplication fix
 19 Jun  2013 first version
