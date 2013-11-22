@@ -20,6 +20,16 @@ function! crunch#debug#PrintMsg(text)
         echom a:text
     endif
 endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+" crunch#debug#PrintMsg()                                                    {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#debug#PrintVarMsg(variable, text)
+    if s:debug
+        echom '['.a:variable.'] = '.a:text
+    endif
+endfunction
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 " debug#Enable()                                                            {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
