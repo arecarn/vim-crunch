@@ -20,7 +20,12 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
-let s:capturedVariables = {} "TODO: empty this after every execution
+augroup Mode
+    autocmd!
+    autocmd CursorMoved * let s:crunchMode = mode()
+augroup END
+
+let s:capturedVariables = {} 
 let s:numPat = '\v[-+]?%(\.\d+|\d+%([.]\d+)?%([eE][+-]?\d+)?)'
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
@@ -104,7 +109,7 @@ function! crunch#EvalLine()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#Visual()                                                          {{{2
+"crunch#Dev()                                                          {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Dev()
     call crunch#debug#PrintHeader('Inizilation')
@@ -117,7 +122,6 @@ function! crunch#Dev()
         if s:ValidLine(exprList[i]) == 0 | continue | endif
         let exprList[i] = s:RemoveOldResult(exprList[i])
         let orgExpr = exprList[i]
-        "TODO also support 
         let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
         let exprList[i] = s:FixMultiplication(exprList[i])
         let exprList[i] = s:IntegerToFloat(exprList[i]) " optionally executed
@@ -146,11 +150,9 @@ function! crunch#EvalBlock(args)
     call crunch#debug#PrintMsg('['.a:args.'] is the variable' )
     execute topline."," bottomline."call "."crunch#Main(a:args)"
 endfunction
-
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
-"HELPER FUNCTIONS{{{
+" INITILAZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "s:HandleArgs()                                                           {{{2
 "Interpret arguments to set flags accordingly
@@ -169,44 +171,6 @@ function! s:HandleArgs(args, fline, lline)
             call s:EchoError(s:ErrorTag ."'".a:args."' is not a valid argument")
         endif
     endif
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-
-"s:BuildResult()                                                          {{{2
-"Return Output
-" append result (option: Append)
-" replace result (option: Replace)
-" append result of Statistical operation (option: Statistic)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:BuildResult(expr, result)
-    let s:option_append = 1
-    let s:option_replace = 0
-
-    if s:option_append == 1 "append result
-        let output = a:expr .' = '. a:result
-    elseif s:option_replace == 1 "replace expr with result
-        let output = a:result
-    endif
-
-    "TODO: insert statistical expression
-    return output
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:EvalMath()                                                         {{{2
-"Return Output
-" append result (option: Append)
-" replace result (option: Replace)
-" append result of Statistical operation (option: Statistic)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:EvalMath(expr)
-    "a function pointers to the eval method
-    "if python
-    "if octave
-    "if vimscript
-    let result = s:EvaluateExpression(a:expr)
-    return result
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -235,6 +199,51 @@ function! s:CrunchInit()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:GetRange()                                                            {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:GetRange(count, firstLine, lastLine)
+    call frisk#debug#PrintHeader('Get Range')
+    if a:count == 0 "no range given extract from command call
+        return ''
+    else "range was given
+        if s:CrunchMode  =~ '\vV|v|'
+            let result = s:GetVisualSelection()
+            call frisk#debug#PrintVarMsg('get visual range =['.result.']')
+        else 
+            let result = join(getline(a:firstLine, a:lastLine), "\n") " search the range instead
+            call frisk#debug#PrintVarMsg(result,' range')
+        endif
+    endif
+    return result
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:GetVisualSelection()                                                  {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:GetVisualSelection()
+    try
+        let a_save = getreg('a')
+        normal! gv"ay
+        return @a
+    finally
+        call setreg('a', a_save)
+    endtry
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:OverWriteVisualSelection()                                            {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:OverWriteVisualSelection(input)
+    let a_save = @a
+    call setreg('a', a:input, 'b')
+    normal! gv"ap
+    let @a = a_save
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
+
+"FORMAT EXPRESSION{{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "s:ValidLine()                                                            {{{2
 "Checks the line to see if it is a variable definition, or a blank line that
 "may or may not contain whitespace.
@@ -267,7 +276,6 @@ function! s:ValidLine(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-
 "s:RemoveOldResult()                                                      {{{2
 "Remove old result if any
 "eg '5+5 = 10' becomes '5+5'
@@ -292,6 +300,42 @@ function! s:RemoveOldResult(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:FixMultiplication()                                                   {{{2
+" turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:FixMultiplication(expr)
+    call crunch#debug#PrintHeader('Fix Multiplication')
+
+    "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
+    let expr = substitute(a:expr,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
+    call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 1')
+
+    "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
+    let expr = substitute(expr,'\v(\d)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
+    call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 2')
+
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:IntegerToFloat()                                                      {{{2
+" Convert Integers in the exprs to floats by calling a substitute
+" command
+" NOTE: from HowMuch.vim
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:IntegerToFloat(expr)
+    call crunch#debug#PrintHeader('Integer to Float')
+    call crunch#debug#PrintMsg('['.a:expr.']= before int to float conversion')
+    let expr = a:expr 
+    let expr = substitute(expr,'\(^\|[^.0-9^eE]\)\zs\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
+    call crunch#debug#PrintMsg('['.expr.']= after int to float conversion')
+    return expr
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
+
+" HANDLE VARIABLES{{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "s:CaptureVariables()                                                     {{{2
 "TODO description
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -339,7 +383,7 @@ function! s:ReplaceVariable(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:ReplaceCapturedVariableVariable()                                                      {{{2
+"s:ReplaceCapturedVariable()                                      {{{2
 "Replaces the variable within an expression with the value of that variable
 "inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -408,38 +452,28 @@ function! s:GetVariableValue(variable)
     return '('.variableValue.')'
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
-" s:FixMultiplication()                                                   {{{2
-" turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
+" RESULT HANDLING{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:FixMultiplication(expr)
-    call crunch#debug#PrintHeader('Fix Multiplication')
-
-    "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
-    let expr = substitute(a:expr,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
-    call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 1')
-
-    "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
-    let expr = substitute(expr,'\v(\d)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
-    call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 2')
-
-    return expr
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:IntegerToFloat()                                                      {{{2
-" Convert Integers in the exprs to floats by calling a substitute
-" command
-" NOTE: from HowMuch.vim
+"s:BuildResult()                                                          {{{2
+"Return Output
+" append result (option: Append)
+" replace result (option: Replace)
+" append result of Statistical operation (option: Statistic)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:IntegerToFloat(expr)
-    call crunch#debug#PrintHeader('Integer to Float')
-    call crunch#debug#PrintMsg('['.a:expr.']= before int to float conversion')
-    let expr = a:expr 
-    let expr = substitute(expr,'\(^\|[^.0-9^eE]\)\zs\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
-    call crunch#debug#PrintMsg('['.expr.']= after int to float conversion')
-    return expr
+function! s:BuildResult(expr, result)
+    let s:option_append = 1
+    let s:option_replace = 0
+
+    if s:option_append == 1 "append result
+        let output = a:expr .' = '. a:result
+    elseif s:option_replace == 1 "replace expr with result
+        let output = a:result
+    endif
+
+    "TODO: insert statistical expression
+    return output
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -455,8 +489,10 @@ function! s:AddLeadingZero(expr)
     return expr
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
+"PREFIX/SUFFIX {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "s:RemovePrefixNSuffix()                                                  {{{2
 "Removes the prefix and suffix from a string
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -554,6 +590,25 @@ function! s:GetInputString()
     return expr
 endfunction
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
+
+"EVALUATION {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"s:EvalMath()                                                             {{{2
+"Return Output
+" append result (option: Append)
+" replace result (option: Replace)
+" append result of Statistical operation (option: Statistic)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:EvalMath(expr)
+    "a function pointers to the eval method
+    "if python
+    "if octave
+    "if vimscript
+    let result = s:EvaluateExpression(a:expr)
+    return result
+endfunction
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " s:EvaluateExpression()                                                  {{{2
 " Evaluates the expression and checks for errors in the process. Also
@@ -581,7 +636,10 @@ function! s:EvaluateExpression(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:EchoError()                                                            {{{2
+"}}}
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"s:EchoError()                                                             {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:EchoError(errorString)
     echohl WarningMsg
@@ -589,33 +647,10 @@ function! s:EchoError(errorString)
     echohl None
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:GetVisualSelection()                                                  {{{2
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:GetVisualSelection()
-    try
-        let a_save = getreg('a')
-        normal! gv"ay
-        return @a
-    finally
-        call setreg('a', a_save)
-    endtry
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:OverWriteVisualSelection()                                            {{{2
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:OverWriteVisualSelection(input)
-    let a_save = @a
-    call setreg('a', a:input, 'b')
-    normal! gv"ap
-    let @a = a_save
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"Restore settings                                                         {{{2
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+"Restore settings                                                          {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let &cpo = save_cpo
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 " vim:foldmethod=marker
