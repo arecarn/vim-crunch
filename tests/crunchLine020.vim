@@ -1,9 +1,8 @@
 " Basic tests with CrunchLine command
 
 " Load the test data. 
-edit OctaveCrunchLine001.in
+edit crunchLine020.in
 
-CrunchEval Octave
 %CrunchLine
 
 " Save the processed buffer contents 
