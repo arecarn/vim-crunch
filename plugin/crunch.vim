@@ -24,7 +24,7 @@ let g:loaded_crunch = 1
 command! -nargs=* Crunch call crunch#Crunch(<q-args>)
 command! -nargs=? -range CrunchLine 
             \ <line1>,<line2>call crunch#Main(<q-args>)
-command! -nargs=? -range CrunchVisual 
+command! -nargs=? -range CrunchDev
             \ call crunch#Dev()
 command! -nargs=? CrunchBlock call crunch#EvalBlock(<q-args>)
 
