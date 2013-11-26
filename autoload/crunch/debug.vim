@@ -22,7 +22,7 @@ function! crunch#debug#PrintMsg(text)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-" crunch#debug#PrintMsg()                                                    {{{
+" crunch#debug#PrintVarMsg()                                                 {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#debug#PrintVarMsg(variable, text)
     if s:debug
@@ -31,7 +31,7 @@ function! crunch#debug#PrintVarMsg(variable, text)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-" debug#Enable()                                                            {{{
+" debug#Enable()                                                             {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#debug#Enable(enable)
     if a:enable
