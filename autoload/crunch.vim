@@ -22,7 +22,7 @@ endif
 
 augroup Mode
     autocmd!
-    autocmd CursorMoved * let s:crunchMode = mode()
+    autocmd CursorMoved * let s:CrunchMode = mode()
 augroup END
 
 let s:capturedVariables = {} 
@@ -31,6 +31,35 @@ let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
 
+
+let s:option = {}
+
+" mutually exclusive
+" defualt vim
+" let s:option.python           = 0
+" let s:option.vim              = 1
+" let s:option.bc               = 0
+" let s:option.octave           = 0
+                               
+"mutually exclusive
+"default is append
+
+let s:option.replace          =  0
+let s:option.append           =  1
+                               
+"only apply to vim & python
+"default to on
+let s:option.float             = 1
+
+" let s:option.sum             = 0
+" let s:option.max             = 0
+" let s:option.min             = 0
+" let s:option.range           = 0
+" let s:option.median          = 0
+" let s:option.avg             = 0
+" let s:option.mode            = 0
+" let s:option.mean            = 0
+"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "MAIN FUNCTIONS{{{
@@ -44,6 +73,7 @@ function! crunch#Crunch(input)
         let origExpr = a:input
     else
         let origExpr = s:GetInputString()
+        redraw
     endif
 
     try
@@ -51,7 +81,7 @@ function! crunch#Crunch(input)
         let expr = s:FixMultiplication(origExpr)
         let expr = s:IntegerToFloat(expr)
         let expr = s:AddLeadingZero(expr)
-        let result = s:EvaluateExpression(expr)
+        let result = s:VimEval(expr)
 
         echo expr
         echo "= ".result
@@ -97,7 +127,7 @@ function! crunch#EvalLine()
         let expr = s:FixMultiplication(expr)
         let expr = s:IntegerToFloat(expr)
         let expr = s:AddLeadingZero(expr)
-        let resultStr = s:EvaluateExpression(expr)
+        let resultStr = s:VimEval(expr)
     catch /Crunch error: /
         call s:EchoError(v:exception)
         let resultStr = v:exception
@@ -109,12 +139,88 @@ function! crunch#EvalLine()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#Dev()                                                          {{{2
+"crunch#EvalPar()                                                       {{{2
+"Evaluates a paragraph, equivalent to vip<leader>cl
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#Dev()
+function! crunch#EvalPar(args)
+    call crunch#debug#PrintHeader('Crunch Paragraph Debug')
+    execute "normal! vip\<ESC>"
+    let topline = line("'<")
+    let bottomline = line("'>")
+
+    call crunch#debug#PrintMsg('['.a:args.'] is the variable' )
+    execute topline."," bottomline."call "."crunch#Main(a:args)"
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#Dev()                                                             {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#Dev(count, firstLine, lastLine, input)
+    "handle args
+    let expr  = s:HandleArgss(a:input)
+
+    if expr != ''
+        call crunch#Crunch(expr)
+    else
+        let expr = s:GetRange(a:count, a:firstLine, a:lastLine)
+        if expr == ''
+            call crunch#Crunch(expr)
+        else
+            call crunch#VisualBlock(expr)
+        endif
+    endif
+
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:HandleArgss()                                                          {{{2
+" test if there is an arg in the correct form.
+" return the arg if it's valid otherwise an empty string is returned
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:HandleArgss(input)
+    call crunch#debug#PrintHeader('Handle Args')
+    call crunch#debug#PrintVarMsg(a:input,'the input')
+
+    let options = split(matchstr(a:input, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
+    let expr = substitute(a:input, '\v\s*(-\a+\s+)+', '', 'g')
+
+
+    call crunch#debug#PrintVarMsg(string(options),'the options')
+    call crunch#debug#PrintVarMsg(expr,'the commandline expr')
+
+    call s:SetOptions(options)
+
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:SetOptions()                                                          {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:SetOptions(input)
+
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:GetValidArg()                                                          {{{2
+" test if there is an arg in the correct form.
+" return the arg if it's valid otherwise an empty string is returned
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:GetValidArg(input)
+    call crunch#debug#PrintHeader('Get Valid Arguments')
+    let arg = matchstr( a:input, '\C\v^\s*-\zs\a+\ze(\s+|$)')
+    call crunch#debug#PrintMsg('The search engine name is =['.arg.']')
+    return arg
+endfunction
+
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#VisualBlock()                                                     {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#VisualBlock(exprs)
     call crunch#debug#PrintHeader('Inizilation')
-    let exprs = s:GetVisualSelection()
-    let exprList = split(exprs, '\n')
+
+    let exprList = split(a:exprs, '\n')
     call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
 
     for i in range(len(exprList))
@@ -137,19 +243,6 @@ function! crunch#Dev()
     let s:CapturedVariables = {}
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#EvalBlock()                                                       {{{2
-"Evaluates a paragraph, equivalent to vip<leader>cl
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#EvalBlock(args)
-    call crunch#debug#PrintHeader('Crunch Block Debug')
-    execute "normal! vip\<ESC>"
-    let topline = line("'<")
-    let bottomline = line("'>")
-
-    call crunch#debug#PrintMsg('['.a:args.'] is the variable' )
-    execute topline."," bottomline."call "."crunch#Main(a:args)"
-endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 " INITILAZATION {{{
@@ -202,16 +295,16 @@ endfunction
 " s:GetRange()                                                            {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetRange(count, firstLine, lastLine)
-    call frisk#debug#PrintHeader('Get Range')
+    call crunch#debug#PrintHeader('Get Range')
     if a:count == 0 "no range given extract from command call
-        return ''
+        let result = ''
     else "range was given
         if s:CrunchMode  =~ '\vV|v|'
             let result = s:GetVisualSelection()
-            call frisk#debug#PrintVarMsg('get visual range =['.result.']')
+            call crunch#debug#PrintVarMsg(result,'visual range')
         else 
             let result = join(getline(a:firstLine, a:lastLine), "\n") " search the range instead
-            call frisk#debug#PrintVarMsg(result,' range')
+            call crunch#debug#PrintVarMsg(result,'range')
         endif
     endif
     return result
@@ -307,7 +400,7 @@ function! s:FixMultiplication(expr)
     call crunch#debug#PrintHeader('Fix Multiplication')
 
     "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
-    let expr = substitute(a:expr,'\v(\))\s*([([:alnum:]])', '\1\*\2','g')
+    let expr = substitute(a:expr,'\v(\))\s*([(\.[:alnum:]])', '\1\*\2','g')
     call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 1')
 
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
@@ -605,17 +698,17 @@ function! s:EvalMath(expr)
     "if python
     "if octave
     "if vimscript
-    let result = s:EvaluateExpression(a:expr)
+    let result = s:VimEval(a:expr)
     return result
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:EvaluateExpression()                                                  {{{2
+" s:VimEval()                                                  {{{2
 " Evaluates the expression and checks for errors in the process. Also
 " if there is no error echo the result and save a copy of it to the default
 " paste register
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:EvaluateExpression(expr)
+function! s:VimEval(expr)
     call crunch#debug#PrintHeader('Evaluate Expression')
     call crunch#debug#PrintMsg('[' . a:expr . "]= the final expression")
 
