@@ -6,10 +6,6 @@
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-augroup Mode
-    autocmd!
-    autocmd CursorMoved * let s:crunchMode = mode()
-augroup END
 
 " Allows the user to disable the plugin
 if exists("g:loaded_crunch")
