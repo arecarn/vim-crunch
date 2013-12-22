@@ -12,7 +12,13 @@ if exists("g:loaded_crunch")
     finish
 endif
 
+
 let g:loaded_crunch = 1
+
+augroup crunchMode
+    autocmd!
+    autocmd CursorMoved * let g:crunchMode = mode()
+augroup END
 
 "COMMANDS{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -20,8 +26,8 @@ let g:loaded_crunch = 1
 command! -nargs=* Crunch call crunch#Crunch(<q-args>)
 command! -nargs=? -range CrunchLine 
             \ <line1>,<line2>call crunch#Main(<q-args>)
-command! -nargs=* -range=0 CrunchDev
-            \ call crunch#Dev(<count>, <line1>, <line2>, <q-args>)
+command! -nargs=* -range=0 -bang CrunchDev
+            \ call crunch#Dev(<count>, <line1>, <line2>, <q-args>, "<bang>")
 command! -nargs=? CrunchBlock call crunch#EvalPar(<q-args>)
 
 

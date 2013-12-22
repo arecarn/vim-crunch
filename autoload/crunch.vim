@@ -20,10 +20,6 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
-augroup Mode
-    autocmd!
-    autocmd CursorMoved * let s:CrunchMode = mode()
-augroup END
 
 let s:capturedVariables = {} 
 let s:numPat = '\v[-+]?%(\.\d+|\d+%([.]\d+)?%([eE][+-]?\d+)?)'
@@ -32,24 +28,22 @@ let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
 
 
-let s:option = {}
 
 " mutually exclusive
 " defualt vim
-" let s:option.python           = 0
-" let s:option.vim              = 1
-" let s:option.bc               = 0
-" let s:option.octave           = 0
-                               
+let g:crunch_eval_type_python = 0
+let g:crunch_eval_type_vim    = 1
+let g:crunch_eval_type_bc     = 0
+let g:crunch_eval_type_octave = 0
+
 "mutually exclusive
 "default is append
+let g:crunch_result_type_append  = 1
 
-let s:option.replace          =  0
-let s:option.append           =  1
-                               
+
 "only apply to vim & python
 "default to on
-let s:option.float             = 1
+" let s:option.float             = 1
 
 " let s:option.sum             = 0
 " let s:option.max             = 0
@@ -154,11 +148,11 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#Dev()                                                             {{{2
+"The top level function that handles arguments and user input
+"TODO: elaborate
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#Dev(count, firstLine, lastLine, input)
-    "handle args
-    let expr  = s:HandleArgss(a:input)
-
+function! crunch#Dev(count, firstLine, lastLine, input, bang)
+    let expr  = s:HandleArgss(a:input, a:bang)
     if expr != ''
         call crunch#Crunch(expr)
     else
@@ -169,7 +163,6 @@ function! crunch#Dev(count, firstLine, lastLine, input)
             call crunch#VisualBlock(expr)
         endif
     endif
-
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -177,13 +170,22 @@ endfunction
 " test if there is an arg in the correct form.
 " return the arg if it's valid otherwise an empty string is returned
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:HandleArgss(input)
+function! s:HandleArgss(input, bang)
     call crunch#debug#PrintHeader('Handle Args')
     call crunch#debug#PrintVarMsg(a:input,'the input')
 
+    if a:bang == '!'
+        if g:crunch_result_type_append  == 1
+            let  s:crunch_result_type_append  = 0
+        else 
+            let  g:crunch_result_type_append  = 1
+        endif 
+    else
+        let s:crunch_result_type_append = g:crunch_result_type_append 
+    endif
+
     let options = split(matchstr(a:input, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
     let expr = substitute(a:input, '\v\s*(-\a+\s+)+', '', 'g')
-
 
     call crunch#debug#PrintVarMsg(string(options),'the options')
     call crunch#debug#PrintVarMsg(expr,'the commandline expr')
@@ -195,15 +197,14 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " s:SetOptions()                                                          {{{2
+" 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:SetOptions(input)
-
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 " s:GetValidArg()                                                          {{{2
-" test if there is an arg in the correct form.
-" return the arg if it's valid otherwise an empty string is returned
+" TODO is this function even needed?
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetValidArg(input)
     call crunch#debug#PrintHeader('Get Valid Arguments')
@@ -216,6 +217,9 @@ endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#VisualBlock()                                                     {{{2
+"Takes string or mathematical expressions delimited by new lines 
+"evaluates "each line individually and saving variables when they occur
+"Finally, pasting over the selection or range
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#VisualBlock(exprs)
     call crunch#debug#PrintHeader('Inizilation')
@@ -299,7 +303,7 @@ function! s:GetRange(count, firstLine, lastLine)
     if a:count == 0 "no range given extract from command call
         let result = ''
     else "range was given
-        if s:CrunchMode  =~ '\vV|v|'
+        if g:crunchMode  =~ '\vV|v|'
             let result = s:GetVisualSelection()
             call crunch#debug#PrintVarMsg(result,'visual range')
         else 
@@ -374,6 +378,7 @@ endfunction
 "eg '5+5 = 10' becomes '5+5'
 "eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
 "inspired by Ihar Filipau's inline calculator
+"TODO remove white space when there is no result?
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:RemoveOldResult(expr)
     call crunch#debug#PrintHeader('Remove Old Result')
@@ -556,13 +561,11 @@ endfunction
 " append result of Statistical operation (option: Statistic)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildResult(expr, result)
-    let s:option_append = 1
-    let s:option_replace = 0
 
-    if s:option_append == 1 "append result
-        let output = a:expr .' = '. a:result
-    elseif s:option_replace == 1 "replace expr with result
+    if s:crunch_result_type_append  != 1 "replace expr with result
         let output = a:result
+    else "append result
+        let output = a:expr .' = '. a:result
     endif
 
     "TODO: insert statistical expression
