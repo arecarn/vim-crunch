@@ -1,5 +1,5 @@
 " Load the test data. 
-edit  crunchDev_VLn_BlankLines.in
+edit crunchDevBlankLines.in
 execute "normal! ggVG\"ay"
 call crunch#VisualBlock(@a)
 

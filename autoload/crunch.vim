@@ -20,6 +20,7 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
+let g:crunch_debug = 0
 
 let s:capturedVariables = {} 
 let s:numPat = '\v[-+]?%(\.\d+|\d+%([.]\d+)?%([eE][+-]?\d+)?)'
@@ -37,8 +38,15 @@ let g:crunch_eval_type_bc     = 0
 let g:crunch_eval_type_octave = 0
 
 "mutually exclusive
+
 "default is append
-let g:crunch_result_type_append  = 1
+if !exists("g:crunch_result_type_append")
+    let g:crunch_result_type_append  = 1
+endif
+
+"given a dummy value on each evaluation this value is reinitalized
+"TODO is this needed
+let s:crunch_result_type_append  = 1
 
 
 "only apply to vim & python
@@ -178,7 +186,7 @@ function! s:HandleArgss(input, bang)
         if g:crunch_result_type_append  == 1
             let  s:crunch_result_type_append  = 0
         else 
-            let  g:crunch_result_type_append  = 1
+            let  s:crunch_result_type_append  = 1
         endif 
     else
         let s:crunch_result_type_append = g:crunch_result_type_append 
@@ -224,7 +232,7 @@ endfunction
 function! crunch#VisualBlock(exprs)
     call crunch#debug#PrintHeader('Inizilation')
 
-    let exprList = split(a:exprs, '\n')
+    let exprList = split(a:exprs, '\n', 1)
     call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
 
     for i in range(len(exprList))
@@ -393,6 +401,12 @@ function! s:RemoveOldResult(expr)
 
     let expr = substitute(expr, '\v\s*\=\s*Crunch error:.*\s*$', "", "")
     call crunch#debug#PrintMsg('[' . expr . ']= after removed old error')
+
+    let expr = substitute(expr, '\v^\s\+\ze?.', "", "")
+    call crunch#debug#PrintMsg('[' . expr . ']= after removed whitespace')
+
+    let expr = substitute(expr, '\v.\zs\s+$', "", "")
+    call crunch#debug#PrintMsg('[' . expr . ']= after removed whitespace')
 
     return expr
 endfunction
@@ -724,6 +738,7 @@ function! s:VimEval(expr)
         let result = string(str2nr(result))
     endif
 
+    "TODO this looks to be some useless code
     call crunch#debug#PrintMsg('['.result.']= before trailing "0" removed')
     call crunch#debug#PrintMsg('['.matchstr(result,'\v\.\d{-1,}\zs0+$').
                 \ ']= trailing "0"')
