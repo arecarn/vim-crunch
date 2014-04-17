@@ -164,6 +164,8 @@ function! crunch#Dev(count, firstLine, lastLine, input, bang)
         let expr = s:GetRange(a:count, a:firstLine, a:lastLine)
         if expr == ''
             call crunch#Crunch(expr)
+        elseif g:crunchMode == "V"
+            execute a:firstLine.','.a:lastLine.'call crunch#EvalLine()'
         else
             call crunch#Visual(expr)
         endif
