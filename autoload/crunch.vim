@@ -165,7 +165,7 @@ function! crunch#Dev(count, firstLine, lastLine, input, bang)
         if expr == ''
             call crunch#Crunch(expr)
         else
-            call crunch#VisualBlock(expr)
+            call crunch#Visual(expr)
         endif
     endif
 endfunction
