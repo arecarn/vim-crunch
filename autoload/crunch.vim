@@ -335,7 +335,11 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:OverWriteVisualSelection(input)
     let a_save = @a
-    call setreg('a', a:input, 'b')
+    if g:crunchMode  =~ '\vV|v|'
+        call setreg('a', a:input, g:crunchMode)
+    else
+        call setreg('a', a:input, 'b')
+    endif 
     normal! gv"ap
     let @a = a_save
 endfunction
