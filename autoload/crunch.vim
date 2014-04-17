@@ -20,15 +20,13 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
-let g:crunch_debug = 0
-
 let s:capturedVariables = {} 
 let s:numPat = '\v[-+]?%(\.\d+|\d+%([.]\d+)?%([eE][+-]?\d+)?)'
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
 
-
+let g:crunch_debug = 0
 
 " mutually exclusive
 " defualt vim
