@@ -44,9 +44,8 @@ if !exists("g:crunch_result_type_append")
     let g:crunch_result_type_append  = 1
 endif
 
-"given a dummy value on each evaluation this value is reinitalized
-"TODO is this needed
-let s:crunch_result_type_append  = 1
+"given a dummy value on each evaluation this value is reinitialized
+let s:bang = ''
 
 
 "only apply to vim & python
@@ -183,13 +182,9 @@ function! s:HandleArgss(input, bang)
     call crunch#debug#PrintVarMsg(a:input,'the input')
 
     if a:bang == '!'
-        if g:crunch_result_type_append  == 1
-            let  s:crunch_result_type_append  = 0
-        else 
-            let  s:crunch_result_type_append  = 1
-        endif 
+        let s:bang = a:bang
     else
-        let s:crunch_result_type_append = g:crunch_result_type_append 
+        let s:bang = ''
     endif
 
     let options = split(matchstr(a:input, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
@@ -576,10 +571,18 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildResult(expr, result)
 
-    if s:crunch_result_type_append  != 1 "replace expr with result
-        let output = a:result
-    else "append result
-        let output = a:expr .' = '. a:result
+    if s:bang == '!'
+        if g:crunch_result_type_append  == 1
+            let output = a:result
+        else 
+            let output = a:expr .' = '. a:result
+        endif 
+    else
+        if g:crunch_result_type_append  == 1
+            let output = a:expr .' = '. a:result
+        else 
+            let output = a:result
+        endif 
     endif
 
     "TODO: insert statistical expression
