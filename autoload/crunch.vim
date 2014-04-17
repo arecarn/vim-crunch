@@ -69,18 +69,15 @@ let s:bang = ''
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Crunch(input)
     if a:input != ''
-        let origExpr = a:input
+        let expr = a:input
     else
-        let origExpr = s:GetInputString()
+        let expr = s:GetInputString()
         redraw
     endif
 
     try
-        if s:ValidLine(origExpr) == 0 | return | endif
-        let expr = s:FixMultiplication(origExpr)
-        let expr = s:IntegerToFloat(expr)
-        let expr = s:AddLeadingZero(expr)
-        let result = s:VimEval(expr)
+        if s:ValidLine(expr) == 0 | return | endif
+        let result = crunch#core(expr)
 
         echo expr
         echo "= ".result
@@ -114,6 +111,17 @@ function! crunch#Main(args) range
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#core()                                                            {{{2
+" The core functionality of crunch 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#core(expression)
+    let expr = s:FixMultiplication(a:expression)
+    let expr = s:IntegerToFloat(expr)
+    let expr = s:AddLeadingZero(expr)
+    return s:EvalMath(expr)
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#EvalLine()                                                        {{{2
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -123,18 +131,15 @@ function! crunch#EvalLine()
         if s:ValidLine(origExpr) == 0 | return | endif
         let origExpr = s:RemoveOldResult(origExpr)
         let expr = s:ReplaceVariable(origExpr)
-        let expr = s:FixMultiplication(expr)
-        let expr = s:IntegerToFloat(expr)
-        let expr = s:AddLeadingZero(expr)
-        let resultStr = s:VimEval(expr)
+        let result  = crunch#core(expr)
     catch /Crunch error: /
         call s:EchoError(v:exception)
-        let resultStr = v:exception
+        let result= v:exception
     endtry
 
-    call setline('.', s:prefix.origExpr.' = '.resultStr.s:suffix)
-    call crunch#debug#PrintMsg('['. resultStr.'] is the result' )
-    return resultStr
+    call setline('.', s:prefix.origExpr.' = '.result.s:suffix)
+    call crunch#debug#PrintMsg('['. result.'] is the result' )
+    return result
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -236,10 +241,7 @@ function! crunch#Visual(exprs)
         let exprList[i] = s:RemoveOldResult(exprList[i])
         let origExpr = exprList[i]
         let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
-        let exprList[i] = s:FixMultiplication(exprList[i])
-        let exprList[i] = s:IntegerToFloat(exprList[i]) " optionally executed
-        let exprList[i] = s:AddLeadingZero(exprList[i])
-        let result = s:EvalMath(exprList[i])
+        let result = crunch#core(exprList[i])
         let exprList[i] = s:BuildResult(origExpr, result)
         call s:CaptureVariable(exprList[i])
     endfor
