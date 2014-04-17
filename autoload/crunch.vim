@@ -217,12 +217,12 @@ endfunction
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#VisualBlock()                                                     {{{2
+"crunch#Visual()                                                     {{{2
 "Takes string or mathematical expressions delimited by new lines 
 "evaluates "each line individually and saving variables when they occur
 "Finally, pasting over the selection or range
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#VisualBlock(exprs)
+function! crunch#Visual(exprs)
     call crunch#debug#PrintHeader('Inizilation')
 
     let exprList = split(a:exprs, '\n', 1)
@@ -232,13 +232,13 @@ function! crunch#VisualBlock(exprs)
         call s:CaptureVariable(exprList[i])
         if s:ValidLine(exprList[i]) == 0 | continue | endif
         let exprList[i] = s:RemoveOldResult(exprList[i])
-        let orgExpr = exprList[i]
+        let origExpr = exprList[i]
         let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
         let exprList[i] = s:FixMultiplication(exprList[i])
         let exprList[i] = s:IntegerToFloat(exprList[i]) " optionally executed
         let exprList[i] = s:AddLeadingZero(exprList[i])
         let result = s:EvalMath(exprList[i])
-        let exprList[i] = s:BuildResult(orgExpr, result)
+        let exprList[i] = s:BuildResult(origExpr, result)
         call s:CaptureVariable(exprList[i])
     endfor
     call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
