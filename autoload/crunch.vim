@@ -385,7 +385,6 @@ endfunction
 "eg '5+5 = 10' becomes '5+5'
 "eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
 "inspired by Ihar Filipau's inline calculator
-"TODO remove white space when there is no result?
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:RemoveOldResult(expr)
     call crunch#debug#PrintHeader('Remove Old Result')
@@ -744,11 +743,6 @@ function! s:VimEval(expr)
     if result =~ '\v\.0+$'
         let result = string(str2nr(result))
     endif
-
-    "TODO this looks to be some useless code
-    call crunch#debug#PrintMsg('['.result.']= before trailing "0" removed')
-    call crunch#debug#PrintMsg('['.matchstr(result,'\v\.\d{-1,}\zs0+$').
-                \ ']= trailing "0"')
 
     return result
 endfunction
