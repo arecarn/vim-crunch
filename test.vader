@@ -1,0 +1,130 @@
+##############################################################################
+Given (Surrouned Expressions):
+  Some text here  sin(43).5    Some text here 
+  Some text here  cos(0)cos(0) Some text also here
+  Some text here  2sin(1)       Some text also here
+  Some text here  sin(1)2       Some text also here
+  Some text here  (2*3)(3*2)   Some text also here
+  Some text here  2(3*2)       Some text also here
+  Some text here  .25*4       Some text also here
+  Some text here  1/2         Some text also here
+  Some text here  .5/2         Some text also here
+  Some text here  pow(2,8)    Some text also here
+
+Before:
+  let g:crunchMode=""
+Do (Append result to surrouned expression):
+  fs\<C-V>9j11l:CrunchDev\<CR>
+Expect:
+  Some text here  sin(43).5 = -0.415887 Some text here 
+  Some text here  cos(0)cos(0) = 1      Some text also here
+  Some text here  2sin(1) = 1.682942     Some text also here
+  Some text here  sin(1)2 = 1.682942     Some text also here
+  Some text here  (2*3)(3*2) = 36       Some text also here
+  Some text here  2(3*2) = 12           Some text also here
+  Some text here  .25*4 = 1            Some text also here
+  Some text here  1/2 = 0.5            Some text also here
+  Some text here  .5/2 = 0.25           Some text also here
+  Some text here  pow(2,8) = 256       Some text also here
+
+##############################################################################
+Given (Surrouned Expressions):
+  Some text here  sin(43).5    Some text here 
+  Some text here  cos(0)cos(0) Some text also here
+  Some text here  2sin(1)       Some text also here
+  Some text here  sin(1)2       Some text also here
+  Some text here  (2*3)(3*2)   Some text also here
+  Some text here  2(3*2)       Some text also here
+  Some text here  .25*4       Some text also here
+  Some text here  1/2         Some text also here
+  Some text here  .5/2         Some text also here
+  Some text here  pow(2,8)    Some text also here
+
+Before:
+  let g:crunchMode=""
+Do (Replace surrouned expressions with result):
+
+  fs\<C-V>9j11l:CrunchDev!\<CR>
+Expect:
+  Some text here  -0.415887 Some text here 
+  Some text here  1         Some text also here
+  Some text here  1.682942   Some text also here
+  Some text here  1.682942   Some text also here
+  Some text here  36        Some text also here
+  Some text here  12        Some text also here
+  Some text here  1        Some text also here
+  Some text here  0.5      Some text also here
+  Some text here  0.25      Some text also here
+  Some text here  256      Some text also here
+
+##############################################################################
+Given (Expression between spaces):
+  sin(43).5
+  cos(0)cos(0)
+  
+  2sin(1)
+  sin(1)2
+  
+  (2*3)(3*2)
+  2(3*2)
+  
+  .25*4
+  1/2
+  
+  .5/2
+  pow(2,8)
+Before:
+  let g:crunchMode="V"
+Do (Evaluate all expressions and append the result):
+  VG:CrunchDev\<CR>
+Expect:
+  sin(43).5 = -0.415887
+  cos(0)cos(0) = 1
+  
+  2sin(1) = 1.682942
+  sin(1)2 = 1.682942
+  
+  (2*3)(3*2) = 36
+  2(3*2) = 12
+  
+  .25*4 = 1
+  1/2 = 0.5
+  
+  .5/2 = 0.25
+  pow(2,8) = 256
+
+##############################################################################
+Given (Expressions between spaces):
+  sin(43).5 = -0.415887
+  cos(0)cos(0) = 1
+  
+  2sin(1) = 1.682942
+  sin(1)2 = 1.682942
+  
+  (2*3)(3*2) = 36
+  2(3*2) = 12
+  
+  .25*4 = 1
+  1/2 = 0.5
+  
+  .5/2 = 0.25
+  pow(2,8) = 256
+Before:
+  let g:crunchMode=""
+Do (Evaluate all expressions replacing them with their result):
+  VG:CrunchDev!\<CR>
+Expect:
+  -0.415887
+  1
+  
+  1.682942
+  1.682942
+  
+  36
+  12
+  
+  1
+  0.5
+  
+  0.25
+  256
