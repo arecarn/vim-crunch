@@ -548,7 +548,7 @@ function! s:GetVariableValue(variable)
 
     call crunch#debug#PrintMsg("[".sline."]= result of search for variable")
     if sline == 0
-        throw s:ErrorTag."variable ".a:variable." not found"
+        call s:Throw("variable ".a:variable." not found")
     endif
 
     call crunch#debug#PrintMsg("[" .getline(sline). "]= line with variable value")
@@ -558,7 +558,7 @@ function! s:GetVariableValue(variable)
     let variableValue = matchstr(line,'\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$')
     call crunch#debug#PrintMsg("[" . variableValue . "]= the variable value")
     if variableValue == ''
-        throw s:ErrorTag.'value for '.a:variable.' not found.'
+        call s:Throw('value for '.a:variable.' not found.')
     endif
 
     return '('.variableValue.')'
@@ -752,8 +752,8 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"s:EchoError()                                                             {{{
+"ERRORS{{{
+"s:EchoError()                                                            {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:EchoError(errorString)
     echohl WarningMsg
@@ -761,6 +761,13 @@ function! s:EchoError(errorString)
     echohl None
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"s:Throw()                                                                {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function!  s:Throw(errorBody) abort
+    let ErrorMsg = s:ErrorTag.a:errorBody
+    throw ErrorMsg
+endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 "Restore settings                                                          {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
