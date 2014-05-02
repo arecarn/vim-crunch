@@ -1,3 +1,30 @@
+Given: 
+   Chillie
+   1/2 teaspoon garlic salt
+   8*(2*1/2) cups tomato sauce
+   1 (8 ounce) jar salsa
+   4 tablespoons chili seasoning mix
+   1 (15 ounce) can light red kidney beans
+   1 (15 ounce) can dark red kidney beans
+Do ():
+  jjviW
+Execute (variables):
+  CrunchDev!
+Expect:
+   Chillie
+   1/2 teaspoon garlic salt
+   8*(2+1/2)  cups tomato sauce
+   1 (8 ounce) jar salsa
+   4 tablespoons chili seasoning mix
+   1 (15 ounce) can light red kidney beans
+   1 (15 ounce) can dark red kidney beans
+##############################################################################
+Given: 
+  5*5/366
+Execute (variables):
+  %CrunchDev
+Expect:
+  5*5/366 = 0.068306
 ##############################################################################
 Given (Surrouned Expressions):
   Some text here  sin(43).5    Some text here 
@@ -10,10 +37,9 @@ Given (Surrouned Expressions):
   Some text here  1/2         Some text also here
   Some text here  .5/2         Some text also here
   Some text here  pow(2,8)    Some text also here
-
 Before:
   let g:crunchMode=""
-Do (Append result to surrouned expression):
+Do (Test :CrunchDev append result to surrouned expression):
   fs\<C-V>9j11l:CrunchDev\<CR>
 Expect:
   Some text here  sin(43).5 = -0.415887 Some text here 
@@ -26,7 +52,6 @@ Expect:
   Some text here  1/2 = 0.5            Some text also here
   Some text here  .5/2 = 0.25           Some text also here
   Some text here  pow(2,8) = 256       Some text also here
-
 ##############################################################################
 Given (Surrouned Expressions):
   Some text here  sin(43).5    Some text here 
@@ -39,11 +64,9 @@ Given (Surrouned Expressions):
   Some text here  1/2         Some text also here
   Some text here  .5/2         Some text also here
   Some text here  pow(2,8)    Some text also here
-
 Before:
   let g:crunchMode=""
-Do (Replace surrouned expressions with result):
-
+Do (Test :CrunchDev! replace surrouned expressions with result):
   fs\<C-V>9j11l:CrunchDev!\<CR>
 Expect:
   Some text here  -0.415887 Some text here 
@@ -56,9 +79,8 @@ Expect:
   Some text here  0.5      Some text also here
   Some text here  0.25      Some text also here
   Some text here  256      Some text also here
-
 ##############################################################################
-Given (Expression between spaces):
+Given (Expressions between spaces):
   sin(43).5
   cos(0)cos(0)
   
@@ -75,7 +97,7 @@ Given (Expression between spaces):
   pow(2,8)
 Before:
   let g:crunchMode="V"
-Do (Evaluate all expressions and append the result):
+Do (Test :CrunchDev and evaluate all expressions appending the result):
   VG:CrunchDev\<CR>
 Expect:
   sin(43).5 = -0.415887
@@ -92,7 +114,6 @@ Expect:
   
   .5/2 = 0.25
   pow(2,8) = 256
-
 ##############################################################################
 Given (Expressions between spaces):
   sin(43).5 = -0.415887
@@ -111,7 +132,7 @@ Given (Expressions between spaces):
   pow(2,8) = 256
 Before:
   let g:crunchMode=""
-Do (Evaluate all expressions replacing them with their result):
+Do (Test CrunchDev! and evaluate all expressions replacing them with their result):
   VG:CrunchDev!\<CR>
 Expect:
   -0.415887
