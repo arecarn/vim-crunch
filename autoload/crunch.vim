@@ -146,6 +146,35 @@ function! crunch#EvalPar(args)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#Visual()                                                     {{{2
+"Takes string or mathematical expressions delimited by new lines 
+"evaluates "each line individually and saving variables when they occur
+"Finally, pasting over the selection or range
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#Visual(exprs)
+    call crunch#debug#PrintHeader('Inizilation')
+
+    let exprList = split(a:exprs, '\n', 1)
+    call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
+
+    for i in range(len(exprList))
+        call s:CaptureVariable(exprList[i])
+        if s:ValidLine(exprList[i]) == 0 | continue | endif
+        let exprList[i] = s:RemoveOldResult(exprList[i])
+        let origExpr = exprList[i]
+        let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
+        let result = crunch#core(exprList[i])
+        let exprList[i] = s:BuildResult(origExpr, result)
+        call s:CaptureVariable(exprList[i])
+    endfor
+    call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
+    let exprLines = join(exprList, "\n")
+    call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
+    call s:OverWriteVisualSelection(exprLines)
+    let s:CapturedVariables = {}
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 "crunch#Dev()                                                             {{{2
 "The top level function that handles arguments and user input
 "TODO: elaborate
@@ -225,35 +254,6 @@ endfunction
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#Visual()                                                     {{{2
-"Takes string or mathematical expressions delimited by new lines 
-"evaluates "each line individually and saving variables when they occur
-"Finally, pasting over the selection or range
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#Visual(exprs)
-    call crunch#debug#PrintHeader('Inizilation')
-
-    let exprList = split(a:exprs, '\n', 1)
-    call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
-
-    for i in range(len(exprList))
-        call s:CaptureVariable(exprList[i])
-        if s:ValidLine(exprList[i]) == 0 | continue | endif
-        let exprList[i] = s:RemoveOldResult(exprList[i])
-        let origExpr = exprList[i]
-        let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
-        let result = crunch#core(exprList[i])
-        let exprList[i] = s:BuildResult(origExpr, result)
-        call s:CaptureVariable(exprList[i])
-    endfor
-    call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
-    let exprLines = join(exprList, "\n")
-    call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
-    call s:OverWriteVisualSelection(exprLines)
-    let s:CapturedVariables = {}
-endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 " INITILAZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
