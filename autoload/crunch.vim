@@ -111,17 +111,6 @@ function! crunch#Main(args) range
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"crunch#core()                                                            {{{2
-" The core functionality of crunch 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#core(expression)
-    let expr = s:FixMultiplication(a:expression)
-    let expr = s:IntegerToFloat(expr)
-    let expr = s:AddLeadingZero(expr)
-    return s:EvalMath(expr)
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#EvalLine()                                                        {{{2
 " evaluates a line in a buffer, allowing for prefixes and suffixes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -178,6 +167,18 @@ function! crunch#Dev(count, firstLine, lastLine, input, bang)
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"crunch#core()                                                            {{{2
+" The core functionality of crunch 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#core(expression)
+    let expr = s:FixMultiplication(a:expression)
+    let expr = s:IntegerToFloat(expr)
+    let expr = s:AddLeadingZero(expr)
+    return s:EvalMath(expr)
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+
 " s:HandleArgss()                                                          {{{2
 " test if there is an arg in the correct form.
 " return the arg if it's valid otherwise an empty string is returned
