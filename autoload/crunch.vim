@@ -169,7 +169,7 @@ function! crunch#Dev(count, firstLine, lastLine, input, bang)
         let expr = s:GetRange(a:count, a:firstLine, a:lastLine)
         if expr == ''
             call crunch#Crunch(expr)
-        elseif g:crunchMode == "V"
+        elseif g:crunchMode == "\C\vV"
             execute a:firstLine.','.a:lastLine.'call crunch#EvalLine()'
         else
             call crunch#Visual(expr)
@@ -308,7 +308,7 @@ function! s:GetRange(count, firstLine, lastLine)
     if a:count == 0 "no range given extract from command call
         let result = ''
     else "range was given
-        if g:crunchMode  =~ '\vV|v|'
+        if g:crunchMode  =~ '\v\CV|v|'
             let result = s:GetVisualSelection()
             call crunch#debug#PrintVarMsg(result,'visual range')
         else 
@@ -337,7 +337,7 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:OverWriteVisualSelection(input)
     let a_save = @a
-    if g:crunchMode  =~ '\vV|v|'
+    if g:crunchMode  =~ '\C\vV|v|'
         call setreg('a', a:input, g:crunchMode)
     else
         call setreg('a', a:input, 'b')
