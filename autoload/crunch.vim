@@ -775,4 +775,78 @@ endfunction
 let &cpo = save_cpo
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+
+"{{{ Range
+let s:Range = { 'type' : "", 'range' : "", 'firstLine' : 0, 'lastLine' : 0 }
+
+"public
+function s:Range.setType(count, firstLine, lastLine) dict
+    if a:count == 0 "no range given
+        let self.type = "none"
+    else "range was given
+        if g:crunchMode =~ '\v\Cv|'
+            let self.type = "selection"
+        else "line wise mark, %, or visual line range given
+            let self.type = "lines"
+            let self.firstLine = a:firstLine
+            let self.lastLine = a:lastLine
+        endif
+    endif
+endfunction
+
+"public
+function s:Range.getType() dict
+    return self.type
+endfunction
+
+
+"public
+function s:Range.capture() dict
+    if self.type == "selection"
+        let self.range = self.getSelection()
+    elseif self.type == "lines"
+        let self.range = self.getLines()
+    else
+        call s:Throw("Invalid value for s:Range.type")
+    endif
+endfunction
+
+"public
+function s:Range.overWrite(rangeToPut) dict
+    call crunch#debug#PrintHeader('Range.overWrite')
+    let a_save = @a
+    
+    call crunch#debug#PrintVarMsg("pasting as", self.type)
+    call crunch#debug#PrintVarMsg("pasting", a:rangeToPut)
+    if self.type == "selection"
+        call setreg('a', a:rangeToPut, g:crunchMode)
+        normal! gv"ap
+    elseif self.type == "lines"
+        call setline(self.firstLine, split(a:rangeToPut, "\n"))
+        call setline(self.firstLine, split(a:rangeToPut, "\n"))
+    else
+        call s:Throw("Invalid value for s:Range.type call s:Range.setType first")
+    endif
+
+    let @a = a_save
+endfunction
+
+"private helper
+function s:Range.getLines() dict
+    return join(getline(self.firstLine, self.lastLine), "\n")
+endfunction
+
+"private helper
+function s:Range.getSelection() dict
+    try
+        let a_save = getreg('a')
+        normal! gv"ay
+        return @a
+    finally
+        call setreg('a', a_save)
+    endtry
+endfunction
+
+"}}}
+
 " vim:foldmethod=marker
