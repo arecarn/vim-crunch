@@ -6,7 +6,7 @@ Given:
    4 tablespoons chili seasoning mix
    1 (15 ounce) can light red kidney beans
    1 (15 ounce) can dark red kidney beans
-Do ():
+Execute ():
   jjviW
 Execute (variables):
   CrunchDev!
@@ -21,7 +21,7 @@ Expect:
 ##############################################################################
 Given: 
   5*5/366
-Execute (variables):
+Execute:
   %CrunchDev
 Expect:
   5*5/366 = 0.068306
@@ -37,7 +37,7 @@ Given (Surrouned Expressions):
   Some text here  1/2         Some text also here
   Some text here  .5/2         Some text also here
   Some text here  pow(2,8)    Some text also here
-Before:
+Execute:
   let g:crunchMode=""
 Do (Test :CrunchDev append result to surrouned expression):
   fs\<C-V>9j11l:CrunchDev\<CR>
@@ -64,7 +64,7 @@ Given (Surrouned Expressions):
   Some text here  1/2         Some text also here
   Some text here  .5/2         Some text also here
   Some text here  pow(2,8)    Some text also here
-Before:
+Execute:
   let g:crunchMode=""
 Do (Test :CrunchDev! replace surrouned expressions with result):
   fs\<C-V>9j11l:CrunchDev!\<CR>
@@ -95,7 +95,7 @@ Given (Expressions between spaces):
   
   .5/2
   pow(2,8)
-Before:
+Execute:
   let g:crunchMode="V"
 Do (Test :CrunchDev and evaluate all expressions appending the result):
   VG:CrunchDev\<CR>
@@ -130,7 +130,7 @@ Given (Expressions between spaces):
   
   .5/2 = 0.25
   pow(2,8) = 256
-Before:
+Execute:
   let g:crunchMode=""
 Do (Test CrunchDev! and evaluate all expressions replacing them with their result):
   VG:CrunchDev!\<CR>
