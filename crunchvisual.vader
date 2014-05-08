@@ -28,6 +28,17 @@ Do:
 Expect:
   5*5/366 = 0.068306
 ##############################################################################
+Given: 
+  5*5/366
+  5*5/366
+Execute:
+  let g:crunchMode="n"
+Do:
+  :.,$CrunchDev\<CR>
+Expect:
+  5*5/366 = 0.068306
+  5*5/366 = 0.068306
+##############################################################################
 Given (Surrouned Expressions):
   Some text here  sin(43).5    Some text here 
   Some text here  cos(0)cos(0) Some text also here
