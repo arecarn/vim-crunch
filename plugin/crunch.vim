@@ -14,6 +14,7 @@ endif
 
 
 let g:loaded_crunch = 1
+let g:crunchMode = 'n'
 
 augroup crunchMode
     autocmd!
