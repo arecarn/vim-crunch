@@ -79,17 +79,22 @@ function! crunch#Crunch(input)
         if s:ValidLine(expr) == 0 | return | endif
         let result = crunch#core(expr)
 
-        echo expr
-        echo "= ".result
-        echo "Yanked Result"
-        "yank the result into the correct register
-        if &cb == 'unnamed'
-            let @* = result
-        elseif &cb == 'unnamedplus'
-            let @+ = result
-        else
-            let @" = result
-        endif
+        echo expr." = ".result
+
+        if has('clipboard')
+            echo "Yanked Result"
+            "yank the result into the correct register
+            if match(&clipboard, '\C\vunnamed') != -1
+                call setreg('*', result, 'c')
+            endif 
+            if match(&clipboard, '\C\vunnamedplus') != -1
+                call setreg('+', result, 'c')
+            endif 
+            if match(&clipboard, '\C\vunnamedplus|unamed') == -1
+                call setreg('"', result, 'c')
+            endif
+    endif
+
     catch /Crunch error: /
         call s:EchoError(v:exception)
     endtry
