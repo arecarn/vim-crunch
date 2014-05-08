@@ -167,31 +167,38 @@ function! crunch#Visual(exprs)
         let exprList[i] = s:BuildResult(origExpr, result)
         call s:CaptureVariable(exprList[i])
     endfor
-    call crunch#debug#PrintMsg(string(exprList).'= the eprLinesList')
+    call crunch#debug#PrintMsg(string(exprList).'= the exprLinesList')
     let exprLines = join(exprList, "\n")
-    call crunch#debug#PrintMsg(string(exprLines).'= the eprLines')
-    call s:OverWriteVisualSelection(exprLines)
+    call crunch#debug#PrintMsg(string(exprLines).'= the exprLines')
+    " call s:OverWriteVisualSelection(exprLines)
+    call s:Range.overWrite(exprLines)
     let s:CapturedVariables = {}
 endfunction
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "crunch#Dev()                                                             {{{2
 "The top level function that handles arguments and user input
 "TODO: elaborate
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#Dev(count, firstLine, lastLine, input, bang)
-    let expr  = s:HandleArgss(a:input, a:bang)
-    if expr != ''
-        call crunch#Crunch(expr)
-    else
-        let expr = s:GetRange(a:count, a:firstLine, a:lastLine)
-        if expr == ''
-            call crunch#Crunch(expr)
-        elseif g:crunchMode == "\C\vV"
-            execute a:firstLine.','.a:lastLine.'call crunch#EvalLine()'
+function! crunch#Dev(count, firstLine, lastLine, cmdInput, bang)
+    let cmdInputExpr  = s:HandleCmdInput(a:cmdInput, a:bang)
+
+    if cmdInputExpr != '' "an expression was passed in
+        call crunch#Crunch(cmdInputExpr) " TODO only call this once if possible 03 May 2014
+    else " no command was passed in
+        " let range = s:GetSelectionOrLines(a:count, a:firstLine, a:lastLine)
+        
+        call s:Range.setType(a:count, a:firstLine, a:lastLine)
+        call s:Range.capture()
+
+        if s:Range.range == '' "no lines or Selection was returned
+            call crunch#Crunch(s:Range.range)
+        " elseif g:crunchMode == "\C\vV"
+            " execute a:firstLine.','.a:lastLine.'call crunch#EvalLine()'
         else
-            call crunch#Visual(expr)
+            call crunch#Visual(s:Range.range)
         endif
+
     endif
 endfunction
 
@@ -205,79 +212,15 @@ function! crunch#core(expression)
     let expr = s:AddLeadingZero(expr)
     return s:EvalMath(expr)
 endfunction
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-
-" s:HandleArgss()                                                          {{{2
-" test if there is an arg in the correct form.
-" return the arg if it's valid otherwise an empty string is returned
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:HandleArgss(input, bang)
-    call crunch#debug#PrintHeader('Handle Args')
-    call crunch#debug#PrintVarMsg(a:input,'the input')
-
-    if a:bang == '!'
-        let s:bang = a:bang
-    else
-        let s:bang = ''
-    endif
-
-    let options = split(matchstr(a:input, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
-    let expr = substitute(a:input, '\v\s*(-\a+\s+)+', '', 'g')
-
-    call crunch#debug#PrintVarMsg(string(options),'the options')
-    call crunch#debug#PrintVarMsg(expr,'the commandline expr')
-
-    call s:SetOptions(options)
-
-    return expr
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:SetOptions()                                                          {{{2
-" 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:SetOptions(input)
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:GetValidArg()                                                          {{{2
-" TODO is this function even needed?
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:GetValidArg(input)
-    call crunch#debug#PrintHeader('Get Valid Arguments')
-    let arg = matchstr( a:input, '\C\v^\s*-\zs\a+\ze(\s+|$)')
-    call crunch#debug#PrintMsg('The search engine name is =['.arg.']')
-    return arg
-endfunction
-
-
-
+"INPUT
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 
 " INITILAZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"s:HandleArgs()                                                           {{{2
-"Interpret arguments to set flags accordingly
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:HandleArgs(args, fline, lline)
-    call crunch#debug#PrintHeader('Handle Arguments Debug')
-    call crunch#debug#PrintMsg('['.a:args.']= the arguments')
-
-    if a:args !=# ''
-        let  s:firstline = a:fline
-        let  s:lastline  = a:lline
-        if a:args ==# '-exclusive' || a:args ==# '-exc'
-            call crunch#debug#PrintMsg('Exclusive set')
-            let s:isExclusive = 1
-        else
-            call s:EchoError(s:ErrorTag ."'".a:args."' is not a valid argument")
-        endif
-    endif
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:CrunchInit()                                                           {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "Gets the expression from current line, builds the suffix/prefix regex if
 "need, and  removes the suffix and prefix from the expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -307,17 +250,17 @@ endfunction
 function! s:GetRange(count, firstLine, lastLine)
     call crunch#debug#PrintHeader('Get Range')
     if a:count == 0 "no range given extract from command call
-        let result = ''
-    else "range was given
-        if g:crunchMode  =~ '\v\CV|v|'
-            let result = s:GetVisualSelection()
-            call crunch#debug#PrintVarMsg(result,'visual range')
-        else 
-            let result = join(getline(a:firstLine, a:lastLine), "\n") " search the range instead
-            call crunch#debug#PrintVarMsg(result,'range')
+        let range = ''
+    else "visual range was given
+        if g:crunchMode  =~ '\v\Cv||V'
+            let range = s:GetVisualSelection()
+            call crunch#debug#PrintVarMsg(range,'visual range')
+        else "mark range was given or % 
+            let range = join(getline(a:firstLine, a:lastLine), "\n") " search the range instead
+            call crunch#debug#PrintVarMsg(range,'range')
         endif
     endif
-    return result
+    return range
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -334,19 +277,72 @@ function! s:GetVisualSelection()
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-" s:OverWriteVisualSelection()                                            {{{2
+" s:HandleCmdInput()                                                          {{{2
+" test if there is an arg in the correct form.
+" return the arg if it's valid otherwise an empty string is returned
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:OverWriteVisualSelection(input)
-    let a_save = @a
-    if g:crunchMode  =~ '\C\vV|v|'
-        call setreg('a', a:input, g:crunchMode)
+function! s:HandleCmdInput(cmdInput, bang)
+    call crunch#debug#PrintHeader('Handle Args')
+    call crunch#debug#PrintVarMsg(a:cmdInput,'the cmdInput')
+
+    " was there a bang after the command?
+    if a:bang == '!'
+        let s:bang = a:bang
     else
-        call setreg('a', a:input, 'b')
-    endif 
-    normal! gv"ap
-    let @a = a_save
+        let s:bang = ''
+    endif
+
+    " find command switches in the expression and extract them into a list 
+    let options = split(matchstr(a:cmdInput, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
+    call crunch#debug#PrintVarMsg(string(options),'the options')
+
+    " remove the command switches from the cmdInput
+    let expr = substitute(a:cmdInput, '\v\s*(-\a+\s+)+', '', 'g')
+    call crunch#debug#PrintVarMsg(expr,'the commandline expr')
+
+    call s:SetOptions(options)
+
+    return expr
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:HandleArgs()                                                           {{{2
+"Interpret arguments to set flags accordingly
+"TODO Remove me, I'm not sure this is still used 03 May 2014
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:HandleArgs(args, fline, lline)
+    call crunch#debug#PrintHeader('Handle Arguments Debug')
+    call crunch#debug#PrintMsg('['.a:args.']= the arguments')
+
+    if a:args !=# ''
+        let  s:firstline = a:fline
+        let  s:lastline  = a:lline
+        if a:args ==# '-exclusive' || a:args ==# '-exc'
+            call crunch#debug#PrintMsg('Exclusive set')
+            let s:isExclusive = 1
+        else
+            call s:EchoError(s:ErrorTag ."'".a:args."' is not a valid argument")
+        endif
+    endif
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:SetOptions()                                                          {{{2
+" 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:SetOptions(input)
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:GetValidArg()                                                          {{{2
+" TODO is this function even needed?
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:GetValidArg(input)
+    call crunch#debug#PrintHeader('Get Valid Arguments')
+    let arg = matchstr( a:input, '\C\v^\s*-\zs\a+\ze(\s+|$)')
+    call crunch#debug#PrintMsg('The search engine name is =['.arg.']')
+    return arg
+endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 "FORMAT EXPRESSION{{{
@@ -608,6 +604,20 @@ function! s:AddLeadingZero(expr)
     return expr
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+" s:OverWriteVisualSelection()                                            {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:OverWriteVisualSelection(input)
+    "TODO handle ranges with marks and "%" 03 May 2014
+    let a_save = @a
+    if g:crunchMode  =~ '\C\vV|v|'
+        call setreg('a', a:input, g:crunchMode)
+    else
+        call setreg('a', a:input, 'V')
+    endif 
+    normal! gv"ap
+    let @a = a_save
+endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 "PREFIX/SUFFIX {{{
@@ -769,8 +779,9 @@ function!  s:Throw(errorBody) abort
     let ErrorMsg = s:ErrorTag.a:errorBody
     throw ErrorMsg
 endfunction
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-"Restore settings                                                          {{{
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
+
+"Restore settings{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let &cpo = save_cpo
 
@@ -822,7 +833,6 @@ function s:Range.overWrite(rangeToPut) dict
         call setreg('a', a:rangeToPut, g:crunchMode)
         normal! gv"ap
     elseif self.type == "lines"
-        call setline(self.firstLine, split(a:rangeToPut, "\n"))
         call setline(self.firstLine, split(a:rangeToPut, "\n"))
     else
         call s:Throw("Invalid value for s:Range.type call s:Range.setType first")
