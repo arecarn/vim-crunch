@@ -1,19 +1,19 @@
 Given: 
    Chillie
    1/2 teaspoon garlic salt
-   8*(2*1/2) cups tomato sauce
+   8*(2+1/2) cups tomato sauce
    1 (8 ounce) jar salsa
    4 tablespoons chili seasoning mix
    1 (15 ounce) can light red kidney beans
    1 (15 ounce) can dark red kidney beans
 Execute ():
-  jjviW
-Execute (variables):
-  CrunchDev!
+  let g:crunchMode="v"
+Do (Test :CrunchDev append result to surrouned expression):
+  jjviW:CrunchDev!\<CR>
 Expect:
    Chillie
    1/2 teaspoon garlic salt
-   8*(2+1/2)  cups tomato sauce
+   20 cups tomato sauce
    1 (8 ounce) jar salsa
    4 tablespoons chili seasoning mix
    1 (15 ounce) can light red kidney beans
@@ -22,7 +22,9 @@ Expect:
 Given: 
   5*5/366
 Execute:
-  %CrunchDev
+  let g:crunchMode="n"
+Do:
+  :%CrunchDev\<CR>
 Expect:
   5*5/366 = 0.068306
 ##############################################################################
