@@ -21,8 +21,14 @@ if !exists("g:crunch_calc_comment")
 endif
 
 let s:capturedVariables = {} 
-let s:numPat = '\v[-+]?%(\.\d+|\d+%([.]\d+)?%([eE][+-]?\d+)?)'
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
+
+"Number Regex Patterns
+let sign = '\v[-+]?'
+let number = '\v\.\d+|\d+%([.]\d+)?'
+let eNotation = '\v%([eE][+-]?\d+)?'
+let s:numPat = sign . '%(' . number . eNotation . ')' 
+
 let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
 
