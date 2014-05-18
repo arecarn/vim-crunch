@@ -20,7 +20,7 @@ if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 
-let s:capturedVariables = {} 
+let s:variables = {} 
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 
 "Number Regex Patterns
@@ -74,7 +74,7 @@ function! crunch#Crunch(input)
             if match(&clipboard, '\C\vunnamedplus|unamed') == -1
                 call setreg('"', result, 'c')
             endif
-    endif
+        endif
 
     catch /Crunch error: /
         call s:EchoError(v:exception)
@@ -160,7 +160,7 @@ function! crunch#Visual(exprs)
     call crunch#debug#PrintMsg(string(exprLines).'= the exprLines')
     " call s:OverWriteVisualSelection(exprLines)
     call s:Range.overWrite(exprLines)
-    let s:CapturedVariables = {}
+    let s:variables = {}
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -469,8 +469,8 @@ function! s:CaptureVariable(expr)
     call crunch#debug#PrintVarMsg(VarValue, 'the value of the variable')
 
     if VarName != ''  && VarValue != ''
-        let s:capturedVariables[VarName] = VarValue
-        call crunch#debug#PrintVarMsg(string(s:capturedVariables), 'captured variables')
+        let s:variables[VarName] = VarValue
+        call crunch#debug#PrintVarMsg(string(s:variables), 'captured variables')
     endif
 
 endfunction
@@ -514,10 +514,10 @@ function! s:ReplaceCapturedVariable(expr)
     let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
     call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
 
+    let variable_regex = '\v('.s:validVariable .'\v)\ze([^(a-zA-Z0-9_]|$)'
     " replace variable with it's value
-    let expr = substitute( expr, '\v('.s:validVariable.
-                \'\v)\ze([^(a-zA-Z0-9_]|$)',
-                \ '\=s:capturedVariables[submatch(1)]', 'g' )
+    let expr = substitute(expr, variable_regex, 
+                \ '\=s:variables[submatch(1)]', 'g' )
 
     call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
