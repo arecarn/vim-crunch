@@ -162,3 +162,18 @@ Expect:
   
   0.25
   256
+##############################################################################
+Given (Expressions between spaces):
+  5e-3 * 2
+  5.0e-3.0 * 2
+  5e3 * 2
+  5.0e3.0 * 2
+Execute:
+  let g:crunchMode="V"
+Do (Test CrunchDev! and evaluate all expressions replacing them with their result):
+  VG:CrunchDev!\<CR>
+Expect:
+  0.01
+  0.01
+  10000
+  10000

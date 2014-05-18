@@ -148,7 +148,9 @@ function! crunch#Visual(exprs)
         if s:ValidLine(exprList[i]) == 0 | continue | endif
         let exprList[i] = s:RemoveOldResult(exprList[i])
         let origExpr = exprList[i]
+        let exprList[i] = s:MarkENotation(exprList[i])
         let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
+        let exprList[i] = s:UnmarkENotation(exprList[i])
         let result = crunch#core(exprList[i])
         let exprList[i] = s:BuildResult(origExpr, result)
         call s:CaptureVariable(exprList[i])
@@ -173,7 +175,7 @@ function! crunch#Dev(count, firstLine, lastLine, cmdInput, bang)
         call crunch#Crunch(cmdInputExpr) " TODO only call this once if possible 03 May 2014
     else " no command was passed in
         " let range = s:GetSelectionOrLines(a:count, a:firstLine, a:lastLine)
-        
+
         call s:Range.setType(a:count, a:firstLine, a:lastLine)
         call s:Range.capture()
 
@@ -420,10 +422,32 @@ function! s:IntegerToFloat(expr)
     call crunch#debug#PrintHeader('Integer to Float')
     call crunch#debug#PrintMsg('['.a:expr.']= before int to float conversion')
     let expr = a:expr 
-    let expr = substitute(expr,'\(^\|[^.0-9^eE]\)\zs\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
+    let expr = substitute(expr,'\(^\|[^.0-9]\)\zs\([eE]-\?\)\@<!\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
     call crunch#debug#PrintMsg('['.expr.']= after int to float conversion')
     return expr
 endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
+
+" E Notation {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:MarkENotation(expr) "{{{2
+    let expr = a:expr
+    let number = '\v(\.\d+|\d+([.]\d+)?)\zs[eE]\ze[+-]?\d+'
+    let expr = substitute(expr, number, '#', 'g')
+    return expr
+endfunction 
+
+" 5#3
+" 5#-3
+function! s:UnmarkENotation(expr)
+    let expr = a:expr
+    call crunch#debug#PrintVarMsg(expr, 'before Unmarking E notation')
+    "put back the e and remove the following ".0"
+    let expr = substitute(expr, '\v#([-]?\d+)(\.0)?', 'e\1', 'g')
+    call crunch#debug#PrintVarMsg(expr, 'after Unmarking E notation')
+    return expr
+endfunction!
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
