@@ -144,7 +144,7 @@ Given (Expressions between spaces):
   .5/2 = 0.25
   pow(2,8) = 256
 Execute:
-  let g:crunchMode=""
+  let g:crunchMode="V"
 Do (Test CrunchDev! and evaluate all expressions replacing them with their result):
   VG:CrunchDev!\<CR>
 Expect:
