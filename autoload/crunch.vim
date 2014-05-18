@@ -31,40 +31,15 @@ let s:numPat = sign . '%(' . number . eNotation . ')'
 
 let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
+let s:bang = ''
 
 let g:crunch_debug = 0
-
-" mutually exclusive
-" defualt vim
-let g:crunch_eval_type_python = 0
-let g:crunch_eval_type_vim    = 1
-let g:crunch_eval_type_bc     = 0
-let g:crunch_eval_type_octave = 0
-
-"mutually exclusive
 
 "default is append
 if !exists("g:crunch_result_type_append")
     let g:crunch_result_type_append  = 1
 endif
 
-"given a dummy value on each evaluation this value is reinitialized
-let s:bang = ''
-
-
-"only apply to vim & python
-"default to on
-" let s:option.float             = 1
-
-" let s:option.sum             = 0
-" let s:option.max             = 0
-" let s:option.min             = 0
-" let s:option.range           = 0
-" let s:option.median          = 0
-" let s:option.avg             = 0
-" let s:option.mode            = 0
-" let s:option.mean            = 0
-"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "MAIN FUNCTIONS{{{
@@ -204,8 +179,6 @@ function! crunch#Dev(count, firstLine, lastLine, cmdInput, bang)
 
         if s:Range.range == '' "no lines or Selection was returned
             call crunch#Crunch(s:Range.range)
-        " elseif g:crunchMode == "\C\vV"
-            " execute a:firstLine.','.a:lastLine.'call crunch#EvalLine()'
         else
             call crunch#Visual(s:Range.range)
         endif
@@ -837,7 +810,7 @@ endfunction
 function s:Range.overWrite(rangeToPut) dict
     call crunch#debug#PrintHeader('Range.overWrite')
     let a_save = @a
-    
+
     call crunch#debug#PrintVarMsg("pasting as", self.type)
     call crunch#debug#PrintVarMsg("pasting", a:rangeToPut)
     if self.type == "selection"
