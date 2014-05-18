@@ -469,7 +469,7 @@ function! s:CaptureVariable(expr)
     call crunch#debug#PrintVarMsg(VarValue, 'the value of the variable')
 
     if VarName != ''  && VarValue != ''
-        let s:variables[VarName] = VarValue
+        let s:variables[VarName] = '('.VarValue.')'
         call crunch#debug#PrintVarMsg(string(s:variables), 'captured variables')
     endif
 
