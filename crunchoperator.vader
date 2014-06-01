@@ -1,0 +1,37 @@
+Given: 
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi
+  volume = pow(radius,3)*pi*4/3
+Do (Test Operator: inner paragraph):
+  g=ip
+Expect:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given: 
+    5*5
+Do (Test Operator: single line):
+  g==
+Expect:
+    5*5 = 25
+##############################################################################
+Given: 
+    5*5
+Do (Test Operator: inner word):
+  g=iW
+Expect:
+    5*5 = 25
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+Do ():
+  g=ip
+Expect:
+  x = 5*5 = 25
+  x*5 = 125

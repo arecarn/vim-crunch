@@ -152,15 +152,13 @@ function! crunch#Visual(exprs)
         let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
         let exprList[i] = s:UnmarkENotation(exprList[i])
         let result = crunch#core(exprList[i])
-        let exprList[i] = s:BuildResult(origExpr, result)
-        call s:CaptureVariable(exprList[i])
+        let exprList[i] = s:BuildResult(origExpr, result) 
     endfor
     call crunch#debug#PrintMsg(string(exprList).'= the exprLinesList')
     let exprLines = join(exprList, "\n")
     call crunch#debug#PrintMsg(string(exprLines).'= the exprLines')
-    " call s:OverWriteVisualSelection(exprLines)
-    call s:Range.overWrite(exprLines)
     let s:variables = {}
+    return exprLines
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -172,7 +170,8 @@ function! crunch#Dev(count, firstLine, lastLine, cmdInput, bang)
     let cmdInputExpr  = s:HandleCmdInput(a:cmdInput, a:bang)
 
     if cmdInputExpr != '' "an expression was passed in
-        call crunch#Crunch(cmdInputExpr) " TODO only call this once if possible 03 May 2014
+        " TODO only call this once if possible 03 May 2014
+        call crunch#Crunch(cmdInputExpr) 
     else " no command was passed in
         " let range = s:GetSelectionOrLines(a:count, a:firstLine, a:lastLine)
 
@@ -182,10 +181,10 @@ function! crunch#Dev(count, firstLine, lastLine, cmdInput, bang)
         if s:Range.range == '' "no lines or Selection was returned
             call crunch#Crunch(s:Range.range)
         else
-            call crunch#Visual(s:Range.range)
+            call s:Range.overWrite(crunch#Visual(s:Range.range))
         endif
-
     endif
+    let s:bang = '' "TODO refactor
 endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -272,11 +271,7 @@ function! s:HandleCmdInput(cmdInput, bang)
     call crunch#debug#PrintVarMsg(a:cmdInput,'the cmdInput')
 
     " was there a bang after the command?
-    if a:bang == '!'
-        let s:bang = a:bang
-    else
-        let s:bang = ''
-    endif
+    let s:bang = a:bang
 
     " find command switches in the expression and extract them into a list 
     let options = split(matchstr(a:cmdInput, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
@@ -429,7 +424,7 @@ endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
-" E Notation {{{
+" E NOTATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:MarkENotation(expr) "{{{2
     let expr = a:expr
@@ -581,21 +576,16 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:BuildResult(expr, result)
 
-    if s:bang == '!'
-        if g:crunch_result_type_append  == 1
-            let output = a:result
-        else 
-            let output = a:expr .' = '. a:result
-        endif 
-    else
-        if g:crunch_result_type_append  == 1
-            let output = a:expr .' = '. a:result
-        else 
-            let output = a:result
-        endif 
-    endif
+    let output = a:expr .' = '. a:result
 
-    "TODO: insert statistical expression
+    " capture variable results if they exists TODO refactor
+    call s:CaptureVariable(output) 
+
+    " bang isn't used and type is not append result
+    if (s:bang == '!' && g:crunch_result_type_append) 
+                \|| (s:bang == '' && !g:crunch_result_type_append) 
+        let output = a:result
+    endif
     return output
 endfunction
 
@@ -789,7 +779,7 @@ function!  s:Throw(errorBody) abort
 endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
-"Restore settings{{{
+"RESTORE SETTINGS{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let &cpo = save_cpo
 

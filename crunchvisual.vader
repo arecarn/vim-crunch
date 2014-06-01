@@ -1,3 +1,4 @@
+##############################################################################
 Given: 
    Chillie
    1/2 teaspoon garlic salt
@@ -177,3 +178,25 @@ Expect:
   0.01
   10000
   10000
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+Execute:
+  let g:crunchMode="V"
+Do ():
+  VG:CrunchDev\<CR>
+Expect:
+  x = 5*5 = 25
+  x*5 = 125
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+Execute:
+  let g:crunchMode="V"
+Do (test that variables are captured even after):
+  VG:CrunchDev!\<CR>
+Expect:
+  25
+  125
