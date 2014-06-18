@@ -35,3 +35,51 @@ Do ():
 Expect:
   x = 5*5 = 25
   x*5 = 125
+##############################################################################
+Given ():
+  x = 100
+
+  x = 5*5
+  x*5
+Do ():
+  jjg=ip
+Expect:
+  x = 100
+
+  x = 5*5 = 25
+  x*5 = 125
+##############################################################################
+Given ():
+  x = 100
+  x = 5*5
+  x*5
+Do ():
+  g=ip
+Expect:
+  x = 100
+  x = 5*5 = 25
+  x*5 = 125
+
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+
+  x = 100
+Do ():
+  g=ip
+Expect:
+  x = 5*5 = 25
+  x*5 = 125
+
+  x = 100
+
+##############################################################################
+Given ():
+  Lorem ipsum dolor 5*5  sit amet, consectetur.
+  Lorem ipsum dolor 5*5  sit amet, consectetur.
+Do (Test: evaluate surrouned text with operator):
+  f5\<C-V>iWjg=
+Expect:
+  Lorem ipsum dolor 5*5 = 25  sit amet, consectetur.
+  Lorem ipsum dolor 5*5 = 25  sit amet, consectetur.

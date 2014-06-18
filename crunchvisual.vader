@@ -56,16 +56,16 @@ Execute:
 Do (Test :CrunchDev append result to surrouned expression):
   fs\<C-V>9j11l:CrunchDev\<CR>
 Expect:
-  Some text here  sin(43).5 = -0.415887 Some text here 
-  Some text here  cos(0)cos(0) = 1      Some text also here
-  Some text here  2sin(1) = 1.682942     Some text also here
-  Some text here  sin(1)2 = 1.682942     Some text also here
-  Some text here  (2*3)(3*2) = 36       Some text also here
-  Some text here  2(3*2) = 12           Some text also here
-  Some text here  .25*4 = 1            Some text also here
-  Some text here  1/2 = 0.5            Some text also here
-  Some text here  .5/2 = 0.25           Some text also here
-  Some text here  pow(2,8) = 256       Some text also here
+  Some text here  sin(43).5 = -0.415887    Some text here 
+  Some text here  cos(0)cos(0) = 1         Some text also here
+  Some text here  2sin(1) = 1.682942        Some text also here
+  Some text here  sin(1)2 = 1.682942        Some text also here
+  Some text here  (2*3)(3*2) = 36          Some text also here
+  Some text here  2(3*2) = 12              Some text also here
+  Some text here  .25*4 = 1               Some text also here
+  Some text here  1/2 = 0.5               Some text also here
+  Some text here  .5/2 = 0.25              Some text also here
+  Some text here  pow(2,8) = 256          Some text also here
 ##############################################################################
 Given (Surrouned Expressions):
   Some text here  sin(43).5    Some text here 
@@ -83,16 +83,16 @@ Execute:
 Do (Test :CrunchDev! replace surrouned expressions with result):
   fs\<C-V>9j11l:CrunchDev!\<CR>
 Expect:
-  Some text here  -0.415887 Some text here 
-  Some text here  1         Some text also here
-  Some text here  1.682942   Some text also here
-  Some text here  1.682942   Some text also here
-  Some text here  36        Some text also here
-  Some text here  12        Some text also here
-  Some text here  1        Some text also here
-  Some text here  0.5      Some text also here
-  Some text here  0.25      Some text also here
-  Some text here  256      Some text also here
+  Some text here  -0.415887     Some text here 
+  Some text here  1             Some text also here
+  Some text here  1.682942       Some text also here
+  Some text here  1.682942       Some text also here
+  Some text here  36            Some text also here
+  Some text here  12            Some text also here
+  Some text here  1            Some text also here
+  Some text here  0.5          Some text also here
+  Some text here  0.25          Some text also here
+  Some text here  256          Some text also here
 ##############################################################################
 Given (Expressions between spaces):
   sin(43).5

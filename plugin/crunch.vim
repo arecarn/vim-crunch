@@ -61,51 +61,22 @@ noremap <unique> <script> <Plug>CrunchEvalBlockExc <SID>CrunchBlockExc
 noremap <SID>CrunchBlockExc :CrunchBlock -exclusive<CR>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-nmap <silent> g= :set opfunc=<SID>Crunchy<CR>g@
-vmap <silent> g= :<C-U>call <SID>Crunchy(visualmode())<CR>
-nmap <silent> g== :normal! V<CR>:<C-U>call <SID>Crunchy(visualmode())<CR>
+nnoremap <unique> <script> <plug>CrunchOperator <SID>CrunchOperator
+nnoremap <SID>CrunchOperator :set opfunc=crunch#operator<CR>g@
+if !hasmapto('<Plug>CrunchOperator')
+    nmap <unique> g= <Plug>CrunchOperator
+endif
 
+xnoremap <unique> <script> <plug>VisualCrunchOperator  <SID>VisualCrunchOperator
+xnoremap <SID>VisualCrunchOperator :<C-U>call crunch#operator(visualmode())<CR>
+if !hasmapto('<Plug>VisualCrunchOperator')
+    vmap <unique> g= <Plug>VisualCrunchOperator
+endif
 
-function! s:Crunchy(type)
-  " backup settings that we will change
-  let sel_save = &selection
-  let cb_save = &clipboard
-  " make selection and clipboard work the way we need
-  set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
-  " backup the unnamed register, which we will be yanking into
-  let reg_save = @@
-  " yank the relevant text, and also set the visual selection (which will be reused if the text
-  " needs to be replaced)
-  if a:type =~ '^\d\+$'
-    " if type is a number, then select that many lines
-    silent exe 'normal! V'.a:type.'$y'
-  elseif a:type =~ '^.$'
-    " if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
-    silent exe "normal! `<" . a:type . "`>y"
-  elseif a:type == 'line'
-    " line-based text motion
-    silent exe "normal! '[V']y"
-  elseif a:type == 'block'
-    " block-based text motion
-    silent exe "normal! `[\<C-V>`]y"
-  else
-    " char-based text motion
-    silent exe "normal! `[v`]y"
-  endif
-  " call the user-defined function, passing it the contents of the unnamed register
-  let repl = crunch#Visual(@@)
-  " if the function returned a value, then replace the text
-  if type(repl) == 1
-    " put the replacement text into the unnamed register, and also set it to be a
-    " characterwise, linewise, or blockwise selection, based upon the selection type of the
-    " yank we did above
-    call setreg('@', repl, getregtype('@'))
-    " relect the visual region and paste
-    normal! gvp
-  endif
-  " restore saved settings and register value
-  let @@ = reg_save
-  let &selection = sel_save
-  let &clipboard = cb_save
-endfunction
+nnoremap <unique> <script> <plug>LineCrunchOperator <SID>LineCrunchOperator
+nnoremap <SID>LineCrunchOperator :normal! V<CR>:<C-U>call crunch#operator(visualmode())<CR>
+if !hasmapto('<Plug>LineCrunchOperator')
+    nmap <unique> g== <Plug>LineCrunchOperator
+endif 
+
 " vim:foldmethod=marker

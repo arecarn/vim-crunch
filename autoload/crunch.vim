@@ -144,14 +144,16 @@ function! crunch#Visual(exprs)
     call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
 
     for i in range(len(exprList))
+        let exprList[i] = s:CrunchInitt(exprList[i])
         call s:CaptureVariable(exprList[i])
         if s:ValidLine(exprList[i]) == 0 | continue | endif
         let exprList[i] = s:RemoveOldResult(exprList[i])
         let origExpr = exprList[i]
         let exprList[i] = s:MarkENotation(exprList[i])
+        let exprList[i] = s:ReplaceVariable2(exprList[i], i)
         let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
         let exprList[i] = s:UnmarkENotation(exprList[i])
-        let result = crunch#core(exprList[i])
+        let result  = crunch#core(exprList[i])
         let exprList[i] = s:BuildResult(origExpr, result) 
     endfor
     call crunch#debug#PrintMsg(string(exprList).'= the exprLinesList')
@@ -197,10 +199,55 @@ function! crunch#core(expression)
     let expr = s:AddLeadingZero(expr)
     return s:EvalMath(expr)
 endfunction
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
-
-"INPUT
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+function! crunch#operator(type) "{{{2
+  " backup settings that we will change
+  let sel_save = &selection
+  let cb_save = &clipboard
+  
+  " make selection and clipboard work the way we need
+  set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
+
+  " backup the unnamed register, which we will be yanking into
+  let reg_save = @@
+
+  " yank the relevant text, and also set the visual selection (which will be reused if the text
+  " needs to be replaced)
+  if a:type =~ '^\d\+$'
+    " if type is a number, then select that many lines
+    silent exe 'normal! V'.a:type.'$y'
+  elseif a:type =~ '^.$'
+    " if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
+    silent exe "normal! `<" . a:type . "`>y"
+  elseif a:type == 'line'
+    " line-based text motion
+    silent exe "normal! `[V`]y"
+  elseif a:type == 'block'
+    " block-based text motion
+    silent exe "normal! `[\<C-V>`]y"
+  else
+    " char-based text motion
+    silent exe "normal! `[v`]y"
+  endif
+
+  let repl = crunch#Visual(@@)
+
+  " if the function returned a value, then replace the text
+  if type(repl) == 1
+    " put the replacement text into the unnamed register, and also set it to be a
+    " characterwise, linewise, or blockwise selection, based upon the selection type of the
+    " yank we did above
+    call setreg('@', repl, getregtype('@'))
+    " reselect the visual region and paste
+    normal! gvp
+  endif
+
+  " restore saved settings and register value
+  let @@ = reg_save
+  let &selection = sel_save
+  let &clipboard = cb_save
+endfunction
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 " INITILAZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -213,6 +260,30 @@ function! s:CrunchInit()
     call crunch#debug#PrintHeader('Crunch Inizilation Debug')
 
     let expr = getline('.')
+
+    if !exists('b:filetype') || &filetype !=# b:filetype
+        let b:filetype = &filetype
+        call crunch#debug#PrintMsg('filetype set, rebuilding prefix/suffix regex')
+        call crunch#debug#PrintMsg('['.&filetype.']= filetype')
+        call s:BuildLinePrefix()
+        call s:BuildLineSuffix()
+    endif
+
+    let s:suffix = matchstr(expr, b:suffixRegex)
+    let s:prefix = matchstr(expr, b:prefixRegex)
+    let expr = s:RemovePrefixNSuffix(expr)
+
+    return expr
+endfunction
+"s:CrunchInit()                                                           {{{2
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"Gets the expression from current line, builds the suffix/prefix regex if
+"need, and  removes the suffix and prefix from the expression
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:CrunchInitt(expr)
+    call crunch#debug#PrintHeader('Crunch Inizilation Debug')
+
+    let expr = a:expr
 
     if !exists('b:filetype') || &filetype !=# b:filetype
         let b:filetype = &filetype
@@ -471,6 +542,30 @@ function! s:CaptureVariable(expr)
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:ReplaceCapturedVariable()                                      {{{2
+"Replaces the variable within an expression with the value of that variable
+"inspired by Ihar Filipau's inline calculator
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:ReplaceCapturedVariable(expr)
+    call crunch#debug#PrintHeader('Replace Captured Variable')
+
+    let expr = a:expr
+    call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
+
+    " strip the variable marker, if any
+    let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
+    call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
+
+    let variable_regex = '\v('.s:validVariable .'\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
+    " replace variable with it's value
+    let expr = substitute(expr, variable_regex, 
+                \ '\=s:variables[submatch(1)]', 'g' )
+
+    call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 "s:ReplaceVariable()                                                      {{{2
 "Replaces the variable within an expression with the value of that variable
 "inspired by Ihar Filipau's inline calculator
@@ -489,30 +584,6 @@ function! s:ReplaceVariable(expr)
     let expr = substitute( expr, '\v('.s:validVariable.
                 \'\v)\ze([^(a-zA-Z0-9_]|$)',
                 \ '\=s:GetVariableValue(submatch(1))', 'g' )
-
-    call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
-    return expr
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
-"s:ReplaceCapturedVariable()                                      {{{2
-"Replaces the variable within an expression with the value of that variable
-"inspired by Ihar Filipau's inline calculator
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:ReplaceCapturedVariable(expr)
-    call crunch#debug#PrintHeader('Replace Captured Variable')
-
-    let expr = a:expr
-    call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
-
-    " strip the variable marker, if any
-    let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
-    call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
-
-    let variable_regex = '\v('.s:validVariable .'\v)\ze([^(a-zA-Z0-9_]|$)'
-    " replace variable with it's value
-    let expr = substitute(expr, variable_regex, 
-                \ '\=s:variables[submatch(1)]', 'g' )
 
     call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
@@ -564,6 +635,49 @@ function! s:GetVariableValue(variable)
     return '('.variableValue.')'
 endfunction
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+
+"s:ReplaceVariable2()                                                      {{{2
+"Replaces the variable within an expression with the value of that variable
+"inspired by Ihar Filipau's inline calculator
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:ReplaceVariable2(expr, num)
+    call crunch#debug#PrintHeader('Replace Variable')
+
+    let expr = a:expr
+    call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
+
+    " strip the variable marker, if any
+    let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
+    call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
+
+    " replace variable with it's value
+    let expr = substitute( expr, '\v('.s:validVariable.
+                \'\v)\ze([^(a-zA-Z0-9_]|$)',
+                \ '\=s:GetVariableValue2(submatch(1), a:num)', 'g' )
+
+    call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
+    return expr
+endfunction
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
+"s:GetVariableValue2()                                                     {{{2
+"Searches for the value of a variable and returns the value assigned to the
+"variable inspired by Ihar Filipau's inline calculator
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:GetVariableValue2(variable, num)
+
+    let sline = search('\v\C^('.b:prefixRegex.')?\V'.a:variable.'\v\s*\=\s*', "bnW", (s:Range.firstLine-a:num ))
+    let line = s:RemovePrefixNSuffix(getline(sline))
+    let variableValue = matchstr(line,'\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$')
+    call crunch#debug#PrintMsg("[" . variableValue . "]= the variable value")
+    if variableValue == ''
+        return a:variable
+    else
+        return '('.variableValue.')'
+    endif
+endfunction
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
 " RESULT HANDLING{{{
@@ -586,7 +700,10 @@ function! s:BuildResult(expr, result)
                 \|| (s:bang == '' && !g:crunch_result_type_append) 
         let output = a:result
     endif
-    return output
+    call crunch#debug#PrintVarMsg(s:prefix,"s:prefix")
+    call crunch#debug#PrintVarMsg(s:suffix,"s:suffix")
+    call crunch#debug#PrintVarMsg(output, "output")
+    return s:prefix.output.s:suffix
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
