@@ -83,3 +83,15 @@ Do (Test: evaluate surrouned text with operator):
 Expect:
   Lorem ipsum dolor 5*5 = 25  sit amet, consectetur.
   Lorem ipsum dolor 5*5 = 25  sit amet, consectetur.
+
+##############################################################################
+Given ():
+  // x = 12 
+  /* x = 10  */
+  x * 10
+Do (Test: evaluate surrouned text with operator):
+  g=ip
+Expect:
+  // x = 12 
+  /* x = 10  */
+  x * 10 = 100

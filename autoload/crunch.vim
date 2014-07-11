@@ -144,9 +144,13 @@ function! crunch#Visual(exprs)
     call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
 
     for i in range(len(exprList))
+        let initialExpr = exprList[i]
         let exprList[i] = s:CrunchInitt(exprList[i])
         call s:CaptureVariable(exprList[i])
-        if s:ValidLine(exprList[i]) == 0 | continue | endif
+        if s:ValidLine(exprList[i]) == 0
+             let exprList[i] = initialExpr
+             continue
+         endif
         let exprList[i] = s:RemoveOldResult(exprList[i])
         let origExpr = exprList[i]
         let exprList[i] = s:MarkENotation(exprList[i])
