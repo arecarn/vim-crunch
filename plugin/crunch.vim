@@ -25,9 +25,11 @@ augroup END
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 command! -nargs=* Crunch call crunch#Crunch(<q-args>)
-command! -nargs=? -range CrunchLine 
-            \ <line1>,<line2>call crunch#Main(<q-args>)
+" command! -nargs=? -range CrunchLine 
+"             \ <line1>,<line2>call crunch#Main(<q-args>)
 command! -nargs=* -range=0 -bang CrunchDev
+            \ call crunch#Dev(<count>, <line1>, <line2>, <q-args>, "<bang>")
+command! -nargs=* -range=0 -bang CrunchLine
             \ call crunch#Dev(<count>, <line1>, <line2>, <q-args>, "<bang>")
 command! -nargs=? CrunchBlock call crunch#EvalPar(<q-args>)
 
@@ -62,21 +64,16 @@ noremap <SID>CrunchBlockExc :CrunchBlock -exclusive<CR>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 nnoremap <unique> <script> <plug>CrunchOperator <SID>CrunchOperator
-nnoremap <SID>CrunchOperator :set opfunc=crunch#operator<CR>g@
+nnoremap <SID>CrunchOperator :<C-U>set opfunc=crunch#operator<CR>g@
 if !hasmapto('<Plug>CrunchOperator')
     nmap <unique> g= <Plug>CrunchOperator
+    nmap <unique> g== <Plug>CrunchOperator_
 endif
 
 xnoremap <unique> <script> <plug>VisualCrunchOperator  <SID>VisualCrunchOperator
 xnoremap <SID>VisualCrunchOperator :<C-U>call crunch#operator(visualmode())<CR>
 if !hasmapto('<Plug>VisualCrunchOperator')
-    vmap <unique> g= <Plug>VisualCrunchOperator
+    xmap <unique> g= <Plug>VisualCrunchOperator
 endif
-
-nnoremap <unique> <script> <plug>LineCrunchOperator <SID>LineCrunchOperator
-nnoremap <SID>LineCrunchOperator :normal! V<CR>:<C-U>call crunch#operator(visualmode())<CR>
-if !hasmapto('<Plug>LineCrunchOperator')
-    nmap <unique> g== <Plug>LineCrunchOperator
-endif 
 
 " vim:foldmethod=marker

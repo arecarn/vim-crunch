@@ -144,16 +144,25 @@ function! crunch#Visual(exprs)
     call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
 
     for i in range(len(exprList))
-        let exprList[i] = s:CrunchInitt(exprList[i])
-        call s:CaptureVariable(exprList[i])
-        if s:ValidLine(exprList[i]) == 0 | continue | endif
-        let exprList[i] = s:RemoveOldResult(exprList[i])
-        let origExpr = exprList[i]
-        let exprList[i] = s:MarkENotation(exprList[i])
-        let exprList[i] = s:ReplaceVariable2(exprList[i], i)
-        let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
-        let exprList[i] = s:UnmarkENotation(exprList[i])
-        let result  = crunch#core(exprList[i])
+        try
+            let origLine = exprList[i]
+            let exprList[i] = s:CrunchInitt(exprList[i])
+            call s:CaptureVariable(exprList[i])
+            if s:ValidLine(exprList[i]) == 0 
+                let exprList[i] = origLine
+                continue 
+            endif
+            let exprList[i] = s:RemoveOldResult(exprList[i])
+            let origExpr = exprList[i]
+            let exprList[i] = s:MarkENotation(exprList[i])
+            let exprList[i] = s:ReplaceCapturedVariable(exprList[i])
+            let exprList[i] = s:ReplaceVariable2(exprList[i], i)
+            let exprList[i] = s:UnmarkENotation(exprList[i])
+            let result  = crunch#core(exprList[i])
+        catch /Crunch error: /
+            call s:EchoError(v:exception)
+            let result= v:exception
+        endtry
         let exprList[i] = s:BuildResult(origExpr, result) 
     endfor
     call crunch#debug#PrintMsg(string(exprList).'= the exprLinesList')
@@ -201,51 +210,66 @@ function! crunch#core(expression)
 endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
 function! crunch#operator(type) "{{{2
-  " backup settings that we will change
-  let sel_save = &selection
-  let cb_save = &clipboard
-  
-  " make selection and clipboard work the way we need
-  set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
+    call crunch#debug#PrintHeader('Operator')
+    " backup settings that we will change
+    let sel_save = &selection
+    let cb_save = &clipboard
 
-  " backup the unnamed register, which we will be yanking into
-  let reg_save = @@
+    " make selection and clipboard work the way we need
+    set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
 
-  " yank the relevant text, and also set the visual selection (which will be reused if the text
-  " needs to be replaced)
-  if a:type =~ '^\d\+$'
-    " if type is a number, then select that many lines
-    silent exe 'normal! V'.a:type.'$y'
-  elseif a:type =~ '^.$'
-    " if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
-    silent exe "normal! `<" . a:type . "`>y"
-  elseif a:type == 'line'
-    " line-based text motion
-    silent exe "normal! `[V`]y"
-  elseif a:type == 'block'
-    " block-based text motion
-    silent exe "normal! `[\<C-V>`]y"
-  else
-    " char-based text motion
-    silent exe "normal! `[v`]y"
-  endif
+    " backup the unnamed register, which we will be yanking into
+    let reg_save = @@
 
-  let repl = crunch#Visual(@@)
+    call crunch#debug#PrintVarMsg(string(a:type), 'Operator Selection Type')
+    " yank the relevant text, and also set the visual selection (which will be reused if the text
+    " needs to be replaced)
+    if a:type =~ '^\d\+$'
+        " if type is a number, then select that many lines
+        silent exe 'normal! V'.a:type.'$y'
 
-  " if the function returned a value, then replace the text
-  if type(repl) == 1
-    " put the replacement text into the unnamed register, and also set it to be a
-    " characterwise, linewise, or blockwise selection, based upon the selection type of the
-    " yank we did above
-    call setreg('@', repl, getregtype('@'))
-    " reselect the visual region and paste
-    normal! gvp
-  endif
+    elseif a:type =~ '^.$'
+        " if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
+        silent exe "normal! `<" . a:type . "`>y"
+        call crunch#debug#PrintMsg('catch all type')
+        let type=a:type
 
-  " restore saved settings and register value
-  let @@ = reg_save
-  let &selection = sel_save
-  let &clipboard = cb_save
+    elseif a:type == 'block' 
+        " block-based text motion
+        silent exe "normal! `[\<C-V>`]y"
+        call crunch#debug#PrintMsg('block type')
+        let type=''
+
+    elseif a:type == 'line'
+        " line-based text motion
+        silent exe "normal! `[V`]y"
+        let type='V'
+    else
+        " char-based text motion
+        silent exe "normal! `[v`]y"
+        let type='v'
+    endif
+
+
+
+    let regtype = type
+    call crunch#debug#PrintVarMsg(regtype, "the regtype")
+    let repl = crunch#Visual(@@)
+
+    " if the function returned a value, then replace the text
+    if type(repl) == 1
+        " put the replacement text into the unnamed register, and also set it to be a
+        " characterwise, linewise, or blockwise selection, based upon the selection type of the
+        " yank we did above
+        call setreg('@', repl, regtype)
+        " reselect the visual region and paste
+        normal! gvp
+    endif
+
+    " restore saved settings and register value
+    let @@ = reg_save
+    let &selection = sel_save
+    let &clipboard = cb_save
 endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2}}}
 
@@ -547,7 +571,7 @@ endfunction
 "inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:ReplaceCapturedVariable(expr)
-    call crunch#debug#PrintHeader('Replace Captured Variable')
+    call crunch#debug#PrintHeader('Replace Captured Variablee')
 
     let expr = a:expr
     call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
@@ -559,7 +583,8 @@ function! s:ReplaceCapturedVariable(expr)
     let variable_regex = '\v('.s:validVariable .'\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
     " replace variable with it's value
     let expr = substitute(expr, variable_regex, 
-                \ '\=s:variables[submatch(1)]', 'g' )
+                \ '\=s:GetVariableValue3(submatch(1))', 'g' )
+
 
     call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
@@ -587,6 +612,16 @@ function! s:ReplaceVariable(expr)
 
     call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
+endfunction
+
+function! s:GetVariableValue3(variable) abort
+    let value = get(s:variables, a:variable, "not found")
+    if value == "not found"
+        " call s:Throw("value for ".a:variable." not found")
+        return a:variable
+    endif 
+
+    return value
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}2
@@ -629,7 +664,7 @@ function! s:GetVariableValue(variable)
     let variableValue = matchstr(line,'\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$')
     call crunch#debug#PrintMsg("[" . variableValue . "]= the variable value")
     if variableValue == ''
-        call s:Throw('value for '.a:variable.' not found.')
+        call s:Throw('value for '.a:variable.' not found')
     endif
 
     return '('.variableValue.')'
@@ -642,7 +677,7 @@ endfunction
 "inspired by Ihar Filipau's inline calculator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:ReplaceVariable2(expr, num)
-    call crunch#debug#PrintHeader('Replace Variable')
+    call crunch#debug#PrintHeader('Replace Variable 2')
 
     let expr = a:expr
     call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
@@ -667,12 +702,19 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetVariableValue2(variable, num)
 
-    let sline = search('\v\C^('.b:prefixRegex.')?\V'.a:variable.'\v\s*\=\s*', "bnW", (s:Range.firstLine-a:num ))
+    call crunch#debug#PrintMsg("[".s:Range.firstLine."]= is the firstline")
+    call crunch#debug#PrintMsg("[".a:num."]= is the num")
+    call crunch#debug#PrintMsg("[".a:variable."]= is the variable to be replaced")
+    let sline = search('\v\C^('.b:prefixRegex.')?\V'.a:variable.'\v\s*\=\s*', 
+                \"bnW" )
+
+    call crunch#debug#PrintMsg("[".sline."]= search line")
+
     let line = s:RemovePrefixNSuffix(getline(sline))
     let variableValue = matchstr(line,'\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$')
     call crunch#debug#PrintMsg("[" . variableValue . "]= the variable value")
     if variableValue == ''
-        return a:variable
+        call s:Throw("value for ".a:variable." not found")
     else
         return '('.variableValue.')'
     endif
@@ -918,6 +960,8 @@ function s:Range.setType(count, firstLine, lastLine) dict
             let self.lastLine = a:lastLine
         endif
     endif
+    call crunch#debug#PrintMsg(self.firstLine.'= first line')
+    call crunch#debug#PrintMsg(self.lastLine.'= last line')
 endfunction
 
 "public
@@ -932,9 +976,12 @@ function s:Range.capture() dict
         let self.range = self.getSelection()
     elseif self.type == "lines"
         let self.range = self.getLines()
+    elseif self.type == "none"
+        let self.range =""
     else
         call s:Throw("Invalid value for s:Range.type")
     endif
+    call crunch#debug#PrintMsg(self.type.'= type of selection')
 endfunction
 
 "public

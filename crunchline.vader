@@ -294,22 +294,22 @@ Given():
   cat + 5
   
   453453454534534*453 = Crunch error:453453454534534 is too large for VimScript evaluation
-  cat+5 = Crunch error: value for cat not found.
-  cat = Crunch error: value for cat not found.
-  cat + 5 = Crunch error: value for cat not found.
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
 Execute(Errors):
   let g:crunchMode="V"
   %CrunchLine
 Expect():
   453453454534534*453 = 2.054144e17
-  cat+5 = Crunch error: variable cat not found
-  cat = Crunch error: variable cat not found
-  cat + 5 = Crunch error: value for cat not found.
-  
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
+
   453453454534534*453 = 2.054144e17
-  cat+5 = Crunch error: value for cat not found.
-  cat = Crunch error: value for cat not found.
-  cat + 5 = Crunch error: value for cat not found.
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
 ##############################################################################
 Given():
   "variables digits
