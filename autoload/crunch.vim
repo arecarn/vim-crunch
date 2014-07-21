@@ -1,7 +1,7 @@
 "HEADER{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-"Maintainer: Ryan Carney arecarn@gmail.com
+"Maintainer: Ryan Carney
 "Repository: https://github.com/arecarn/crunch
 "License: WTFPL
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
@@ -79,54 +79,6 @@ function! crunch#Crunch(input) "{{{2
     endtry
 endfunction "}}}2
 
-function! crunch#Main(args) range "{{{2
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "Captures the range for later use, Handles arguments, and then calls
-    "EvalLine
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-        call crunch#debug#PrintMsg(a:args. ' = the Argument(s)')
-
-        call s:HandleArgs(a:args, a:firstline, a:lastline)
-
-        execute a:firstline.','.a:lastline.'call crunch#EvalLine()'
-        call crunch#debug#PrintMsg('Exclusive cleared')
-        let s:isExclusive = 0
-    endfunction "}}}2
-
-    function! crunch#EvalLine() "{{{2
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "evaluates a line in a buffer, allowing for prefixes and suffixes
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    let origExpr = s:CrunchInit()
-    try
-        if s:ValidLine(origExpr) == 0 | return | endif
-        let origExpr = s:RemoveOldResult(origExpr)
-        let expr = s:ReplaceVariable(origExpr)
-        let result  = crunch#core(expr)
-    catch /Crunch error: /
-        call s:EchoError(v:exception)
-        let result= v:exception
-    endtry
-
-    call setline('.', s:prefix.origExpr.' = '.result.s:suffix)
-    call crunch#debug#PrintMsg('['. result.'] is the result' )
-    return result
-endfunction "}}}2
-
-function! crunch#EvalPar(args) "{{{2
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "Evaluates a paragraph, equivalent to vip<leader>cl
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    call crunch#debug#PrintHeader('Crunch Paragraph Debug')
-    execute "normal! vip\<ESC>"
-    let topline = line("'<")
-    let bottomline = line("'>")
-
-    call crunch#debug#PrintMsg('['.a:args.'] is the variable' )
-    execute topline."," bottomline."call "."crunch#Main(a:args)"
-endfunction "}}}2
-
 function! crunch#Visual(exprs) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Takes string or mathematical expressions delimited by new lines
@@ -141,7 +93,7 @@ function! crunch#Visual(exprs) "{{{2
     for i in range(len(exprList))
         try
             let origLine = exprList[i]
-            let exprList[i] = s:CrunchInitt(exprList[i])
+            let exprList[i] = s:CrunchInit(exprList[i])
             call s:CaptureVariable(exprList[i])
             if s:ValidLine(exprList[i]) == 0
                 let exprList[i] = origLine
@@ -178,7 +130,6 @@ function! crunch#Dev(count, firstLine, lastLine, cmdInput, bang) "{{{2
         "TODO only call this once if possible 03 May 2014
         call crunch#Crunch(cmdInputExpr)
     else "no command was passed in
-        "let range = s:GetSelectionOrLines(a:count, a:firstLine, a:lastLine)
 
         call s:Range.setType(a:count, a:firstLine, a:lastLine)
         call s:Range.capture()
@@ -266,31 +217,8 @@ endfunction "}}}2
 
 "INITIALIZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:CrunchInit() "{{{2
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "Gets the expression from current line, builds the suffix/prefix regex if
-    "need, and  removes the suffix and prefix from the expression
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    call crunch#debug#PrintHeader('Crunch Inizilation Debug')
 
-    let expr = getline('.')
-
-    if !exists('b:filetype') || &filetype !=# b:filetype
-        let b:filetype = &filetype
-        call crunch#debug#PrintMsg('filetype set, rebuilding prefix/suffix regex')
-        call crunch#debug#PrintMsg('['.&filetype.']= filetype')
-        call s:BuildLinePrefix()
-        call s:BuildLineSuffix()
-    endif
-
-    let s:suffix = matchstr(expr, b:suffixRegex)
-    let s:prefix = matchstr(expr, b:prefixRegex)
-    let expr = s:RemovePrefixNSuffix(expr)
-
-    return expr
-endfunction "}}}2
-
-function! s:CrunchInitt(expr) "{{{2
+function! s:CrunchInit(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Gets the expression from current line, builds the suffix/prefix regex if
     "need, and  removes the suffix and prefix from the expression
@@ -314,32 +242,6 @@ function! s:CrunchInitt(expr) "{{{2
     return expr
 endfunction "}}}2
 
-function! s:GetRange(count, firstLine, lastLine) "{{{2
-    call crunch#debug#PrintHeader('Get Range')
-    if a:count == 0 "no range given extract from command call
-        let range = ''
-    else "visual range was given
-        if g:crunchMode  =~ '\v\Cv||V'
-            let range = s:GetVisualSelection()
-            call crunch#debug#PrintVarMsg(range,'visual range')
-        else "mark range was given or %
-            let range = join(getline(a:firstLine, a:lastLine), "\n") "search the range instead
-            call crunch#debug#PrintVarMsg(range,'range')
-        endif
-    endif
-    return range
-endfunction "}}}2
-
-function! s:GetVisualSelection() "{{{2
-    try
-        let a_save = getreg('a')
-        normal! gv"ay
-        return @a
-    finally
-        call setreg('a', a_save)
-    endtry
-endfunction "}}}2
-
 function! s:HandleCmdInput(cmdInput, bang) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "test if there is an arg in the correct form.
@@ -360,36 +262,6 @@ function! s:HandleCmdInput(cmdInput, bang) "{{{2
     call crunch#debug#PrintVarMsg(expr,'the commandline expr')
 
     return expr
-endfunction "}}}2
-
-function! s:HandleArgs(args, fline, lline) "{{{2
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "Interpret arguments to set flags accordingly
-    "TODO Remove me, I'm not sure this is still used 03 May 2014
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    call crunch#debug#PrintHeader('Handle Arguments Debug')
-    call crunch#debug#PrintMsg('['.a:args.']= the arguments')
-
-    if a:args !=# ''
-        let  s:firstline = a:fline
-        let  s:lastline  = a:lline
-        if a:args ==# '-exclusive' || a:args ==# '-exc'
-            call crunch#debug#PrintMsg('Exclusive set')
-            let s:isExclusive = 1
-        else
-            call s:EchoError(s:ErrorTag ."'".a:args."' is not a valid argument")
-        endif
-    endif
-endfunction "}}}2
-
-function! s:GetValidArg(input) "{{{2
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "TODO is this function even needed?
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    call crunch#debug#PrintHeader('Get Valid Arguments')
-    let arg = matchstr( a:input, '\C\v^\s*-\zs\a+\ze(\s+|$)')
-    call crunch#debug#PrintMsg('The search engine name is =['.arg.']')
-    return arg
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
@@ -526,7 +398,6 @@ function! s:CaptureVariable(expr) "{{{2
         let s:variables[VarName] = '('.VarValue.')'
         call crunch#debug#PrintVarMsg(string(s:variables), 'captured variables')
     endif
-
 endfunction "}}}2
 
 function! s:ReplaceCapturedVariable(expr) "{{{2
@@ -867,13 +738,6 @@ function!  s:Throw(errorBody) abort "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"RESTORE SETTINGS {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-let &cpo = save_cpo
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-
 "RANGE {{{
 let s:Range = { 'type' : "", 'range' : "", 'firstLine' : 0, 'lastLine' : 0 }
 
@@ -943,4 +807,5 @@ function s:Range.getSelection() dict "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"vim:foldmethod=marker
+let &cpo = save_cpo
+" vim:foldmethod=marker
