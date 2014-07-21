@@ -6,7 +6,7 @@ Given:
   volume = pow(radius,3)*pi*4/3 = 113.094
 Execute (variables):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   radius = 3
   " radius = 5
@@ -23,7 +23,7 @@ Given:
   5.34234*2
 Execute (variables):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   a = 3
   b = 8
@@ -40,7 +40,7 @@ Given:
   doubletest / 23.42
 Execute (variables):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   test = 10
   testTwo = 2.78790
@@ -58,7 +58,7 @@ Execute (variables, comments):
   let g:crunchMode="V"
   " check if all regex are independent of value of 'magic' setting
   set nomagic
-  %CrunchLine
+  %Crunch
 Expect:
   radius = 3
      " radius = 5
@@ -75,7 +75,7 @@ Given:
 Execute (variables, comments):
   let g:crunchMode="V"
   call search('pow')
-  .CrunchLine
+  .Crunch
 Expect:
   radius = 3
   " radius = 5
@@ -90,7 +90,7 @@ Given:
   volume = pow(radius,3)*pi*4/3 =
 Execute (variables, equal sign and no result):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   radius = 3
   pi = 3.1415
@@ -106,7 +106,7 @@ Given:
   5.34234*2 =
 Execute (variables, equal sign and no result):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   a = 3
   b = 8
@@ -123,7 +123,7 @@ Given:
   doubletest / 23.42 =
 Execute (variable with matching sub strings, equal sign and no result):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   test = 10
   testTwo = 2.78790
@@ -140,7 +140,7 @@ Given:
   5.34234*2 = 10.68468
 Execute (existing expression result):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   a = 3
   b = 8
@@ -157,7 +157,7 @@ Given:
   doubletest / 23.42 = 43.723313
 Execute (variable name sub strings):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   test = 10
   testTwo = 2.78790
@@ -196,7 +196,7 @@ Given:
   Yet_Another_Var_283 + Yet_Another_Var_534
 Execute (variable names):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   a = 3
   b = 8
@@ -257,7 +257,7 @@ Given():
   /*   Yet_Another_Var_283 + Yet_Another_Var_534*/
 Execute (Line prefix/suffix):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect():
   //a = 3
   //  b = 8
@@ -299,7 +299,7 @@ Given():
   cat + 5 = Crunch error: value for cat not found
 Execute(Errors):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect():
   453453454534534*453 = 2.054144e17
   cat+5 = Crunch error: value for cat not found
@@ -329,7 +329,7 @@ Given():
   2abc*2var2abc + abc
 Execute (Variable names comments):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect():
   "variables digits
   var2 = 10
@@ -353,32 +353,11 @@ Given():
   var1 + var2
 Execute (negative variables):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect():
   var1 = -10*200 = -2000
   var2 = -20
   var1 + var2 = -2020
-##############################################################################
-Given():
-  cos(0)*cos(0)
-  2sin(2)2
-  
-  (2*3)(3*2)
-  2(2*2)
-  .25*4
-Execute (no leading zero, implied multiplication):
-  normal! 2G
-  CrunchBlock
-  
-  normal! 5G
-  CrunchBlock
-Expect():
-  cos(0)*cos(0) = 1
-  2sin(2)2 = 3.63719
-  
-  (2*3)(3*2) = 36
-  2(2*2) = 8
-  .25*4 = 1
 ##############################################################################
 Given ():
   sin(1)sin(1)
@@ -396,7 +375,7 @@ Given ():
   pow(2,8)
 Execute (command, implicit multiplication, comments, remove zeros in result, no leading zero, forced integer conversion):
   let g:crunchMode="V"
-  %CrunchLine
+  %Crunch
 Expect:
   sin(1)sin(1) = 0.708073
   2sin(1) = 1.682942
