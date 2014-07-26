@@ -1,29 +1,32 @@
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-" crunch#debug#PrintHeader()                                                 {{{ 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#debug#PrintHeader(text)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Maintainer: Ryan Carney
+"Repository: https://github.com/arecarn/crunch
+"License: WTFPL
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"DEBUG {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! crunch#debug#PrintHeader(text) "{{{2
     if g:crunch_debug
         echom repeat(' ', 80)
         echom repeat('=', 80)
         echom a:text." Debug"
         echom repeat('-', 80)
     endif
-endfunction
+endfunction "}}}2
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-" crunch#debug#PrintMsg()                                                    {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#debug#PrintMsg(text)
+function! crunch#debug#PrintMsg(text) "{{{2
     if g:crunch_debug
         echom a:text
     endif
-endfunction
+endfunction "}}}2
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-" crunch#debug#PrintVarMsg()                                                 {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#debug#PrintVarMsg(variable, text)
+function! crunch#debug#PrintVarMsg(variable, text) "{{{2
     if g:crunch_debug
         echom '['.a:variable.'] = '.a:text
     endif
-endfunction
+endfunction "}}}2
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+
+let &cpo = save_cpo
+" vim:foldmethod=marker

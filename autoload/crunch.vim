@@ -1,10 +1,8 @@
-"HEADER{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 "Maintainer: Ryan Carney
 "Repository: https://github.com/arecarn/crunch
 "License: WTFPL
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 "SCRIPT SETTINGS {{{
 let save_cpo = &cpo   "allow line continuation
@@ -19,8 +17,16 @@ endif
 if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
+if !exists('g:crunch_debug')
+    let g:crunch_debug = 0
+endif 
+if !exists("g:crunch_result_type_append")
+    let g:crunch_result_type_append  = 1
+endif
 
+"Holds the variables captured in a range/selection
 let s:variables = {}
+
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 
 "Number Regex Patterns
@@ -29,19 +35,13 @@ let number = '\v\.\d+|\d+%([.]\d+)?'
 let eNotation = '\v%([eE][+-]?\d+)?'
 let s:numPat = sign . '%(' . number . eNotation . ')'
 
-let s:ErrorTag = 'Crunch error: '
+let s:errorTag = 'Crunch error: '
 let s:isExclusive = 0
 let s:bang = ''
-
-let g:crunch_debug = 0
-
-"default is append
-if !exists("g:crunch_result_type_append")
-    let g:crunch_result_type_append  = 1
-endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "MAIN FUNCTIONS {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Crunch(input) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "When called opens a command window prompt for an equation to be evaluated
@@ -217,7 +217,6 @@ endfunction "}}}2
 
 "INITIALIZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 function! s:CrunchInit(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Gets the expression from current line, builds the suffix/prefix regex if
@@ -265,6 +264,7 @@ endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "FORMAT EXPRESSION{{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:ValidLine(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Checks the line to see if it is a variable definition, or a blank line
@@ -381,6 +381,7 @@ endfunction! "}}}3
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "HANDLE VARIABLES {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:CaptureVariable(expr) "{{{2
     call crunch#debug#PrintHeader('Capture Variable')
 
@@ -413,7 +414,6 @@ function! s:ReplaceCapturedVariable(expr) "{{{2
     "replace variable with it's value
     let expr = substitute(expr, variable_regex,
                 \ '\=s:GetVariableValue3(submatch(1))', 'g' )
-
 
     call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
@@ -521,7 +521,6 @@ endfunction "}}}2
 
 "RESULT HANDLING{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 function! s:BuildResult(expr, result) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Return Output
@@ -572,7 +571,6 @@ endfunction "}}}2
 
 "PREFIX/SUFFIX {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 function! s:RemovePrefixNSuffix(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Removes the prefix and suffix from a string
@@ -623,12 +621,10 @@ function! s:GetInputString() "{{{2
     call inputrestore()
     return expr
 endfunction "}}}2
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "EVALUATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 function! s:EvalMath(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Return Output
@@ -668,7 +664,6 @@ endfunction "}}}2
 
 "ERRORS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 function! s:EchoError(errorString) "{{{2
     echohl WarningMsg
     echomsg a:errorString
@@ -676,12 +671,13 @@ function! s:EchoError(errorString) "{{{2
 endfunction "}}}2
 
 function!  s:Throw(errorBody) abort "{{{2
-    let ErrorMsg = s:ErrorTag.a:errorBody
+    let ErrorMsg = s:errorTag.a:errorBody
     throw ErrorMsg
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "RANGE {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:Range = { 'type' : "", 'range' : "", 'firstLine' : 0, 'lastLine' : 0 }
 
 function s:Range.setType(count, firstLine, lastLine) dict "{{{2
