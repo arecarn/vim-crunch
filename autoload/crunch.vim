@@ -231,8 +231,7 @@ function! s:CrunchInit(expr) "{{{2
         let b:filetype = &filetype
         call crunch#debug#PrintMsg('filetype set, rebuilding prefix/suffix regex')
         call crunch#debug#PrintMsg('['.&filetype.']= filetype')
-        call s:BuildLinePrefix()
-        call s:BuildLineSuffix()
+        call s:BuildPrefixAndSuffixRegex()
     endif
 
     let s:suffix = matchstr(expr, b:suffixRegex)
@@ -604,7 +603,7 @@ function! s:RemovePrefixNSuffix(expr) "{{{2
     return expr
 endfunction "}}}2
 
-function! s:BuildLineSuffix() "{{{2
+function! s:BuildPrefixAndSuffixRegex() "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "from a list of suffixes builds a regex expression for all suffixes in
     "the list
@@ -612,63 +611,20 @@ function! s:BuildLineSuffix() "{{{2
     call crunch#debug#PrintHeader('Build Line Suffix')
     call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
-
-    "Build the suffix
-
-    "Valid Line suffix list
-    let s:Linesuffixs = ["*","//", s:commentEnd]
-    let b:suffixRegex = ''
-    let NumberOfsuffixes = len(s:Linesuffixs)
-
-    "TODO replace with join() + map()
-    for suffix in s:Linesuffixs
-        "call crunch#debug#PrintMsg( "[".suffix."]= suffix to be added to regex")
-        let b:suffixRegex = b:suffixRegex.escape(suffix,'\/')
-        if NumberOfsuffixes !=1
-            let b:suffixRegex = b:suffixRegex.'\|'
-        endif
-
-        call crunch#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for all the suffixes")
-        let NumberOfsuffixes -= 1
-    endfor
+    let s:suffixs = ['*','//', s:commentEnd]
+    let b:suffixRegex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
+    call crunch#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for suffixes ")
     let b:suffixRegex= '\V\s\*\('.b:suffixRegex.'\)\=\s\*\$\v'
-
-    "NOTE: this regex is very non magic see :h \V
-    call crunch#debug#PrintMsg("[".b:suffixRegex."]= REGEX for all the suffixes")
-endfunction "}}}2
-
-function! s:BuildLinePrefix() "{{{2
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "from a list of prefixes builds a regex expression for all prefixes in the
-    "list
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     call crunch#debug#PrintHeader('Build Line Prefix')
     call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentStart = matchstr(&commentstring, '\v.+\ze\%s')
-
-    "Build the prefix
-
-    "Valid Line Prefix list
-    let s:LinePrefixs = ["*","//", s:commentStart]
-    let b:prefixRegex = ''
-    let NumberOfPrefixes = len(s:LinePrefixs)
-
-    "TODO replace with join() + map()
-    for prefix in s:LinePrefixs
-        "call crunch#debug#PrintMsg( "[".prefix."]= prefix to be added to regex")
-        let b:prefixRegex = b:prefixRegex.escape(prefix,'\/')
-        if NumberOfPrefixes !=1
-            let b:prefixRegex = b:prefixRegex.'\|'
-        endif
-
-        call crunch#debug#PrintMsg( "[".b:prefixRegex."]= REGEX for the prefixes")
-        let NumberOfPrefixes -= 1
-    endfor
+    let s:prefixs = ['*','//', s:commentStart]
+    let b:prefixRegex = join( map(copy(s:prefixs), 'escape(v:val, ''\/'')'), '\|')
+    call crunch#debug#PrintMsg("[".b:prefixRegex."]= REGEX for the prefixes")
     let b:prefixRegex= '\V\^\s\*\('.b:prefixRegex.'\)\=\s\*\v'
 
-    "NOTE: this regex is very non magic see :h \V
-    call crunch#debug#PrintMsg("[".b:prefixRegex."]= REGEX for all the prefixes")
+    "NOTE: these regex is very non magic see :h \V
 endfunction "}}}2
 
 function! s:GetInputString() "{{{2
