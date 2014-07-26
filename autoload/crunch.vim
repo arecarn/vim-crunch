@@ -11,15 +11,15 @@ set cpo&vim
 
 "GLOBALS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if !exists("g:crunch_calc_prompt")
-    let g:crunch_calc_prompt = 'Calc >> '
+if !exists("g:crunch_prompt")
+    let g:crunch_prompt = 'Crunch >> '
 endif
 if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
 if !exists('g:crunch_debug')
     let g:crunch_debug = 0
-endif 
+endif
 if !exists("g:crunch_result_type_append")
     let g:crunch_result_type_append  = 1
 endif
@@ -617,7 +617,7 @@ function! s:GetInputString() "{{{2
     "prompt the user for an expression
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     call inputsave()
-    let expr = input(g:crunch_calc_prompt)
+    let expr = input(g:crunch_prompt)
     call inputrestore()
     return expr
 endfunction "}}}2
