@@ -453,26 +453,13 @@ endfunction "}}}2
 
 function! s:GetVariableValue(variable) "{{{2
 
-    if a:variable =~ '\c^e\d*$'
-        "TODO: make the E of e handling cleaner
-        "if variable is e or E don't do anything
-        return a:variable
-    endif
-
     call crunch#debug#PrintHeader('Get Variable Value')
     call crunch#debug#PrintMsg("[".getline('.')."]= the current line")
 
     call crunch#debug#PrintMsg("[" . a:variable . "]= the variable")
 
-    if s:isExclusive == 1
-        call crunch#debug#PrintMsg("Searching with Stopline")
-        call crunch#debug#PrintMsg("[".s:firstline."]= Stopline")
-        let sline =search('\v\C^('.b:prefixRegex.
-                    \ ')?\V'.a:variable.'\v\s*\=\s*', "bnW", (s:firstline -1))
-    else
-        let sline = search('\v\C^('.b:prefixRegex.
-                    \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
-    endif
+    let sline = search('\v\C^('.b:prefixRegex.
+                \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
 
     call crunch#debug#PrintMsg("[".sline."]= result of search for variable")
     if sline == 0
