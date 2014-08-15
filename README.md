@@ -67,8 +67,8 @@ compared to the default math syntax.
 
 ##Installation
 
-If you don't have an preferred method, I recommend one of the following plugin
-managers.
+If you don't have an preferred method, check out some of the following popular
+methods
 * [Neobundle](https://github.com/Shougo/neobundle.vim)
 * [Vundle](https://github.com/gmarik/vundle)
 * [pathogen](https://github.com/tpope/vim-pathogen)
@@ -95,3 +95,6 @@ Sources inspiration and credits for this plugin
 - https://github.com/sk1418/HowMuch
   sk1418 wrote a similar plugin with visual block/characterwise evaluation, as
   well as providing an even better int to float conversion method
+
+- Marcelo Montu (github: mMontu)
+  For contributing to make crunch more user friendly and useful
