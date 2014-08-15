@@ -396,7 +396,7 @@ Sources inspiration and credits for this plugin
   sk1418 wrote a similar plugin with visual block/characterwise evaluation
 
 - Marcelo Montu (github: mMontu)
-  For contributing to make crunch more user friendy and useful
+  For contributing to make crunch more user friendly and useful
 
 
 ==============================================================================
