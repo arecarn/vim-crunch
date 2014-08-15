@@ -1,8 +1,10 @@
+"HEADER{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 "Maintainer: Ryan Carney
 "Repository: https://github.com/arecarn/crunch
 "License: WTFPL
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "SCRIPT SETTINGS {{{
 let save_cpo = &cpo   "allow line continuation
@@ -11,22 +13,14 @@ set cpo&vim
 
 "GLOBALS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if !exists("g:crunch_prompt")
-    let g:crunch_prompt = 'Crunch >> '
+if !exists("g:crunch_calc_prompt")
+    let g:crunch_calc_prompt = 'Calc >> '
 endif
 if !exists("g:crunch_calc_comment")
     let g:crunch_calc_comment = '"'
 endif
-if !exists('g:crunch_debug')
-    let g:crunch_debug = 0
-endif
-if !exists("g:crunch_result_type_append")
-    let g:crunch_result_type_append  = 1
-endif
 
-"Holds the variables captured in a range/selection
 let s:variables = {}
-
 let s:validVariable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 
 "Number Regex Patterns
@@ -35,13 +29,19 @@ let number = '\v\.\d+|\d+%([.]\d+)?'
 let eNotation = '\v%([eE][+-]?\d+)?'
 let s:numPat = sign . '%(' . number . eNotation . ')'
 
-let s:errorTag = 'Crunch error: '
+let s:ErrorTag = 'Crunch error: '
 let s:isExclusive = 0
 let s:bang = ''
+
+let g:crunch_debug = 0
+
+"default is append
+if !exists("g:crunch_result_type_append")
+    let g:crunch_result_type_append  = 1
+endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "MAIN FUNCTIONS {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#Crunch(input) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "When called opens a command window prompt for an equation to be evaluated
@@ -217,6 +217,7 @@ endfunction "}}}2
 
 "INITIALIZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 function! s:CrunchInit(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Gets the expression from current line, builds the suffix/prefix regex if
@@ -230,7 +231,8 @@ function! s:CrunchInit(expr) "{{{2
         let b:filetype = &filetype
         call crunch#debug#PrintMsg('filetype set, rebuilding prefix/suffix regex')
         call crunch#debug#PrintMsg('['.&filetype.']= filetype')
-        call s:BuildPrefixAndSuffixRegex()
+        call s:BuildLinePrefix()
+        call s:BuildLineSuffix()
     endif
 
     let s:suffix = matchstr(expr, b:suffixRegex)
@@ -264,7 +266,6 @@ endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "FORMAT EXPRESSION{{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:ValidLine(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Checks the line to see if it is a variable definition, or a blank line
@@ -381,7 +382,6 @@ endfunction! "}}}3
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "HANDLE VARIABLES {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:CaptureVariable(expr) "{{{2
     call crunch#debug#PrintHeader('Capture Variable')
 
@@ -414,6 +414,7 @@ function! s:ReplaceCapturedVariable(expr) "{{{2
     "replace variable with it's value
     let expr = substitute(expr, variable_regex,
                 \ '\=s:GetVariableValue3(submatch(1))', 'g' )
+
 
     call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
@@ -453,13 +454,26 @@ endfunction "}}}2
 
 function! s:GetVariableValue(variable) "{{{2
 
+    if a:variable =~ '\c^e\d*$'
+        "TODO: make the E of e handling cleaner
+        "if variable is e or E don't do anything
+        return a:variable
+    endif
+
     call crunch#debug#PrintHeader('Get Variable Value')
     call crunch#debug#PrintMsg("[".getline('.')."]= the current line")
 
     call crunch#debug#PrintMsg("[" . a:variable . "]= the variable")
 
-    let sline = search('\v\C^('.b:prefixRegex.
-                \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
+    if s:isExclusive == 1
+        call crunch#debug#PrintMsg("Searching with Stopline")
+        call crunch#debug#PrintMsg("[".s:firstline."]= Stopline")
+        let sline =search('\v\C^('.b:prefixRegex.
+                    \ ')?\V'.a:variable.'\v\s*\=\s*', "bnW", (s:firstline -1))
+    else
+        let sline = search('\v\C^('.b:prefixRegex.
+                    \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
+    endif
 
     call crunch#debug#PrintMsg("[".sline."]= result of search for variable")
     if sline == 0
@@ -521,6 +535,7 @@ endfunction "}}}2
 
 "RESULT HANDLING{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 function! s:BuildResult(expr, result) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Return Output
@@ -571,6 +586,7 @@ endfunction "}}}2
 
 "PREFIX/SUFFIX {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 function! s:RemovePrefixNSuffix(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Removes the prefix and suffix from a string
@@ -588,7 +604,7 @@ function! s:RemovePrefixNSuffix(expr) "{{{2
     return expr
 endfunction "}}}2
 
-function! s:BuildPrefixAndSuffixRegex() "{{{2
+function! s:BuildLineSuffix() "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "from a list of suffixes builds a regex expression for all suffixes in
     "the list
@@ -596,20 +612,63 @@ function! s:BuildPrefixAndSuffixRegex() "{{{2
     call crunch#debug#PrintHeader('Build Line Suffix')
     call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
-    let s:suffixs = ['*','//', s:commentEnd]
-    let b:suffixRegex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
-    call crunch#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for suffixes ")
+
+    "Build the suffix
+
+    "Valid Line suffix list
+    let s:Linesuffixs = ["*","//", s:commentEnd]
+    let b:suffixRegex = ''
+    let NumberOfsuffixes = len(s:Linesuffixs)
+
+    "TODO replace with join() + map()
+    for suffix in s:Linesuffixs
+        "call crunch#debug#PrintMsg( "[".suffix."]= suffix to be added to regex")
+        let b:suffixRegex = b:suffixRegex.escape(suffix,'\/')
+        if NumberOfsuffixes !=1
+            let b:suffixRegex = b:suffixRegex.'\|'
+        endif
+
+        call crunch#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for all the suffixes")
+        let NumberOfsuffixes -= 1
+    endfor
     let b:suffixRegex= '\V\s\*\('.b:suffixRegex.'\)\=\s\*\$\v'
+
+    "NOTE: this regex is very non magic see :h \V
+    call crunch#debug#PrintMsg("[".b:suffixRegex."]= REGEX for all the suffixes")
+endfunction "}}}2
+
+function! s:BuildLinePrefix() "{{{2
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "from a list of prefixes builds a regex expression for all prefixes in the
+    "list
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     call crunch#debug#PrintHeader('Build Line Prefix')
     call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentStart = matchstr(&commentstring, '\v.+\ze\%s')
-    let s:prefixs = ['*','//', s:commentStart]
-    let b:prefixRegex = join( map(copy(s:prefixs), 'escape(v:val, ''\/'')'), '\|')
-    call crunch#debug#PrintMsg("[".b:prefixRegex."]= REGEX for the prefixes")
+
+    "Build the prefix
+
+    "Valid Line Prefix list
+    let s:LinePrefixs = ["*","//", s:commentStart]
+    let b:prefixRegex = ''
+    let NumberOfPrefixes = len(s:LinePrefixs)
+
+    "TODO replace with join() + map()
+    for prefix in s:LinePrefixs
+        "call crunch#debug#PrintMsg( "[".prefix."]= prefix to be added to regex")
+        let b:prefixRegex = b:prefixRegex.escape(prefix,'\/')
+        if NumberOfPrefixes !=1
+            let b:prefixRegex = b:prefixRegex.'\|'
+        endif
+
+        call crunch#debug#PrintMsg( "[".b:prefixRegex."]= REGEX for the prefixes")
+        let NumberOfPrefixes -= 1
+    endfor
     let b:prefixRegex= '\V\^\s\*\('.b:prefixRegex.'\)\=\s\*\v'
 
-    "NOTE: these regex is very non magic see :h \V
+    "NOTE: this regex is very non magic see :h \V
+    call crunch#debug#PrintMsg("[".b:prefixRegex."]= REGEX for all the prefixes")
 endfunction "}}}2
 
 function! s:GetInputString() "{{{2
@@ -617,14 +676,16 @@ function! s:GetInputString() "{{{2
     "prompt the user for an expression
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     call inputsave()
-    let expr = input(g:crunch_prompt)
+    let expr = input(g:crunch_calc_prompt)
     call inputrestore()
     return expr
 endfunction "}}}2
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "EVALUATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 function! s:EvalMath(expr) "{{{2
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Return Output
@@ -664,6 +725,7 @@ endfunction "}}}2
 
 "ERRORS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 function! s:EchoError(errorString) "{{{2
     echohl WarningMsg
     echomsg a:errorString
@@ -671,13 +733,12 @@ function! s:EchoError(errorString) "{{{2
 endfunction "}}}2
 
 function!  s:Throw(errorBody) abort "{{{2
-    let ErrorMsg = s:errorTag.a:errorBody
+    let ErrorMsg = s:ErrorTag.a:errorBody
     throw ErrorMsg
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "RANGE {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:Range = { 'type' : "", 'range' : "", 'firstLine' : 0, 'lastLine' : 0 }
 
 function s:Range.setType(count, firstLine, lastLine) dict "{{{2
