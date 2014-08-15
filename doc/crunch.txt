@@ -30,8 +30,8 @@
         3.3 Prefix & Suffix ......................... |crunch-prefix-suffix||
         3.4 Looser Syntax ........................... |crunch-looser-syntax|
      4. Configuration ............................... |crunch-configuration|
-         4.1 g:crunch_calc_prompt ................... |crunch-calc-prompt|
-         4.2 g:crunch_calc_comment .................. |crunch-calc-comment|
+         4.1 g:crunch_prompt ........................ |crunch-calc-prompt|
+         4.2 g:crunch_comment ....................... |crunch-calc-comment|
          4.3 g:crunch_result_type_append ............ |crunch-result-type-append|
      5. Known Issues ................................ |crunch-known-issues|
      6. Contribute .................................. |crunch-contribute|
@@ -177,7 +177,7 @@ inside the evaluated area are considered.
 
 Crunch has support for ignoring lines with comments. By default the string to
 start a comment it '"' just like Vim Script, but this can be configured
-|g:crunch_calc_comment| global variable.
+|g:crunch_comment| global variable.
 
 ------------------------------------------------------------------------------
 3.3  PREFIX & SUFFIX                                   *crunch-prefix-suffix*
@@ -276,14 +276,14 @@ worry about the syntax as much, and getting the answer you expect.
 4. CONFIGURATION                                       *crunch-configuration*
 
 ------------------------------------------------------------------------------
-4.1 g:crunch_calc_prompt                                 *crunch-calc-prompt*
+4.1 g:crunch_prompt                                 *crunch-calc-prompt*
 
 Default 'Calc >> '
 
 The prompt provided when using |:Crunch| without a range
 
 ------------------------------------------------------------------------------
-4.2 g:crunch_calc_comment                               *crunch-calc-comment*
+4.2 g:crunch_comment                               *crunch-calc-comment*
 
 Default '"'
 

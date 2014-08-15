@@ -13,11 +13,11 @@ set cpo&vim
 
 "GLOBALS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if !exists("g:crunch_calc_prompt")
-    let g:crunch_calc_prompt = 'Calc >> '
+if !exists("g:crunch_prompt")
+    let g:crunch_prompt = 'Calc >> '
 endif
-if !exists("g:crunch_calc_comment")
-    let g:crunch_calc_comment = '"'
+if !exists("g:crunch_comment")
+    let g:crunch_comment = '"'
 endif
 
 let s:variables = {}
@@ -276,7 +276,7 @@ function! s:ValidLine(expr) "{{{2
     call crunch#debug#PrintMsg('[' . a:expr . ']= the tested string' )
 
     "checks for commented lines
-    if a:expr =~ '\v^\s*'.g:crunch_calc_comment
+    if a:expr =~ '\v^\s*'.g:crunch_comment
         call crunch#debug#PrintMsg('test1 failed comment')
         return 0
     endif
