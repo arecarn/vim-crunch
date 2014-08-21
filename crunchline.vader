@@ -5,7 +5,7 @@ Given:
   area = pow(radius,2)*pi = 28.2735
   volume = pow(radius,3)*pi*4/3 = 113.094
 Execute (variables):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   radius = 3
@@ -22,7 +22,7 @@ Given:
   x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
   5.34234*2
 Execute (variables):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   a = 3
@@ -39,7 +39,7 @@ Given:
   doubletest = pow(2,10)
   doubletest / 23.42
 Execute (variables):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   test = 10
@@ -55,7 +55,7 @@ Given:
   area = pow(radius,2)*pi
    volume = pow(radius,3)*pi*4/3
 Execute (variables, comments):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   " check if all regex are independent of value of 'magic' setting
   set nomagic
   %Crunch
@@ -73,7 +73,7 @@ Given:
   area = pow(radius,2)*pi
   volume = pow(radius,3)*pi*4/3
 Execute (variables, comments):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   call search('pow')
   .Crunch
 Expect:
@@ -89,7 +89,7 @@ Given:
   area = pow(radius,2)*pi =
   volume = pow(radius,3)*pi*4/3 =
 Execute (variables, equal sign and no result):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   radius = 3
@@ -105,7 +105,7 @@ Given:
   x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) =
   5.34234*2 =
 Execute (variables, equal sign and no result):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   a = 3
@@ -122,7 +122,7 @@ Given:
   doubletest = pow(2,10) =
   doubletest / 23.42 =
 Execute (variable with matching sub strings, equal sign and no result):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   test = 10
@@ -139,7 +139,7 @@ Given:
   x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
   5.34234*2 = 10.68468
 Execute (existing expression result):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   a = 3
@@ -156,7 +156,7 @@ Given:
   doubletest = pow(2,10) = 1024
   doubletest / 23.42 = 43.723313
 Execute (variable name sub strings):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   test = 10
@@ -195,7 +195,7 @@ Given:
   Yet_Another_Var_283 = 30
   Yet_Another_Var_283 + Yet_Another_Var_534
 Execute (variable names):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   a = 3
@@ -256,7 +256,7 @@ Given():
   /*Yet_Another_Var_283 = 30*/
   /*   Yet_Another_Var_283 + Yet_Another_Var_534*/
 Execute (Line prefix/suffix):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect():
   //a = 3
@@ -298,7 +298,7 @@ Given():
   cat = Crunch error: value for cat not found
   cat + 5 = Crunch error: value for cat not found
 Execute(Errors):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect():
   453453454534534*453 = 2.054144e17
@@ -328,7 +328,7 @@ Given():
   var2abc= 20
   2abc*2var2abc + abc
 Execute (Variable names comments):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect():
   "variables digits
@@ -352,7 +352,7 @@ Given():
   var2 = -20
   var1 + var2
 Execute (negative variables):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect():
   var1 = -10*200 = -2000
@@ -374,7 +374,7 @@ Given ():
   .25*4
   pow(2,8)
 Execute (command, implicit multiplication, comments, remove zeros in result, no leading zero, forced integer conversion):
-  let g:crunchMode="V"
+  let g:crunch_mode="V"
   %Crunch
 Expect:
   sin(1)sin(1) = 0.708073

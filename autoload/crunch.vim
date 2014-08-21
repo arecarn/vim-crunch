@@ -630,8 +630,8 @@ function! s:OverWriteVisualSelection(input) "{{{2
     """
 
     let a_save = @a
-    if g:crunchMode  =~ '\C\vV|v|'
-        call setreg('a', a:input, g:crunchMode)
+    if g:crunch_mode  =~ '\C\vV|v|'
+        call setreg('a', a:input, g:crunch_mode)
     else
         call setreg('a', a:input, 'V')
     endif
@@ -778,7 +778,7 @@ function! s:Range.setType(count, firstLine, lastLine) dict "{{{2
     if a:count == 0 "no range given
         let self.type = "none"
     else "range was given
-        if g:crunchMode =~ '\v\Cv|'
+        if g:crunch_mode =~ '\v\Cv|'
             let self.type = "selection"
         else "line wise mark, %, or visual line range given
             let self.type = "lines"
@@ -826,7 +826,7 @@ function! s:Range.overWrite(rangeToPut) dict "{{{2
     call crunch#debug#PrintVarMsg("pasting as", self.type)
     call crunch#debug#PrintVarMsg("pasting", a:rangeToPut)
     if self.type == "selection"
-        call setreg('a', a:rangeToPut, g:crunchMode)
+        call setreg('a', a:rangeToPut, g:crunch_mode)
         normal! gv"ap
     elseif self.type == "lines"
         call setline(self.firstLine, split(a:rangeToPut, "\n"))
