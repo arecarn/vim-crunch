@@ -249,6 +249,13 @@ function! s:CrunchInit(expr) "{{{2
 
     let s:suffix = matchstr(expr, b:suffixRegex)
     let s:prefix = matchstr(expr, b:prefixRegex)
+
+    call crunch#debug#PrintVarMsg(s:prefix, "s:prefix")
+    call crunch#debug#PrintVarMsg(b:prefixRegex, "prefix regex")
+
+    call crunch#debug#PrintVarMsg(s:suffix, "s:suffix")
+    call crunch#debug#PrintVarMsg(b:suffixRegex, "suffix regex")
+
     let expr = s:RemovePrefixNSuffix(expr)
 
     return expr
@@ -590,7 +597,6 @@ endfunction "}}}2
 function! s:BuildResult(expr, result) "{{{2
     """
     """
-
     let output = a:expr .' = '. a:result
 
     "capture variable results if they exists TODO refactor
@@ -601,8 +607,8 @@ function! s:BuildResult(expr, result) "{{{2
                 \|| (s:bang == '' && !g:crunch_result_type_append)
         let output = a:result
     endif
-    call crunch#debug#PrintVarMsg(s:prefix,"s:prefix")
-    call crunch#debug#PrintVarMsg(s:suffix,"s:suffix")
+    call crunch#debug#PrintVarMsg(s:prefix, "s:prefix")
+    call crunch#debug#PrintVarMsg(s:suffix, "s:suffix")
     call crunch#debug#PrintVarMsg(output, "output")
     return s:prefix.output.s:suffix
 endfunction "}}}2
@@ -674,7 +680,7 @@ function! s:BuildPrefixAndSuffixRegex() "{{{2
     let s:suffixs = ['//', s:commentEnd]
     let b:suffixRegex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
     call crunch#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for suffixes ")
-    let b:suffixRegex= '\V\s\*\('.b:suffixRegex.'\)\=\s\*\$\v'
+    let b:suffixRegex= '\V\.\{-1,}\zs\s\*\(\('.b:suffixRegex.'\)\.\*\)\=\s\*\$\v'
 
     call crunch#debug#PrintHeader('Build Line Prefix')
     call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
