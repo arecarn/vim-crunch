@@ -1,8 +1,0 @@
-test = 10
-testTwo = 2.78790
-" 5.021701
-(test + 4) / testTwo
-"1024
-doubletest = pow(2,10)
-" 43.723313
-doubletest / 23.42

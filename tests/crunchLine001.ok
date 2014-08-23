@@ -1,5 +1,0 @@
-radius = 3
-   " radius = 5
-pi = 3.1415
-area = pow(radius,2)*pi = 28.2735
-volume = pow(radius,3)*pi*4/3 = 113.094
