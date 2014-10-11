@@ -7,8 +7,8 @@ filetype off
 set rtp^=~/.vim/bundle/vader.vim
 
 " The plugin under test
-set rtp^=~/Dropbox/repos/crunch/crunch/
-set rtp+=~/Dropbox/repos/crunch/crunch/after
+set rtp^=~/Dropbox/projects/crunch/crunch/
+set rtp+=~/Dropbox/projects/crunch/crunch/after
 
 " Enable loading plugins and indent files for specific file types
 filetype plugin indent on
