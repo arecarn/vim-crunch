@@ -678,14 +678,18 @@ function! s:BuildPrefixAndSuffixRegex() "{{{2
     call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
     let s:suffixs = ['//', s:commentEnd]
+    call filter (s:suffixs, "v:val != ''")
+    call crunch#debug#PrintVarMsg(string(s:suffixs), "s:suffixs")
     let b:suffixRegex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
     call crunch#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for suffixes ")
-    let b:suffixRegex= '\V\.\{-1,}\zs\s\*\(\('.b:suffixRegex.'\)\.\*\)\=\s\*\$\v'
+    let b:suffixRegex= '\V\[^ ]\{-1,}\zs\s\*\(\('.b:suffixRegex.'\)\.\*\)\=\s\*\$\v'
 
     call crunch#debug#PrintHeader('Build Line Prefix')
     call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentStart = matchstr(&commentstring, '\v.+\ze\%s')
     let s:prefixs = ['*','//', s:commentStart]
+    call filter (s:prefixs, "v:val != ''")
+    call crunch#debug#PrintVarMsg(string(s:prefixs), "s:prefixs")
     let b:prefixRegex = join( map(copy(s:prefixs), 'escape(v:val, ''\/'')'), '\|')
     call crunch#debug#PrintMsg("[".b:prefixRegex."]= REGEX for the prefixes")
     let b:prefixRegex= '\V\^\s\*\('.b:prefixRegex.'\)\=\s\*\v'
