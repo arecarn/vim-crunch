@@ -1,6 +1,5 @@
 Before:
   redir => g:MsgOutputGot
-Given:
 Execute (Test Commandline Input #1):
   let g:MsgOutputExpect = "\n5*5 = 25\nYanked Result"
   Crunch 5*5
@@ -17,7 +16,6 @@ After:
 ##############################################################################
 Before:
   redir => g:MsgOutputGot
-Given:
 Execute (Test Commandline Input #2):
   let g:MsgOutputExpect = "\nsin(5*5) = -0.132352\nYanked Result"
   Crunch sin(5*5)
