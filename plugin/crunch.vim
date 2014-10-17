@@ -12,6 +12,12 @@ else
     let g:loaded_crunch = 1
 endif
 
+let g:crunch_prompt = get(g:, 'crunch_prompt', 'Calc >> ')
+let g:crunch_comment = get(g:, 'crunch_comment', '"')
+let g:crunch_debug = get(g:, 'crunch_debug', 0)
+let g:crunch_user_variables = get(g:, 'crunch_user_variables', {})
+let g:crunch_result_type_append = get(g:, 'crunch_result_type_append', 1)
+
 augroup crunch_mode
     autocmd!
     autocmd CursorMoved * let g:crunch_mode = mode()

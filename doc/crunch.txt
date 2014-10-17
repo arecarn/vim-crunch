@@ -30,9 +30,10 @@
         3.3 Prefix & Suffix ......................... |crunch-prefix-suffix||
         3.4 Looser Syntax ........................... |crunch-looser-syntax|
      4. Configuration ............................... |crunch-configuration|
-         4.1 g:crunch_prompt ........................ |crunch-calc-prompt|
-         4.2 g:crunch_comment ....................... |crunch-calc-comment|
+         4.1 g:crunch_prompt ........................ |crunch-prompt|
+         4.2 g:crunch_comment ....................... |crunch-comment|
          4.3 g:crunch_result_type_append ............ |crunch-result-type-append|
+         4.4 g:crunch_user_variables ................ |crunch-user-variables|
      5. Known Issues ................................ |crunch-known-issues|
      6. Contribute .................................. |crunch-contribute|
      7. Change Log .................................. |crunch-change-log|
@@ -149,7 +150,8 @@ Invalid names
   6var
 
 ------------------------------------------------------------------------------
-Example: calculate area and volume given the radius.
+EXAMPLE~
+Calculate area and volume given the radius.
 
 radius = 5
 pi = 3.1415
@@ -163,6 +165,13 @@ evaluate the expressions and see the results.
 
 area = pow(radius,2)*pi = 78.5375
 volume = pow(radius,3)*pi*4/3 = 523.583333
+
+------------------------------------------------------------------------------
+User defined variables.
+
+g:crunch_variables
+
+
 
 ------------------------------------------------------------------------------
 Notes:
@@ -276,14 +285,14 @@ worry about the syntax as much, and getting the answer you expect.
 4. CONFIGURATION                                       *crunch-configuration*
 
 ------------------------------------------------------------------------------
-4.1 g:crunch_prompt                                 *crunch-calc-prompt*
+4.1 g:crunch_prompt                                           *crunch-prompt*
 
 Default 'Calc >> '
 
 The prompt provided when using |:Crunch| without a range
 
 ------------------------------------------------------------------------------
-4.2 g:crunch_comment                               *crunch-calc-comment*
+4.2 g:crunch_comment                                         *crunch-comment*
 
 Default '"'
 
@@ -296,7 +305,20 @@ Defualt 1
 
 Controls weather or not the result of each expression(s) is appended onto the
 end or if the result replaces the expression(s)
+------------------------------------------------------------------------------
+4.4 g:crunch_user_variables                           *crunch-user-variables*
 
+Default {}
+
+Dictionary that can be used to define user variable(s).
+
+EXAMPLE~
+
+let g:crunch_user_variables = {'foo': 123,  'j':456}
+
+ALTERNATIVLY~
+
+let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
 
 ==============================================================================
 5. KNOWN ISSUES                                         *crunch-known-issues*

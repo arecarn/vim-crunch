@@ -11,18 +11,6 @@ set cpo&vim
 
 "GLOBALS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if !exists("g:crunch_prompt")
-    let g:crunch_prompt = 'Calc >> '
-endif
-if !exists("g:crunch_comment")
-    let g:crunch_comment = '"'
-endif
-if !exists('g:crunch_debug')
-    let g:crunch_debug = 0
-endif
-if !exists("g:crunch_result_type_append")
-    let g:crunch_result_type_append  = 1
-endif
 
 "Holds the variables captured in a range/selection
 let s:variables = {}
@@ -89,6 +77,7 @@ function! crunch#Eval(exprs) "{{{2
     """
 
     call crunch#debug#PrintHeader('Inizilation')
+    let s:variables = g:crunch_user_variables
 
     let exprList = split(a:exprs, '\n', 1)
     call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
