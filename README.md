@@ -1,4 +1,4 @@
-#Crunch
+#Crunch ![travis-ci](https://travis-ci.org/arecarn/crunch.vim.svg?branch=master)
 
 ###An easier way to perform calculations inside Vim
 
