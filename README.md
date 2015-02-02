@@ -1,5 +1,7 @@
 #Crunch ![travis-ci](https://travis-ci.org/arecarn/crunch.vim.svg?branch=master)
 
+[![Join the chat at https://gitter.im/arecarn/crunch.vim](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/arecarn/crunch.vim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ###A calculator inside Vim
 
 ##Overview
