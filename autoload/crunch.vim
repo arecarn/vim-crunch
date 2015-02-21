@@ -76,11 +76,11 @@ function! crunch#Eval(exprs) "{{{2
     "evaluates "each line individually while saving variables when they occur
     """
 
-    call crunch#debug#PrintHeader('Inizilation')
+    call util#debug#PrintHeader('Inizilation')
     let s:variables = g:crunch_user_variables
 
     let exprList = split(a:exprs, '\n', 1)
-    call crunch#debug#PrintVarMsg(string(exprList), 'List of expr')
+    call util#debug#PrintVarMsg(string(exprList), 'List of expr')
 
     for i in range(len(exprList))
         try
@@ -104,9 +104,9 @@ function! crunch#Eval(exprs) "{{{2
         endtry
         let exprList[i] = s:BuildResult(origExpr, result)
     endfor
-    call crunch#debug#PrintMsg(string(exprList).'= the exprLinesList')
+    call util#debug#PrintMsg(string(exprList).'= the exprLinesList')
     let exprLines = join(exprList, "\n")
-    call crunch#debug#PrintMsg(string(exprLines).'= the exprLines')
+    call util#debug#PrintMsg(string(exprLines).'= the exprLines')
     let s:variables = {}
     return exprLines
 endfunction "}}}2
@@ -156,7 +156,7 @@ function! crunch#Operator(type) "{{{2
     """
     """
 
-    call crunch#debug#PrintHeader('Operator')
+    call util#debug#PrintHeader('Operator')
     "backup settings that we will change
     let sel_save = &selection
     let cb_save = &clipboard
@@ -167,7 +167,7 @@ function! crunch#Operator(type) "{{{2
     "backup the unnamed register, which we will be yanking into
     let reg_save = @@
 
-    call crunch#debug#PrintVarMsg(string(a:type), 'Operator Selection Type')
+    call util#debug#PrintVarMsg(string(a:type), 'Operator Selection Type')
     "yank the relevant text, and also set the visual selection (which will be reused if the text
     "needs to be replaced)
     if a:type =~ '^\d\+$'
@@ -177,13 +177,13 @@ function! crunch#Operator(type) "{{{2
     elseif a:type =~ '^.$'
         "if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
         silent exe "normal! `<" . a:type . "`>y"
-        call crunch#debug#PrintMsg('catch all type')
+        call util#debug#PrintMsg('catch all type')
         let type=a:type
 
     elseif a:type == 'block'
         "block-based text motion
         silent exe "normal! `[\<C-V>`]y"
-        call crunch#debug#PrintMsg('block type')
+        call util#debug#PrintMsg('block type')
         let type=''
 
     elseif a:type == 'line'
@@ -197,7 +197,7 @@ function! crunch#Operator(type) "{{{2
     endif
 
     let regtype = type
-    call crunch#debug#PrintVarMsg(regtype, "the regtype")
+    call util#debug#PrintVarMsg(regtype, "the regtype")
     let repl = crunch#Eval(@@)
 
     "if the function returned a value, then replace the text
@@ -225,24 +225,24 @@ function! s:CrunchInit(expr) "{{{2
     "need, and  removes the suffix and prefix from the expression
     """
 
-    call crunch#debug#PrintHeader('Crunch Inizilation Debug')
+    call util#debug#PrintHeader('Crunch Inizilation Debug')
 
     let expr = a:expr
 
     if !exists('b:filetype') || &filetype !=# b:filetype
         let b:filetype = &filetype
-        call crunch#debug#PrintMsg('filetype set, rebuilding prefix/suffix regex')
-        call crunch#debug#PrintMsg('['.&filetype.']= filetype')
+        call util#debug#PrintMsg('filetype set, rebuilding prefix/suffix regex')
+        call util#debug#PrintMsg('['.&filetype.']= filetype')
         call s:BuildPrefixAndSuffixRegex()
     endif
 
     let s:prefix = matchstr(expr, b:prefixRegex)
-    call crunch#debug#PrintVarMsg(s:prefix, "s:prefix")
-    call crunch#debug#PrintVarMsg(b:prefixRegex, "prefix regex")
+    call util#debug#PrintVarMsg(s:prefix, "s:prefix")
+    call util#debug#PrintVarMsg(b:prefixRegex, "prefix regex")
 
     let s:suffix = matchstr(expr, b:suffixRegex)
-    call crunch#debug#PrintVarMsg(s:suffix, "s:suffix")
-    call crunch#debug#PrintVarMsg(b:suffixRegex, "suffix regex")
+    call util#debug#PrintVarMsg(s:suffix, "s:suffix")
+    call util#debug#PrintVarMsg(b:suffixRegex, "suffix regex")
 
     let expr = s:RemovePrefixNSuffix(expr)
 
@@ -257,19 +257,19 @@ function! s:HandleCmdInput(cmdInput, bang) "{{{2
     "return the arg if it's valid otherwise an empty string is returned
     """
 
-    call crunch#debug#PrintHeader('Handle Args')
-    call crunch#debug#PrintVarMsg(a:cmdInput,'the cmdInput')
+    call util#debug#PrintHeader('Handle Args')
+    call util#debug#PrintVarMsg(a:cmdInput,'the cmdInput')
 
     "was there a bang after the command?
     let s:bang = a:bang
 
     "find command switches in the expression and extract them into a list
     let options = split(matchstr(a:cmdInput, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
-    call crunch#debug#PrintVarMsg(string(options),'the options')
+    call util#debug#PrintVarMsg(string(options),'the options')
 
     "remove the command switches from the cmdInput
     let expr = substitute(a:cmdInput, '\v\s*(-\a+\s+)+', '', 'g')
-    call crunch#debug#PrintVarMsg(expr,'the commandline expr')
+    call util#debug#PrintVarMsg(expr,'the commandline expr')
 
     return expr
 endfunction "}}}2
@@ -284,27 +284,27 @@ function! s:ValidLine(expr) "{{{2
     "function returns false
     """
 
-    call crunch#debug#PrintHeader('Valid Line')
-    call crunch#debug#PrintMsg('[' . a:expr . ']= the tested string' )
+    call util#debug#PrintHeader('Valid Line')
+    call util#debug#PrintMsg('[' . a:expr . ']= the tested string' )
 
     "checks for commented lines
     if a:expr =~ '\v^\s*'.g:crunch_comment
-        call crunch#debug#PrintMsg('test1 failed comment')
+        call util#debug#PrintMsg('test1 failed comment')
         return 0
     endif
 
     "checks for empty/blank lines
     if a:expr =~ '\v^\s*$'
-        call crunch#debug#PrintMsg('test2 failed blank line')
+        call util#debug#PrintMsg('test2 failed blank line')
         return 0
     endif
 
     "checks for lines that don't need evaluation
     if a:expr =~ '\v\C^\s*'.s:validVariable.'\s*\=\s*-?\s*'.s:numPat.'\s*$'
-        call crunch#debug#PrintMsg('test3 failed dosnt need evaluation')
+        call util#debug#PrintMsg('test3 failed dosnt need evaluation')
         return 0
     endif
-    call crunch#debug#PrintMsg('It is a valid line!')
+    call util#debug#PrintMsg('It is a valid line!')
     return 1
 endfunction "}}}2
 
@@ -318,24 +318,24 @@ function! s:RemoveOldResult(expr) "{{{2
     "inspired by Ihar Filipau's inline calculator
     """
 
-    call crunch#debug#PrintHeader('Remove Old Result')
+    call util#debug#PrintHeader('Remove Old Result')
 
     let expr = a:expr
     "if it's a variable declaration with an expression ignore the first = sign
     "else if it's just a normal expression just remove it
-    call crunch#debug#PrintMsg('[' . expr . ']= expression before removed result')
+    call util#debug#PrintMsg('[' . expr . ']= expression before removed result')
 
     let expr = substitute(expr, '\v\s*\=\s*('.s:numPat.')?\s*$', "", "")
-    call crunch#debug#PrintMsg('[' . expr . ']= after removed old result')
+    call util#debug#PrintMsg('[' . expr . ']= after removed old result')
 
     let expr = substitute(expr, '\v\s*\=\s*Crunch error:.*\s*$', "", "")
-    call crunch#debug#PrintMsg('[' . expr . ']= after removed old error')
+    call util#debug#PrintMsg('[' . expr . ']= after removed old error')
 
     let expr = substitute(expr, '\v^\s\+\ze?.', "", "")
-    call crunch#debug#PrintMsg('[' . expr . ']= after removed whitespace')
+    call util#debug#PrintMsg('[' . expr . ']= after removed whitespace')
 
     let expr = substitute(expr, '\v.\zs\s+$', "", "")
-    call crunch#debug#PrintMsg('[' . expr . ']= after removed whitespace')
+    call util#debug#PrintMsg('[' . expr . ']= after removed whitespace')
 
     return expr
 endfunction "}}}2
@@ -347,15 +347,15 @@ function! s:FixMultiplication(expr) "{{{2
     "turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
     """
 
-    call crunch#debug#PrintHeader('Fix Multiplication')
+    call util#debug#PrintHeader('Fix Multiplication')
 
     "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
     let expr = substitute(a:expr,'\v(\))\s*([(\.[:alnum:]])', '\1\*\2','g')
-    call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 1')
+    call util#debug#PrintMsg('[' . expr . ']= fixed multiplication 1')
 
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
     let expr = substitute(expr,'\v(\d)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
-    call crunch#debug#PrintMsg('[' . expr . ']= fixed multiplication 2')
+    call util#debug#PrintMsg('[' . expr . ']= fixed multiplication 2')
 
     return expr
 endfunction "}}}2
@@ -369,11 +369,11 @@ function! s:IntegerToFloat(expr) "{{{2
     "NOTE: from HowMuch.vim
     """
 
-    call crunch#debug#PrintHeader('Integer to Float')
-    call crunch#debug#PrintMsg('['.a:expr.']= before int to float conversion')
+    call util#debug#PrintHeader('Integer to Float')
+    call util#debug#PrintMsg('['.a:expr.']= before int to float conversion')
     let expr = a:expr
     let expr = substitute(expr,'\(^\|[^.0-9]\)\zs\([eE]-\?\)\@<!\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
-    call crunch#debug#PrintMsg('['.expr.']= after int to float conversion')
+    call util#debug#PrintMsg('['.expr.']= after int to float conversion')
     return expr
 endfunction "}}}2
 
@@ -402,10 +402,10 @@ function! s:UnmarkENotation(expr) "{{{3
     """
 
     let expr = a:expr
-    call crunch#debug#PrintVarMsg(expr, 'before Unmarking E notation')
+    call util#debug#PrintVarMsg(expr, 'before Unmarking E notation')
     "put back the e and remove the following ".0"
     let expr = substitute(expr, '\v#([-]?\d+)(\.0)?', 'e\1', 'g')
-    call crunch#debug#PrintVarMsg(expr, 'after Unmarking E notation')
+    call util#debug#PrintVarMsg(expr, 'after Unmarking E notation')
     return expr
 endfunction! "}}}3
 "}}}2
@@ -417,7 +417,7 @@ function! s:CaptureVariable(expr) "{{{2
     """
     """
 
-    call crunch#debug#PrintHeader('Capture Variable')
+    call util#debug#PrintHeader('Capture Variable')
 
     let VarNamePat = '\v\C^\s*\zs'.s:validVariable.'\ze\s*\=\s*'
     let VarValuePat = '\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$'
@@ -425,12 +425,12 @@ function! s:CaptureVariable(expr) "{{{2
     let VarName = matchstr(a:expr, VarNamePat)
     let VarValue = matchstr(a:expr, VarValuePat)
 
-    call crunch#debug#PrintVarMsg(VarName, 'the name of the variable')
-    call crunch#debug#PrintVarMsg(VarValue, 'the value of the variable')
+    call util#debug#PrintVarMsg(VarName, 'the name of the variable')
+    call util#debug#PrintVarMsg(VarValue, 'the value of the variable')
 
     if VarName != ''  && VarValue != ''
         let s:variables[VarName] = '('.VarValue.')'
-        call crunch#debug#PrintVarMsg(string(s:variables), 'captured variables')
+        call util#debug#PrintVarMsg(string(s:variables), 'captured variables')
     endif
 endfunction "}}}2
 
@@ -440,21 +440,21 @@ function! s:ReplaceCapturedVariable(expr) "{{{2
     """
     """
 
-    call crunch#debug#PrintHeader('Replace Captured Variablee')
+    call util#debug#PrintHeader('Replace Captured Variablee')
 
     let expr = a:expr
-    call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
+    call util#debug#PrintMsg("[".expr."]= expression before variable replacement ")
 
     "strip the variable marker, if any
     let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
-    call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
+    call util#debug#PrintMsg("[".expr."]= expression striped of variable")
 
     let variable_regex = '\v('.s:validVariable .'\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
     "replace variable with it's value
     let expr = substitute(expr, variable_regex,
                 \ '\=s:GetVariableValue3(submatch(1))', 'g' )
 
-    call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
+    call util#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
 endfunction "}}}2
 
@@ -466,21 +466,21 @@ function! s:ReplaceVariable(expr) "{{{2
     "variable inspired by Ihar Filipau's inline calculator
     """
 
-    call crunch#debug#PrintHeader('Replace Variable')
+    call util#debug#PrintHeader('Replace Variable')
 
     let expr = a:expr
-    call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
+    call util#debug#PrintMsg("[".expr."]= expression before variable replacement ")
 
     "strip the variable marker, if any
     let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
-    call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
+    call util#debug#PrintMsg("[".expr."]= expression striped of variable")
 
     "replace variable with it's value
     let expr = substitute( expr, '\v('.s:validVariable.
                 \'\v)\ze([^(a-zA-Z0-9_]|$)',
                 \ '\=s:GetVariableValue(submatch(1))', 'g' )
 
-    call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
+    call util#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
 endfunction "}}}2
 
@@ -505,25 +505,25 @@ function! s:GetVariableValue(variable) "{{{2
     """
     """
 
-    call crunch#debug#PrintHeader('Get Variable Value')
-    call crunch#debug#PrintMsg("[".getline('.')."]= the current line")
+    call util#debug#PrintHeader('Get Variable Value')
+    call util#debug#PrintMsg("[".getline('.')."]= the current line")
 
-    call crunch#debug#PrintMsg("[" . a:variable . "]= the variable")
+    call util#debug#PrintMsg("[" . a:variable . "]= the variable")
 
     let sline = search('\v\C^('.b:prefixRegex.
                 \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
 
-    call crunch#debug#PrintMsg("[".sline."]= result of search for variable")
+    call util#debug#PrintMsg("[".sline."]= result of search for variable")
     if sline == 0
         call s:Throw("variable ".a:variable." not found")
     endif
 
-    call crunch#debug#PrintMsg("[" .getline(sline). "]= line with variable value")
+    call util#debug#PrintMsg("[" .getline(sline). "]= line with variable value")
     let line = s:RemovePrefixNSuffix(getline(sline))
-    call crunch#debug#PrintHeader('Get Variable Value Contiuned')
+    call util#debug#PrintHeader('Get Variable Value Contiuned')
 
     let variableValue = matchstr(line,'\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$')
-    call crunch#debug#PrintMsg("[" . variableValue . "]= the variable value")
+    call util#debug#PrintMsg("[" . variableValue . "]= the variable value")
     if variableValue == ''
         call s:Throw('value for '.a:variable.' not found')
     endif
@@ -537,21 +537,21 @@ function! s:ReplaceVariable2(expr, num) "{{{2
     """
     """
 
-    call crunch#debug#PrintHeader('Replace Variable 2')
+    call util#debug#PrintHeader('Replace Variable 2')
 
     let expr = a:expr
-    call crunch#debug#PrintMsg("[".expr."]= expression before variable replacement ")
+    call util#debug#PrintMsg("[".expr."]= expression before variable replacement ")
 
     "strip the variable marker, if any
     let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
-    call crunch#debug#PrintMsg("[".expr."]= expression striped of variable")
+    call util#debug#PrintMsg("[".expr."]= expression striped of variable")
 
     "replace variable with it's value
     let expr = substitute( expr, '\v('.s:validVariable.
                 \'\v)\ze([^(a-zA-Z0-9_]|$)',
                 \ '\=s:GetVariableValue2(submatch(1), a:num)', 'g' )
 
-    call crunch#debug#PrintMsg("[".expr."]= expression after variable replacement")
+    call util#debug#PrintMsg("[".expr."]= expression after variable replacement")
     return expr
 endfunction "}}}2
 
@@ -561,17 +561,17 @@ function! s:GetVariableValue2(variable, num) "{{{2
     """
     """
 
-    call crunch#debug#PrintMsg("[".s:Range.firstLine."]= is the firstline")
-    call crunch#debug#PrintMsg("[".a:num."]= is the num")
-    call crunch#debug#PrintMsg("[".a:variable."]= is the variable to be replaced")
+    call util#debug#PrintMsg("[".s:Range.firstLine."]= is the firstline")
+    call util#debug#PrintMsg("[".a:num."]= is the num")
+    call util#debug#PrintMsg("[".a:variable."]= is the variable to be replaced")
     let sline = search('\v\C^('.b:prefixRegex.')?\V'.a:variable.'\v\s*\=\s*',
                 \"bnW" )
 
-    call crunch#debug#PrintMsg("[".sline."]= search line")
+    call util#debug#PrintMsg("[".sline."]= search line")
 
     let line = s:RemovePrefixNSuffix(getline(sline))
     let variableValue = matchstr(line,'\v\=\s*\zs-?\s*'.s:numPat.'\ze\s*$')
-    call crunch#debug#PrintMsg("[" . variableValue . "]= the variable value")
+    call util#debug#PrintMsg("[" . variableValue . "]= the variable value")
     if variableValue == ''
         call s:Throw("value for ".a:variable." not found")
     else
@@ -595,9 +595,9 @@ function! s:BuildResult(expr, result) "{{{2
                 \|| (s:bang == '' && !g:crunch_result_type_append)
         let output = a:result
     endif
-    call crunch#debug#PrintVarMsg(s:prefix, "s:prefix")
-    call crunch#debug#PrintVarMsg(s:suffix, "s:suffix")
-    call crunch#debug#PrintVarMsg(output, "output")
+    call util#debug#PrintVarMsg(s:prefix, "s:prefix")
+    call util#debug#PrintVarMsg(s:suffix, "s:suffix")
+    call util#debug#PrintVarMsg(output, "output")
     return s:prefix.output.s:suffix
 endfunction "}}}2
 
@@ -609,10 +609,10 @@ function! s:AddLeadingZero(expr) "{{{2
     """
 
     let expr = a:expr
-    call crunch#debug#PrintHeader('Add Leading Zero')
-    call crunch#debug#PrintMsg('['.expr.']= before adding leading zero')
+    call util#debug#PrintHeader('Add Leading Zero')
+    call util#debug#PrintMsg('['.expr.']= before adding leading zero')
     let expr = substitute(expr,'\v(^|[^.0-9])\zs\.\ze([0-9])', '0&', 'g')
-    call crunch#debug#PrintMsg('['.expr.']= after adding leading zero')
+    call util#debug#PrintMsg('['.expr.']= after adding leading zero')
     return expr
 endfunction "}}}2
 
@@ -642,15 +642,15 @@ function! s:RemovePrefixNSuffix(expr) "{{{2
     """
 
     let expr = a:expr
-    call crunch#debug#PrintHeader('Remove Line Prefix and Suffix')
+    call util#debug#PrintHeader('Remove Line Prefix and Suffix')
 
-    call crunch#debug#PrintMsg('['.b:prefixRegex.']= the REGEX of the prefix')
-    call crunch#debug#PrintMsg('['.b:suffixRegex.']= the REGEX of the suffix')
-    call crunch#debug#PrintMsg('['.expr.']= expression BEFORE removing prefix/suffix')
+    call util#debug#PrintMsg('['.b:prefixRegex.']= the REGEX of the prefix')
+    call util#debug#PrintMsg('['.b:suffixRegex.']= the REGEX of the suffix')
+    call util#debug#PrintMsg('['.expr.']= expression BEFORE removing prefix/suffix')
     let expr = substitute(expr, b:prefixRegex, '', '')
-    call crunch#debug#PrintMsg('['.expr.']= expression AFTER removing prefix')
+    call util#debug#PrintMsg('['.expr.']= expression AFTER removing prefix')
     let expr = substitute(expr, b:suffixRegex, '', '')
-    call crunch#debug#PrintMsg('['.expr.']= expression AFTER removing suffix')
+    call util#debug#PrintMsg('['.expr.']= expression AFTER removing suffix')
     return expr
 endfunction "}}}2
 
@@ -661,24 +661,24 @@ function! s:BuildPrefixAndSuffixRegex() "{{{2
     "from a list of suffixes builds a regex expression for all suffixes in the
     "list
     """
-    call crunch#debug#PrintHeader('Build Line Prefix')
-    call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
+    call util#debug#PrintHeader('Build Line Prefix')
+    call util#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentStart = matchstr(&commentstring, '\v.+\ze\%s')
     let s:prefixs = ['*','//', s:commentStart]
     call filter (s:prefixs, "v:val != ''")
-    call crunch#debug#PrintVarMsg(string(s:prefixs), "s:prefixs")
+    call util#debug#PrintVarMsg(string(s:prefixs), "s:prefixs")
     let b:prefixRegex = join( map(copy(s:prefixs), 'escape(v:val, ''\/'')'), '\|')
-    call crunch#debug#PrintMsg("[".b:prefixRegex."]= REGEX for the prefixes")
+    call util#debug#PrintMsg("[".b:prefixRegex."]= REGEX for the prefixes")
     let b:prefixRegex= '\V\^\s\*\('.b:prefixRegex.'\)\=\s\*\v'
 
-    call crunch#debug#PrintHeader('Build Line Suffix')
-    call crunch#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
+    call util#debug#PrintHeader('Build Line Suffix')
+    call util#debug#PrintMsg( "[".&commentstring."]=  the comment string ")
     let s:commentEnd = matchstr(&commentstring, '\v.+\%s\zs.*')
     let s:suffixs = ['//', s:commentEnd]
     call filter (s:suffixs, "v:val != ''")
-    call crunch#debug#PrintVarMsg(string(s:suffixs), "s:suffixs")
+    call util#debug#PrintVarMsg(string(s:suffixs), "s:suffixs")
     let b:suffixRegex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
-    call crunch#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for suffixes ")
+    call util#debug#PrintMsg( "[".b:suffixRegex."]= REGEX for suffixes ")
     let b:suffixRegex= '\V\[^ ]\{-1,}\zs\s\*\(\('.b:suffixRegex.'\)\.\*\)\=\s\*\$\v'
 
     "NOTE: these regex is very non magic see :h \V
@@ -725,12 +725,12 @@ function! s:VimEval(expr) "{{{2
     "paste register
     """
 
-    call crunch#debug#PrintHeader('Evaluate Expression')
-    call crunch#debug#PrintMsg('[' . a:expr . "]= the final expression")
+    call util#debug#PrintHeader('Evaluate Expression')
+    call util#debug#PrintMsg('[' . a:expr . "]= the final expression")
 
     let result = string(eval(a:expr))
-    call crunch#debug#PrintMsg('['.result.']= before trailing ".0" removed')
-    call crunch#debug#PrintMsg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
+    call util#debug#PrintMsg('['.result.']= before trailing ".0" removed')
+    call util#debug#PrintMsg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
 
     "check for trailing '.0' in result and remove it (occurs with vim eval)
     if result =~ '\v\.0+$'
@@ -783,8 +783,8 @@ function! s:Range.setType(count, firstLine, lastLine) dict "{{{2
             let self.lastLine = a:lastLine
         endif
     endif
-    call crunch#debug#PrintMsg(self.firstLine.'= first line')
-    call crunch#debug#PrintMsg(self.lastLine.'= last line')
+    call util#debug#PrintMsg(self.firstLine.'= first line')
+    call util#debug#PrintMsg(self.lastLine.'= last line')
 endfunction "}}}2
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -809,7 +809,7 @@ function! s:Range.capture() dict "{{{2
     else
         call s:Throw("Invalid value for s:Range.type")
     endif
-    call crunch#debug#PrintMsg(self.type.'= type of selection')
+    call util#debug#PrintMsg(self.type.'= type of selection')
 endfunction "}}}2
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -817,11 +817,11 @@ function! s:Range.overWrite(rangeToPut) dict "{{{2
     """
     """
 
-    call crunch#debug#PrintHeader('Range.overWrite')
+    call util#debug#PrintHeader('Range.overWrite')
     let a_save = @a
 
-    call crunch#debug#PrintVarMsg("pasting as", self.type)
-    call crunch#debug#PrintVarMsg("pasting", a:rangeToPut)
+    call util#debug#PrintVarMsg("pasting as", self.type)
+    call util#debug#PrintVarMsg("pasting", a:rangeToPut)
     if self.type == "selection"
         call setreg('a', a:rangeToPut, g:crunch_mode)
         normal! gv"ap
