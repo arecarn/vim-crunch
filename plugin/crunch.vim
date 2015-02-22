@@ -19,10 +19,6 @@ let g:crunch_result_type_append = get(g:, 'crunch_result_type_append', 1)
 
 let g:util_debug = get(g:, 'util_debug', 0)
 
-augroup crunch_mode
-    autocmd!
-    autocmd CursorMoved * let g:crunch_mode = mode()
-augroup END
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "COMMANDS {{{

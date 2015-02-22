@@ -2,3 +2,7 @@
 	path = autoload/util
 	url = https://github.com/arecarn/util.vim
 	branch = master
+[submodule "autoload/range"]
+	path = autoload/range
+	url = https://github.com/arecarn/range.vim
+	branch = master

@@ -4,7 +4,7 @@ Given:
   foo * bar
   sin(foo)pow(bar,2)
 Execute (variables):
-  let g:crunch_mode="V"
+  let g:range_mode="V"
   %Crunch
 Expect:
   foo * bar = 56088

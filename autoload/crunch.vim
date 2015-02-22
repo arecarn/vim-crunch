@@ -26,6 +26,9 @@ let s:numPat = sign . '%(' . number . eNotation . ')'
 let s:errorTag = 'Crunch error: '
 let s:isExclusive = 0
 let s:bang = ''
+
+let s:Range = range#range#New()
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "MAIN FUNCTIONS {{{
@@ -125,13 +128,13 @@ function! crunch#Command(count, firstLine, lastLine, cmdInput, bang) "{{{2
         call crunch#CmdLineCrunch(cmdInputExpr)
     else "no command was passed in
 
-        call s:Range.setType(a:count, a:firstLine, a:lastLine)
-        call s:Range.capture()
+        call s:Range.SetType(a:count, a:firstLine, a:lastLine)
+        call s:Range.Capture()
 
-        if s:Range.range == '' "no lines or Selection was returned
-            call crunch#CmdLineCrunch(s:Range.range)
+        if s:Range.Range == '' "no lines or Selection was returned
+            call crunch#CmdLineCrunch(s:Range.Range)
         else
-            call s:Range.overWrite(crunch#Eval(s:Range.range))
+            call s:Range.OverWrite(crunch#Eval(s:Range.Range))
         endif
     endif
     let s:bang = '' "TODO refactor
@@ -561,7 +564,7 @@ function! s:GetVariableValue2(variable, num) "{{{2
     """
     """
 
-    call util#debug#PrintMsg("[".s:Range.firstLine."]= is the firstline")
+    call util#debug#PrintMsg("[".s:Range.FirstLine."]= is the firstline")
     call util#debug#PrintMsg("[".a:num."]= is the num")
     call util#debug#PrintMsg("[".a:variable."]= is the variable to be replaced")
     let sline = search('\v\C^('.b:prefixRegex.')?\V'.a:variable.'\v\s*\=\s*',
@@ -617,21 +620,6 @@ function! s:AddLeadingZero(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:OverWriteVisualSelection(input) "{{{2
-    """
-    "TODO handle ranges with marks and "%" 03 May 2014
-    """
-
-    let a_save = @a
-    if g:crunch_mode  =~ '\C\vV|v|'
-        call setreg('a', a:input, g:crunch_mode)
-    else
-        call setreg('a', a:input, 'V')
-    endif
-    normal! gv"ap
-    let @a = a_save
-endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "PREFIX/SUFFIX {{{
@@ -760,97 +748,6 @@ function!  s:Throw(errorBody) abort "{{{2
 
     let ErrorMsg = s:errorTag.a:errorBody
     throw ErrorMsg
-endfunction "}}}2
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-
-"RANGE {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let s:Range = { 'type' : "", 'range' : "", 'firstLine' : 0, 'lastLine' : 0 }
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:Range.setType(count, firstLine, lastLine) dict "{{{2
-    """
-    """
-
-    if a:count == 0 "no range given
-        let self.type = "none"
-    else "range was given
-        if g:crunch_mode =~ '\v\Cv|'
-            let self.type = "selection"
-        else "line wise mark, %, or visual line range given
-            let self.type = "lines"
-            let self.firstLine = a:firstLine
-            let self.lastLine = a:lastLine
-        endif
-    endif
-    call util#debug#PrintMsg(self.firstLine.'= first line')
-    call util#debug#PrintMsg(self.lastLine.'= last line')
-endfunction "}}}2
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:Range.getType() dict "{{{2
-    """
-    """
-
-    return self.type
-endfunction "}}}2
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:Range.capture() dict "{{{2
-    """
-    """
-
-    if self.type == "selection"
-        let self.range = self.getSelection()
-    elseif self.type == "lines"
-        let self.range = self.getLines()
-    elseif self.type == "none"
-        let self.range =""
-    else
-        call s:Throw("Invalid value for s:Range.type")
-    endif
-    call util#debug#PrintMsg(self.type.'= type of selection')
-endfunction "}}}2
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:Range.overWrite(rangeToPut) dict "{{{2
-    """
-    """
-
-    call util#debug#PrintHeader('Range.overWrite')
-    let a_save = @a
-
-    call util#debug#PrintVarMsg("pasting as", self.type)
-    call util#debug#PrintVarMsg("pasting", a:rangeToPut)
-    if self.type == "selection"
-        call setreg('a', a:rangeToPut, g:crunch_mode)
-        normal! gv"ap
-    elseif self.type == "lines"
-        call setline(self.firstLine, split(a:rangeToPut, "\n"))
-    else
-        call s:Throw("Invalid value for s:Range.type call s:Range.setType first")
-    endif
-
-    let @a = a_save
-endfunction "}}}2
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:Range.getLines() dict "{{{2
-    return join(getline(self.firstLine, self.lastLine), "\n")
-endfunction "}}}2
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:Range.getSelection() dict "{{{2
-    """
-    """
-
-    try
-        let a_save = getreg('a')
-        normal! gv"ay
-        return @a
-    finally
-        call setreg('a', a_save)
-    endtry
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 

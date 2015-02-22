@@ -8,7 +8,7 @@ Given:
    1 (15 ounce) can light red kidney beans
    1 (15 ounce) can dark red kidney beans
 Execute ():
-  let g:crunch_mode="v"
+  let g:range_mode="v"
 Do (Test :Crunch append result to surrouned expression):
   jjviW:Crunch!\<CR>
 Expect:
@@ -23,7 +23,7 @@ Expect:
 Given:
   5*5/366
 Execute:
-  let g:crunch_mode="n"
+  let g:range_mode="n"
 Do:
   :%Crunch\<CR>
 Expect:
@@ -33,7 +33,7 @@ Given:
   5*5/366
   5*5/366
 Execute:
-  let g:crunch_mode="n"
+  let g:range_mode="n"
 Do:
   :.,$Crunch\<CR>
 Expect:
@@ -52,7 +52,7 @@ Given (Surrouned Expressions):
   Some text here  .5/2         Some text also here
   Some text here  pow(2,8)    Some text also here
 Execute:
-  let g:crunch_mode=""
+  let g:range_mode=""
 Do (Test :Crunch append result to surrouned expression):
   fs\<C-V>9j11l:Crunch\<CR>
 Expect:
@@ -79,7 +79,7 @@ Given (Surrouned Expressions):
   Some text here  .5/2         Some text also here
   Some text here  pow(2,8)    Some text also here
 Execute:
-  let g:crunch_mode=""
+  let g:range_mode=""
 Do (Test :Crunch! replace surrouned expressions with result):
   fs\<C-V>9j11l:Crunch!\<CR>
 Expect:
@@ -110,7 +110,7 @@ Given (Expressions between spaces):
   .5/2
   pow(2,8)
 Execute:
-  let g:crunch_mode="V"
+  let g:range_mode="V"
 Do (Test :Crunch and evaluate all expressions appending the result):
   VG:Crunch\<CR>
 Expect:
@@ -145,7 +145,7 @@ Given (Expressions between spaces):
   .5/2 = 0.25
   pow(2,8) = 256
 Execute:
-  let g:crunch_mode="V"
+  let g:range_mode="V"
 Do (Test Crunch! and evaluate all expressions replacing them with their result):
   VG:Crunch!\<CR>
 Expect:
@@ -170,7 +170,7 @@ Given (Expressions between spaces):
   5e3 * 2
   5.0e3.0 * 2
 Execute:
-  let g:crunch_mode="V"
+  let g:range_mode="V"
 Do (Test Crunch! and evaluate all expressions replacing them with their result):
   VG:Crunch!\<CR>
 Expect:
@@ -183,7 +183,7 @@ Given ():
   x = 5*5
   x*5
 Execute:
-  let g:crunch_mode="V"
+  let g:range_mode="V"
 Do ():
   VG:Crunch\<CR>
 Expect:
@@ -194,7 +194,7 @@ Given ():
   x = 5*5
   x*5
 Execute:
-  let g:crunch_mode="V"
+  let g:range_mode="V"
 Do (test that variables are captured even after):
   VG:Crunch!\<CR>
 Expect:
