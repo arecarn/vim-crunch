@@ -25,8 +25,6 @@ let g:util_debug = get(g:, 'util_debug', 0)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 command! -nargs=* -range=0 -bang Crunch
             \ call crunch#Command(<count>, <line1>, <line2>, <q-args>, "<bang>")
-command! CrunchLine :echoerr "removed: use :[range]Crunch, g={movement}"
-command! CrunchBlock :echoerr "removed: use vip:Crunch or g=ip"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "OPERATOR {{{
@@ -45,21 +43,6 @@ xnoremap <SID>VisualCrunchOperator :<C-U>call crunch#Operator(visualmode())<CR>
 if !hasmapto('<Plug>VisualCrunchOperator')
     xmap <unique> g= <Plug>VisualCrunchOperator
 endif
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-
-"REMOVED MAPPINGS {{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-if !hasmapto('<Plug>CrunchEvalLine')
-    map <unique> <leader>cl <Plug>CrunchEvalLine
-endif
-noremap <unique> <script> <Plug>CrunchEvalLine <SID>CrunchLine
-noremap <SID>CrunchLine :CrunchLine<CR>
-
-if !hasmapto('<Plug>CrunchEvalBlock')
-    map <unique> <leader>cb <Plug>CrunchEvalBlock
-endif
-noremap <unique> <script> <Plug>CrunchEvalBlock <SID>CrunchBlock
-noremap <SID>CrunchBlock :CrunchBlock<CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 " vim:foldmethod=marker
