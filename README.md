@@ -10,11 +10,12 @@ Crunch makes calculations in Vim more accessible and loosens Vim's math
 syntax.  Most of Crunch's looser syntax is accomplished by extensive search
 and replace.  Crunch also forces floating point to be used.
 
-Requirements: Vim compiled with `+float` feature.
-
 Crunch allows you to just type in mathematical expressions without having to
 worry about the syntax as much.
 
+##Requirements
+* [selection.vim](https://github.com/arecarn/selection.vim)
+* Vim compiled with `+float` feature.
 
 ##Usage
 

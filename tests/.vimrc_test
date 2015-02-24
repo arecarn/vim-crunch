@@ -9,11 +9,12 @@ else
 endif
 
 filetype off
+
 execute "set rtp+=".s:vimpath."/bundle/vader.vim"
 execute "set rtp+=".s:vimpath."/bundle/crunch.vim"
-" set rtp+=~/.vim/bundle/vader.vim
-" set runtimepath+=~/.vim/bundle/plugin/
+execute "set rtp+=".s:vimpath."/bundle/selection.vim"
 set rtp+=.
+
 filetype plugin indent on
 syntax enable
 

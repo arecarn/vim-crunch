@@ -1,8 +1,13 @@
 language: vim
 
+git:
+    submodules: false
+before_install:
+    git submodule update --init --recursive
 
 before_script: |
     git clone https://github.com/junegunn/vader.vim.git
+    git clone https://github.com/arecarn/selection.vim.git
 
     hg clone https://code.google.com/p/vim/
     cd vim
@@ -15,6 +20,7 @@ script: |
     vim -Nu <(cat << VIMRC
     filetype off
     set rtp+=vader.vim
+    set rtp+=selection.vim
     set rtp+=.
     filetype plugin indent on
     syntax enable

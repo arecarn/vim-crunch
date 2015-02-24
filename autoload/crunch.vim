@@ -5,7 +5,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 "SCRIPT SETTINGS {{{
-let save_cpo = &cpo   "allow line continuation
+let saveCpo = &cpo
 set cpo&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
@@ -27,7 +27,6 @@ let s:errorTag = 'Crunch error: '
 let s:isExclusive = 0
 let s:bang = ''
 
-let s:Range = range#range#New()
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
@@ -116,7 +115,7 @@ endfunction "}}}2
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#Command(count, firstLine, lastLine, cmdInput, bang) "{{{2
+function! crunch#Command(count, firstLine, lastLine, cmdInput, bang) abort "{{{2
     """
     "The top level function that handles arguments and user input
     """
@@ -128,13 +127,16 @@ function! crunch#Command(count, firstLine, lastLine, cmdInput, bang) "{{{2
         call crunch#CmdLineCrunch(cmdInputExpr)
     else "no command was passed in
 
-        call s:Range.SetType(a:count, a:firstLine, a:lastLine)
-        call s:Range.Capture()
+        try
+            let s:selection = selection#New(a:count, a:firstLine, a:lastLine)
+        catch
+            call s:Throw('Please install selection.vim for this operation')
+        endtry
 
-        if s:Range.Range == '' "no lines or Selection was returned
-            call crunch#CmdLineCrunch(s:Range.Range)
+        if s:selection.content == '' "no lines or Selection was returned
+            call crunch#CmdLineCrunch(s:selection.content)
         else
-            call s:Range.OverWrite(crunch#Eval(s:Range.Range))
+            call s:selection.OverWrite(crunch#Eval(s:selection.content))
         endif
     endif
     let s:bang = '' "TODO refactor
@@ -161,14 +163,14 @@ function! crunch#Operator(type) "{{{2
 
     call util#debug#PrintHeader('Operator')
     "backup settings that we will change
-    let sel_save = &selection
-    let cb_save = &clipboard
+    let selSave = &selection
+    let cbSave = &clipboard
 
     "make selection and clipboard work the way we need
     set selection=inclusive clipboard-=unnamed clipboard-=unnamedplus
 
     "backup the unnamed register, which we will be yanking into
-    let reg_save = @@
+    let regSave = @@
 
     call util#debug#PrintVarMsg(string(a:type), 'Operator Selection Type')
     "yank the relevant text, and also set the visual selection (which will be reused if the text
@@ -214,9 +216,9 @@ function! crunch#Operator(type) "{{{2
     endif
 
     "restore saved settings and register value
-    let @@ = reg_save
-    let &selection = sel_save
-    let &clipboard = cb_save
+    let @@ = regSave
+    let &selection = selSave
+    let &clipboard = cbSave
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
@@ -452,9 +454,9 @@ function! s:ReplaceCapturedVariable(expr) "{{{2
     let expr = substitute( expr, '\v\C^\s*'.s:validVariable.'\s*\=\s*', "", "")
     call util#debug#PrintMsg("[".expr."]= expression striped of variable")
 
-    let variable_regex = '\v('.s:validVariable .'\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
+    let variableRegex = '\v('.s:validVariable .'\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
     "replace variable with it's value
-    let expr = substitute(expr, variable_regex,
+    let expr = substitute(expr, variableRegex,
                 \ '\=s:GetVariableValue3(submatch(1))', 'g' )
 
     call util#debug#PrintMsg("[".expr."]= expression after variable replacement")
@@ -564,7 +566,6 @@ function! s:GetVariableValue2(variable, num) "{{{2
     """
     """
 
-    call util#debug#PrintMsg("[".s:Range.FirstLine."]= is the firstline")
     call util#debug#PrintMsg("[".a:num."]= is the num")
     call util#debug#PrintMsg("[".a:variable."]= is the variable to be replaced")
     let sline = search('\v\C^('.b:prefixRegex.')?\V'.a:variable.'\v\s*\=\s*',
@@ -751,5 +752,5 @@ function!  s:Throw(errorBody) abort "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-let &cpo = save_cpo
+let &cpo = saveCpo
 " vim:foldmethod=marker
