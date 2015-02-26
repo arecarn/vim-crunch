@@ -112,15 +112,6 @@ replaces the expression(s)
     Where [expr] is some mathematical expression to be evaluated. The result
     is then available to be pasted from the default register.
 
-:CrunchLine                                                     *:CrunchLine*
-   Removed, try using the operator |g=| for example in formal mode type |g==| to
-   evaluate the current line
-
-
-:CrunchBlock                                                   :*CrunchBlock*
-   Removed, try using the operator |g=| for example in normal mode type |g=|ip to
-   evaluate the current paragraph
-
 ------------------------------------------------------------------------------
 NOTES~
 

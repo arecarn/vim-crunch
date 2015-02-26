@@ -16,32 +16,31 @@ let g:crunch_prompt = get(g:, 'crunch_prompt', 'Calc >> ')
 let g:crunch_comment = get(g:, 'crunch_comment', '"')
 let g:crunch_user_variables = get(g:, 'crunch_user_variables', {})
 let g:crunch_result_type_append = get(g:, 'crunch_result_type_append', 1)
-
 let g:util_debug = get(g:, 'util_debug', 0)
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "COMMANDS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 command! -nargs=* -range=0 -bang Crunch
-            \ call crunch#Command(<count>, <line1>, <line2>, <q-args>, "<bang>")
+            \ call crunch#command(<count>, <line1>, <line2>, <q-args>, "<bang>")
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 "OPERATOR {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-nnoremap <unique> <script> <plug>CrunchOperator <SID>CrunchOperator
-nnoremap <SID>CrunchOperator :<C-U>set opfunc=crunch#Operator<CR>g@
+nnoremap <unique> <script> <Plug>crunch-operator <SID>crunch-operator
+nnoremap <SID>crunch-operator :<C-U>set opfunc=crunch#operator<CR>g@
+nnoremap <SID>crunch-operator-line :<C-U>set opfunc=crunch#operator<CR>g@_
 
-if !hasmapto('<Plug>CrunchOperator')
-    nmap <unique> g= <Plug>CrunchOperator
-    nmap <unique> g== <Plug>CrunchOperator_
+if !hasmapto('<Plug>crunch-operator')
+    nmap <unique> g= <Plug>(crunch-operator)
+    nmap <unique> g== <Plug>(crunch-operator-line)
 endif
 
-xnoremap <unique> <script> <plug>VisualCrunchOperator  <SID>VisualCrunchOperator
-xnoremap <SID>VisualCrunchOperator :<C-U>call crunch#Operator(visualmode())<CR>
+xnoremap <unique> <script> <Plug>visual_crunch_operator  <SID>visual_crunch_operator
+xnoremap <SID>visual_crunch_operator :<C-U>call crunch#operator(visualmode())<CR>
 
-if !hasmapto('<Plug>VisualCrunchOperator')
-    xmap <unique> g= <Plug>VisualCrunchOperator
+if !hasmapto('<Plug>visual-crunch-operator')
+    xmap <unique> g= <Plug>(visual-crunch-operator)
 endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
