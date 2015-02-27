@@ -27,18 +27,18 @@ command! -nargs=* -range=0 -bang Crunch
 
 "OPERATOR {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-nnoremap <unique> <script> <Plug>crunch-operator <SID>crunch-operator
-nnoremap <SID>crunch-operator :<C-U>set opfunc=crunch#operator<CR>g@
-nnoremap <SID>crunch-operator-line :<C-U>set opfunc=crunch#operator<CR>g@_
-
+nnoremap <unique> <script> <Plug>(crunch-operator) <SID>crunch_operator
+nnoremap <SID>crunch_operator :<C-U>set opfunc=crunch#operator<CR>g@
 if !hasmapto('<Plug>crunch-operator')
     nmap <unique> g= <Plug>(crunch-operator)
-    nmap <unique> g== <Plug>(crunch-operator-line)
 endif
 
-xnoremap <unique> <script> <Plug>visual_crunch_operator  <SID>visual_crunch_operator
-xnoremap <SID>visual_crunch_operator :<C-U>call crunch#operator(visualmode())<CR>
+nnoremap <unique> <script> <Plug>(crunch-operator-line) <SID>crunch_operator_line
+nnoremap <SID>crunch_operator_line :<C-U>set opfunc=crunch#operator<CR>g@_
+nmap <unique> g== <Plug>(crunch-operator-line)
 
+xnoremap <unique> <script> <Plug>(visual-crunch-operator) <SID>visual_crunch_operator
+xnoremap <SID>visual_crunch_operator :<C-U>call crunch#operator(visualmode())<CR>
 if !hasmapto('<Plug>visual-crunch-operator')
     xmap <unique> g= <Plug>(visual-crunch-operator)
 endif

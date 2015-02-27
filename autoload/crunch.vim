@@ -35,7 +35,7 @@ function! crunch#cmd_line_crunch(user_input) "{{{2
     " copying it to the user's clipboard
 
     if a:user_input != ''
-        let expr = a:input
+        let expr = a:user_input
     else
         let expr = s:get_user_input()
         redraw
@@ -133,7 +133,7 @@ function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{
         if s:selection.content == '' "no lines or Selection was returned
             call crunch#cmd_line_crunch(s:selection.content)
         else
-            call s:selection.Over_write(crunch#eval(s:selection.content))
+            call s:selection.over_write(crunch#eval(s:selection.content))
         endif
     endif
     let s:bang = '' "TODO refactor
@@ -342,7 +342,7 @@ function! s:fix_multiplication(expr) "{{{2
     call util#debug#print_msg('[' . expr . ']= fixed multiplication 1')
 
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
-    let expr = substitute(expr,'\v(\d)\s*([(a-df-z_a-D_f-Z])', '\1\*\2','g')
+    let expr = substitute(expr,'\v(\d)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
     call util#debug#print_msg('[' . expr . ']= fixed multiplication 2')
 
     return expr
@@ -399,17 +399,17 @@ function! s:capture_variable(expr) "{{{2
 
     call util#debug#print_header('Capture Variable')
 
-    let Var_name_pat = '\v\C^\s*\zs'.s:valid_variable.'\ze\s*\=\s*'
-    let Var_value_pat = '\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$'
+    let var_name_pat = '\v\C^\s*\zs'.s:valid_variable.'\ze\s*\=\s*'
+    let var_value_pat = '\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$'
 
-    let Var_name = matchstr(a:expr, Var_name_pat)
-    let Var_value = matchstr(a:expr, Var_value_pat)
+    let var_name = matchstr(a:expr, var_name_pat)
+    let var_value = matchstr(a:expr, var_value_pat)
 
-    call util#debug#print_var_msg(Var_name, 'the name of the variable')
-    call util#debug#print_var_msg(Var_value, 'the value of the variable')
+    call util#debug#print_var_msg(var_name, 'the name of the variable')
+    call util#debug#print_var_msg(var_value, 'the value of the variable')
 
-    if Var_name != ''  && Var_value != ''
-        let s:variables[Var_name] = '('.Var_value.')'
+    if var_name != ''  && var_value != ''
+        let s:variables[var_name] = '('.var_value.')'
         call util#debug#print_var_msg(string(s:variables), 'captured variables')
     endif
 endfunction "}}}2
@@ -482,16 +482,16 @@ function! s:get_variable_value(variable) "{{{2
 
     call util#debug#print_msg("[" . a:variable . "]= the variable")
 
-    let sline = search('\v\C^('.b:prefix_regex.
+    let search_line = search('\v\C^('.b:prefix_regex.
                 \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
 
-    call util#debug#print_msg("[".sline."]= result of search for variable")
-    if sline == 0
+    call util#debug#print_msg("[".search_line."]= result of search for variable")
+    if search_line == 0
         call s:throw("variable ".a:variable." not found")
     endif
 
-    call util#debug#print_msg("[" .getline(sline). "]= line with variable value")
-    let line = s:remove_prefix_n_suffix(getline(sline))
+    call util#debug#print_msg("[" .getline(search_line). "]= line with variable value")
+    let line = s:remove_prefix_n_suffix(getline(search_line))
     call util#debug#print_header('Get Variable Value Contiuned')
 
     let variable_value = matchstr(line,'\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$')
@@ -518,7 +518,7 @@ function! s:replace_variable2(expr, num) "{{{2
 
     "replace variable with it's value
     let expr = substitute( expr, '\v('.s:valid_variable.
-                \'\v)\ze([^(a-z_a-Z0-9_]|$)',
+                \'\v)\ze([^(a-zA-Z0-9_]|$)',
                 \ '\=s:get_variable_value2(submatch(1), a:num)', 'g' )
 
     call util#debug#print_msg("[".expr."]= expression after variable replacement")
@@ -531,12 +531,12 @@ function! s:get_variable_value2(variable, num) "{{{2
 
     call util#debug#print_msg("[".a:num."]= is the num")
     call util#debug#print_msg("[".a:variable."]= is the variable to be replaced")
-    let sline = search('\v\C^('.b:prefix_regex.')?\V'.a:variable.'\v\s*\=\s*',
+    let search_line = search('\v\C^('.b:prefix_regex.')?\V'.a:variable.'\v\s*\=\s*',
                 \"bnW" )
 
-    call util#debug#print_msg("[".sline."]= search line")
+    call util#debug#print_msg("[".search_line."]= search line")
 
-    let line = s:remove_prefix_n_suffix(getline(sline))
+    let line = s:remove_prefix_n_suffix(getline(search_line))
     let variable_value = matchstr(line,'\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$')
     call util#debug#print_msg("[" . variable_value . "]= the variable value")
     if variable_value == ''
@@ -670,7 +670,7 @@ function! s:vim_eval(expr) "{{{2
 
     let result = string(eval(a:expr))
     call util#debug#print_msg('['.result.']= before trailing ".0" removed')
-    call util#debug#pRint_msg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
+    call util#debug#print_msg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
 
     "check for trailing '.0' in result and remove it (occurs with vim eval)
     if result =~ '\v\.0+$'
