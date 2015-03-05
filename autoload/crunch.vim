@@ -1,22 +1,22 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Maintainer: Ryan Carney
-"Repository: https://github.com/arecarn/crunch
-"License: WTFPL
+" Original Author: Ryan Carney
+" License: WTFPL
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-"SCRIPT SETTINGS {{{
-let save_cpo = &cpo
+" BOILER PLATE {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let s:save_cpo = &cpo
 set cpo&vim
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"GLOBALS {{{
+" GLOBALS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Holds the variables captured in a range/selection
+" Holds the variables captured in a range/selection
 let s:variables = {}
 
 let s:valid_variable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
 
-"Number Regex Patterns
+" Number Regex Patterns
 let sign = '\v[-+]?'
 let number = '\v\.\d+|\d+%([.]\d+)?'
 let e_notation = '\v%([eE][+-]?\d+)?'
@@ -27,7 +27,7 @@ let s:is_exclusive = 0
 let s:bang = ''
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"MAIN FUNCTIONS {{{
+" PUBLIC FUNCTIONS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#cmd_line_crunch(user_input) "{{{2
     " If there is no user input prompts the user for it, then evaluate the
@@ -68,7 +68,6 @@ function! crunch#cmd_line_crunch(user_input) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#eval(exprs) abort "{{{2
     " Takes string of mathematical expressions delimited by new lines
     " evaluates "each line individually while saving variables when they occur
@@ -113,7 +112,6 @@ function! crunch#eval(exprs) abort "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{{{2
     " The top level function that handles arguments and user input
 
@@ -140,7 +138,6 @@ function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#core(expression) "{{{2
     " The core functionality of crunch
 
@@ -151,7 +148,6 @@ function! crunch#core(expression) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! crunch#operator(type) "{{{2
 
     call util#debug#print_header('Operator')
@@ -215,7 +211,7 @@ function! crunch#operator(type) "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"INITIALIZATION {{{
+" INITIALIZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:crunch_init(expr) "{{{2
     " Gets the expression from current line, builds the suffix/prefix regex if
@@ -246,7 +242,6 @@ function! s:crunch_init(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:handle_cmd_input(cmd_input, bang) "{{{2
     " test if there is an arg in the correct form.
     " return the arg if it's valid otherwise an empty string is returned
@@ -269,7 +264,7 @@ function! s:handle_cmd_input(cmd_input, bang) "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"FORMAT EXPRESSION{{{
+" FORMAT EXPRESSION{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:valid_line(expr) "{{{2
     " Checks the line to see if it is a variable definition, or a blank line
@@ -301,7 +296,6 @@ function! s:valid_line(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:remove_old_result(expr) "{{{2
     " Remove old result if any
     " eg '5+5 = 10' becomes '5+5'
@@ -331,7 +325,6 @@ function! s:remove_old_result(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:fix_multiplication(expr) "{{{2
     " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
 
@@ -349,7 +342,6 @@ function! s:fix_multiplication(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:integer_to_float(expr) "{{{2
     " Convert Integers in the exprs to floats by calling a substitute
     " command
@@ -363,7 +355,8 @@ function! s:integer_to_float(expr) "{{{2
     return expr
 endfunction "}}}2
 
-"E NOTATION {{{2
+
+" E NOTATION {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:mark_e_notation(expr) "{{{3
     " e.g
@@ -390,10 +383,10 @@ function! s:unmark_e_notation(expr) "{{{3
     call util#debug#print_var_msg(expr, 'after Unmarking E notation')
     return expr
 endfunction! "}}}3
-"}}}2
+" }}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"HANDLE VARIABLES {{{
+" HANDLE VARIABLES {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:capture_variable(expr) "{{{2
 
@@ -415,7 +408,6 @@ function! s:capture_variable(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:replace_captured_variable(expr) "{{{2
 
     call util#debug#print_header('Replace Captured Variablee')
@@ -437,7 +429,6 @@ function! s:replace_captured_variable(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:replace_variable(expr) "{{{2
     " Replaces the variable within an expression with the value of that
     " variable inspired by Ihar Filipau's inline calculator
@@ -474,7 +465,6 @@ function! s:get_variable_value3(variable) abort
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:get_variable_value(variable) "{{{2
 
     call util#debug#print_header('Get Variable Value')
@@ -504,7 +494,6 @@ function! s:get_variable_value(variable) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:replace_variable2(expr, num) "{{{2
 
     call util#debug#print_header('Replace Variable 2')
@@ -526,7 +515,6 @@ function! s:replace_variable2(expr, num) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:get_variable_value2(variable, num) "{{{2
 
     call util#debug#print_msg("[".a:num."]= is the num")
@@ -547,7 +535,7 @@ function! s:get_variable_value2(variable, num) "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"RESULT HANDLING{{{
+" RESULT HANDLING{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:build_result(expr, result) "{{{2
 
@@ -568,7 +556,6 @@ function! s:build_result(expr, result) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:add_leading_zero(expr) "{{{2
     " convert .5*.34 -> 0.5*0.34
 
@@ -579,11 +566,9 @@ function! s:add_leading_zero(expr) "{{{2
     call util#debug#print_msg('['.expr.']= after adding leading zero')
     return expr
 endfunction "}}}2
-
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"PREFIX/SUFFIX {{{
+" PREFIX/SUFFIX {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:remove_prefix_n_suffix(expr) "{{{2
     " Removes the prefix and suffix from a string
@@ -602,7 +587,6 @@ function! s:remove_prefix_n_suffix(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:build_prefix_and_suffix_regex() "{{{2
     " from a list of suffixes builds a regex expression for all suffixes in the
     " list
@@ -631,7 +615,6 @@ function! s:build_prefix_and_suffix_regex() "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:get_user_input() "{{{2
     " prompt the user for an expression
 
@@ -642,7 +625,7 @@ function! s:get_user_input() "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"EVALUATION {{{
+" EVALUATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:eval_math(expr) "{{{2
     " Return Output
@@ -659,7 +642,6 @@ function! s:eval_math(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:vim_eval(expr) "{{{2
     " Evaluates the expression and checks for errors in the process. Also
     " if there is no error echo the result and save a copy of it to the default
@@ -681,7 +663,7 @@ function! s:vim_eval(expr) "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"ERRORS {{{
+" ERRORS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:echo_error(error_string) "{{{2
 
@@ -691,7 +673,6 @@ function! s:echo_error(error_string) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function!  s:throw(error_body) abort "{{{2
 
     let Error_msg = s:error_tag.a:error_body
@@ -699,5 +680,9 @@ function!  s:throw(error_body) abort "{{{2
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-let &cpo = save_cpo
+" BOILER PLATE {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let &cpo = s:save_cpo
+unlet s:save_cpo
 " vim:foldmethod=marker
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}

@@ -1,10 +1,15 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Maintainer: Ryan Carney
-"Repository: https://github.com/arecarn/crunch
-"License: WTFPL
+" Original Author: Ryan Carney
+" License: WTFPL
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-"GLOBALS & AUTOCMDS{{{
+" BOILER PLATE {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let s:save_cpo = &cpo
+set cpo&vim
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
+
+" GLOBALS & AUTOCMDS{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 if exists("g:loaded_crunch")
     finish
@@ -19,29 +24,36 @@ let g:crunch_result_type_append = get(g:, 'crunch_result_type_append', 1)
 let g:util_debug = get(g:, 'util_debug', 0)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"COMMANDS {{{
+" COMMANDS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 command! -nargs=* -range=0 -bang Crunch
             \ call crunch#command(<count>, <line1>, <line2>, <q-args>, "<bang>")
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-"OPERATOR {{{
+" MAPPINGS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-nnoremap <unique> <script> <Plug>(crunch-operator) <SID>crunch_operator
-nnoremap <SID>crunch_operator :<C-U>set opfunc=crunch#operator<CR>g@
-if !hasmapto('<Plug>crunch-operator')
+nnoremap <silent> <script> <Plug>(crunch-operator)
+            \ :<C-U>set opfunc=crunch#operator<CR>g@
+if !hasmapto('<Plug>(crunch-operator)')
     nmap <unique> g= <Plug>(crunch-operator)
 endif
 
-nnoremap <unique> <script> <Plug>(crunch-operator-line) <SID>crunch_operator_line
-nnoremap <SID>crunch_operator_line :<C-U>set opfunc=crunch#operator<CR>g@_
-nmap <unique> g== <Plug>(crunch-operator-line)
+nnoremap <silent> <script> <Plug>(crunch-operator-line)
+            \ :<C-U>set opfunc=crunch#operator<CR>g@_
+if !hasmapto('<Plug>(crunch-operator-line)')
+    nmap <unique> g== <Plug>(crunch-operator-line)
+endif
 
-xnoremap <unique> <script> <Plug>(visual-crunch-operator) <SID>visual_crunch_operator
-xnoremap <SID>visual_crunch_operator :<C-U>call crunch#operator(visualmode())<CR>
-if !hasmapto('<Plug>visual-crunch-operator')
+xnoremap <silent> <script> <Plug>(visual-crunch-operator)
+            \ :<C-U>call crunch#operator(visualmode())<CR>
+if !hasmapto('<Plug>(visual-crunch-operator)')
     xmap <unique> g= <Plug>(visual-crunch-operator)
 endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
+" BOILER PLATE {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let &cpo = s:save_cpo
+unlet s:save_cpo
 " vim:foldmethod=marker
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
