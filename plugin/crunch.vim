@@ -7,16 +7,16 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:save_cpo = &cpo
 set cpo&vim
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
-" GLOBALS & AUTOCMDS{{{
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 if exists("g:loaded_crunch")
     finish
 else
     let g:loaded_crunch = 1
 endif
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
+" GLOBALS {{{
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:crunch_prompt = get(g:, 'crunch_prompt', 'Calc >> ')
 let g:crunch_comment = get(g:, 'crunch_comment', '"')
 let g:crunch_user_variables = get(g:, 'crunch_user_variables', {})
