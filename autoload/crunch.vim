@@ -73,7 +73,7 @@ function! crunch#eval(exprs) abort "{{{2
     " evaluates "each line individually while saving variables when they occur
 
     call util#debug#print_header('Inizilation')
-    let s:variables = g:crunch_user_variables
+    let s:variables = deepcopy(g:crunch_user_variables, 0)
 
     let expr_list = split(a:exprs, '\n', 1)
     call util#debug#print_var_msg(string(expr_list), 'List of expr')
