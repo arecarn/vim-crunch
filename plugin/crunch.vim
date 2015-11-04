@@ -33,19 +33,22 @@ command! -nargs=* -range=0 -bang Crunch
 " MAPPINGS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 nnoremap <silent> <script> <Plug>(crunch-operator)
-            \ :<C-U>set opfunc=crunch#operator<CR>g@
+            \ :<C-U>call crunch#normal_operator()<CR>
+            \ :set opfunc=crunch#operator<CR>g@
 if !hasmapto('<Plug>(crunch-operator)')
     nmap <unique> g= <Plug>(crunch-operator)
 endif
 
 nnoremap <silent> <script> <Plug>(crunch-operator-line)
-            \ :<C-U>set opfunc=crunch#operator<CR>g@_
+            \ :<C-U>call crunch#linewise_operator()<CR>
+            \ :set opfunc=crunch#operator<CR>g@_
 if !hasmapto('<Plug>(crunch-operator-line)')
     nmap <unique> g== <Plug>(crunch-operator-line)
 endif
 
 xnoremap <silent> <script> <Plug>(visual-crunch-operator)
-            \ :<C-U>call crunch#operator(visualmode())<CR>
+            \ :<C-U>call crunch#visual_operator()<CR>
+            \ :call crunch#operator(visualmode())<CR>
 if !hasmapto('<Plug>(visual-crunch-operator)')
     xmap <unique> g= <Plug>(visual-crunch-operator)
 endif

@@ -26,6 +26,8 @@ let s:num_pat = sign . '%(' . number . e_notation . ')'
 let s:error_tag = 'Crunch error: '
 let s:is_exclusive = 0
 let s:bang = ''
+
+let s:input_type = ''
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 " PUBLIC FUNCTIONS {{{
@@ -116,6 +118,7 @@ endfunction "}}}2
 function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{{{2
     " The top level function that handles arguments and user input
 
+    let s:input_type = ''
     let cmd_input_expr  = s:handle_cmd_input(a:cmd_input, a:bang)
 
     if cmd_input_expr != '' "an expression was passed in
@@ -147,6 +150,18 @@ function! crunch#core(expression) "{{{2
     let expr = s:add_leading_zero(expr)
     return s:eval_math(expr)
 endfunction "}}}2
+
+function! crunch#linewise_operator() abort
+    let s:input_type = 'linewise_operator'
+endfunction
+
+function! crunch#normal_operator() abort
+    let s:input_type = ''
+endfunction
+
+function! crunch#visual_operator() abort
+    let s:input_type = ''
+endfunction
 
 
 function! crunch#operator(type) "{{{2
@@ -500,9 +515,27 @@ function! s:build_result(expr, result) "{{{2
     "capture variable results if they exists TODO refactor
     call s:capture_variable(output)
 
+
+    let bang = s:bang
+    let crunch_result_type_append = g:crunch_result_type_append
+    let input_type = s:input_type
+
+"    Decho 's:bang = <'.bang.'>'
+"    Decho 'g:crunch_result_type_append = <'.crunch_result_type_append.'>'
+"    Decho 's:input_type = <'.input_type.'>'
+
+    let is_not_append_result_type = (
+                \ (s:bang == '!' && g:crunch_result_type_append == 1) ||
+                \ (s:bang == '' && g:crunch_result_type_append == 0)  ||
+                \ (
+                \     (s:bang == '' && g:crunch_result_type_append == 2)  &&
+                \     (s:input_type != 'linewise_operator')
+                \ )
+                \ )
+
+"    Decho 'is_not_append_result_type = <'.is_not_append_result_type.'>'
     "bang isn't used and type is not append result
-    if (s:bang == '!' && g:crunch_result_type_append) ||
-                \ (s:bang == '' && !g:crunch_result_type_append)
+    if (is_not_append_result_type)
         let output = a:result
     endif
     let prefix = s:prefix
