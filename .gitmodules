@@ -1,4 +1,0 @@
-[submodule "autoload/util"]
-	path = autoload/util
-	url = https://github.com/arecarn/util.vim
-	branch = master
