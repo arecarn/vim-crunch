@@ -135,6 +135,9 @@ function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{
         if s:selection.content == '' "no lines or Selection was returned
             call crunch#cmd_line_crunch(s:selection.content)
         else
+            if s:selection.type == 'lines'
+                let s:input_type = 'linewise'
+            endif
             call s:selection.over_write(crunch#eval(s:selection.content))
         endif
     endif
@@ -152,7 +155,7 @@ function! crunch#core(expression) "{{{2
 endfunction "}}}2
 
 function! crunch#linewise_operator() abort
-    let s:input_type = 'linewise_operator'
+    let s:input_type = 'linewise'
 endfunction
 
 function! crunch#normal_operator() abort
@@ -525,12 +528,12 @@ function! s:build_result(expr, result) "{{{2
 "    Decho 's:input_type = <'.input_type.'>'
 
     let is_not_append_result_type = (
-                \ (s:bang == '!' && g:crunch_result_type_append == 1) ||
-                \ (s:bang == '' && g:crunch_result_type_append == 0)  ||
-                \ (
-                \     (s:bang == '' && g:crunch_result_type_append == 2)  &&
-                \     (s:input_type != 'linewise_operator')
-                \ )
+                \   (s:bang == '!' && g:crunch_result_type_append == 1) ||
+                \   (s:bang == '' && g:crunch_result_type_append == 0) ||
+                \   (
+                \     (s:bang == '' && g:crunch_result_type_append == 2) &&
+                \     (s:input_type != 'linewise')
+                \   )
                 \ )
 
 "    Decho 'is_not_append_result_type = <'.is_not_append_result_type.'>'
