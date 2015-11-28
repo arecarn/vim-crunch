@@ -453,29 +453,6 @@ function! s:replace_captured_variable(expr) "{{{2
 endfunction "}}}2
 
 
-function! s:replace_variable(expr) "{{{2
-    " Replaces the variable within an expression with the value of that
-    " variable inspired by Ihar Filipau's inline calculator
-
-    call s:d_header('Replace Variable')
-
-    let expr = a:expr
-    call s:d_msg("[".expr."]= expression before variable replacement ")
-
-    "strip the variable marker, if any
-    let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', "", "")
-    call s:d_msg("[".expr."]= expression striped of variable")
-
-    "replace variable with it's value
-    let expr = substitute( expr, '\v('.s:valid_variable.
-                \'\v)\ze([^(a-zA-Z0-9_]|$)',
-                \ '\=s:get_variable_value(submatch(1))', 'g' )
-
-    call s:d_msg("[".expr."]= expression after variable replacement")
-    return expr
-endfunction "}}}2
-
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:get_variable_value3(variable) abort
 
