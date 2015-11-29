@@ -119,7 +119,7 @@ function! crunch#eval(exprs) abort "{{{2
 
             let expr_list[i] = s:mark_e_notation(expr_list[i])
             let expr_list[i] = s:replace_captured_variable(expr_list[i])
-            let expr_list[i] = s:replace_variable2(expr_list[i], i)
+            let expr_list[i] = s:replace_variable_with_value(expr_list[i], i)
             let expr_list[i] = s:unmark_e_notation(expr_list[i])
             let result  = crunch#core(expr_list[i])
         catch /Crunch error: /
@@ -432,6 +432,7 @@ function! s:capture_variable(expr) "{{{2
 endfunction "}}}2
 
 
+" TODO this is the same as s:replace_variable_with_value
 function! s:replace_captured_variable(expr) "{{{2
 
     call s:d_header('Replace Captured Variablee')
@@ -443,7 +444,9 @@ function! s:replace_captured_variable(expr) "{{{2
     let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', "", "")
     call s:d_msg("[".expr."]= expression striped of variable")
 
-    let variable_regex = '\v('.s:valid_variable .'\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
+    let variable_regex = '\v('.s:valid_variable.
+                \ '\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
+
     "replace variable with it's value
     let expr = substitute(expr, variable_regex,
                 \ '\=s:get_variable_value3(submatch(1))', 'g' )
@@ -453,8 +456,7 @@ function! s:replace_captured_variable(expr) "{{{2
 endfunction "}}}2
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:get_variable_value3(variable) abort
+function! s:get_variable_value3(variable) abort "{{{2
 
     let value = get(s:variables, a:variable, "not found")
     if value == "not found"
@@ -466,38 +468,9 @@ function! s:get_variable_value3(variable) abort
 endfunction "}}}2
 
 
-function! s:get_variable_value(variable) "{{{2
+function! s:replace_variable_with_value(expr, num) "{{{2
 
-    call s:d_header('Get Variable Value')
-    call s:d_msg("[".getline('.')."]= the current line")
-
-    call s:d_msg("[" . a:variable . "]= the variable")
-
-    let search_line = search('\v\C^('.b:prefix_regex.
-                \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
-
-    call s:d_msg("[".search_line."]= result of search for variable")
-    if search_line == 0
-        call s:throw("variable ".a:variable." not found")
-    endif
-
-    call s:d_msg("[" .getline(search_line). "]= line with variable value")
-    let line = s:remove_prefix_n_suffix(getline(search_line))
-    call s:d_header('Get Variable Value Contiuned')
-
-    let variable_value = matchstr(line,'\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$')
-    call s:d_msg("[" . variable_value . "]= the variable value")
-    if variable_value == ''
-        call s:throw('value for '.a:variable.' not found')
-    endif
-
-    return '('.variable_value.')'
-endfunction "}}}2
-
-
-function! s:replace_variable2(expr, num) "{{{2
-
-    call s:d_header('Replace Variable 2')
+    call s:d_header('Replace Variable')
 
     let expr = a:expr
     call s:d_msg("[".expr."]= expression before variable replacement ")
@@ -508,7 +481,7 @@ function! s:replace_variable2(expr, num) "{{{2
 
     "replace variable with it's value
     let expr = substitute( expr, '\v('.s:valid_variable.
-                \'\v)\ze([^(a-zA-Z0-9_]|$)',
+                \ '\v)\ze([^(a-zA-Z0-9_]|$)',
                 \ '\=s:get_variable_value2(submatch(1), a:num)', 'g' )
 
     call s:d_msg("[".expr."]= expression after variable replacement")
