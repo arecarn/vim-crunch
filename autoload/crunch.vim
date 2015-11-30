@@ -449,14 +449,14 @@ function! s:replace_captured_variable(expr) "{{{2
 
     "replace variable with it's value
     let expr = substitute(expr, variable_regex,
-                \ '\=s:get_variable_value3(submatch(1))', 'g' )
+                \ '\=s:get_stored_variable_value(submatch(1))', 'g' )
 
     call s:d_msg("[".expr."]= expression after variable replacement")
     return expr
 endfunction "}}}2
 
 
-function! s:get_variable_value3(variable) abort "{{{2
+function! s:get_stored_variable_value(variable) abort "{{{2
 
     let value = get(s:variables, a:variable, "not found")
     if value == "not found"
@@ -484,14 +484,14 @@ function! s:replace_variable_with_value(expr, num) "{{{2
 
     "replace variable with it's value
     let expr = substitute( expr, variable_regex
-                \ '\=s:get_variable_value2(submatch(1), a:num)', 'g' )
+                \ '\=s:get_searched_variable_value(submatch(1), a:num)', 'g' )
 
     call s:d_msg("[".expr."]= expression after variable replacement")
     return expr
 endfunction "}}}2
 
 
-function! s:get_variable_value2(variable, num) "{{{2
+function! s:get_searched_variable_value(variable, num) "{{{2
 
     call s:d_msg("[".a:num."]= is the num")
     call s:d_msg("[".a:variable."]= is the variable to be replaced")
