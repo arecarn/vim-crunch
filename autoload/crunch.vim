@@ -483,7 +483,7 @@ function! s:replace_variable_with_value(expr, num) "{{{2
                 \ '\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
 
     "replace variable with it's value
-    let expr = substitute( expr, variable_regex
+    let expr = substitute(expr, variable_regex,
                 \ '\=s:get_searched_variable_value(submatch(1), a:num)', 'g' )
 
     call s:d_msg("[".expr."]= expression after variable replacement")
