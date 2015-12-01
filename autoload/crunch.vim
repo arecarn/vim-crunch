@@ -15,6 +15,7 @@ set cpo&vim
 let s:variables = {}
 
 let s:valid_variable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
+let s:variable_regex = '\v('.s:valid_variable.'\v)\ze([^(a-zA-Z0-9_]|$)'
 
 " Number Regex Patterns
 let sign = '\v[-+]?'
@@ -27,7 +28,7 @@ let s:is_exclusive = 0
 let s:bang = ''
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
- " PRIVATE FUNCTIONS DEBUG {{{1
+" PRIVATE FUNCTIONS DEBUG {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:d_header(text) abort "{{{2
     try
@@ -444,12 +445,11 @@ function! s:replace_captured_variable(expr) "{{{2
     let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', "", "")
     call s:d_msg("[".expr."]= expression striped of variable")
 
-    let variable_regex = '\v('.s:valid_variable.
-                \ '\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
-
     "replace variable with it's value
-    let expr = substitute(expr, variable_regex,
-                \ '\=s:get_stored_variable_value(submatch(1))', 'g' )
+    let expr = substitute(
+                \ expr,
+                \ s:variable_regex,
+                \ '\=s:get_stored_variable_value(submatch(1))', 'g')
 
     call s:d_msg("[".expr."]= expression after variable replacement")
     return expr
@@ -479,12 +479,11 @@ function! s:replace_variable_with_value(expr, num) "{{{2
     let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', "", "")
     call s:d_msg("[".expr."]= expression striped of variable")
 
-    let variable_regex = '\v('.s:valid_variable.
-                \ '\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
-
     "replace variable with it's value
-    let expr = substitute(expr, variable_regex,
-                \ '\=s:get_searched_variable_value(submatch(1), a:num)', 'g' )
+    let expr = substitute(
+                \ expr,
+                \ s:variable_regex,
+                \ '\=s:get_searched_variable_value(submatch(1), a:num)', 'g')
 
     call s:d_msg("[".expr."]= expression after variable replacement")
     return expr
