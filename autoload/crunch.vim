@@ -230,12 +230,16 @@ function! s:crunch_init(expr) "{{{2
     endif
 
     let s:prefix = matchstr(expr, b:prefix_regex)
-"    " Decho 's:prefix = <'.s:prefix.'>'
-"    " Decho 'b:prefix_regex = <'.b:prefix_regex.'>'
+    let prefix = s:prefix
+"    Decho 'prefix = <'.string(prefix).'>'
+    let prefix_regex = b:prefix_regex
+"    Decho 'prefix_regex = <'.string(prefix_regex).'>'
 
     let s:suffix = matchstr(expr, b:suffix_regex)
-"    " Decho 's:suffix = <'.s:suffix.'>'
-"    " Decho 'b:suffix_regex = <'.b:suffix_regex.'>'
+    let suffix = s:suffix
+"    Decho 'suffix = <'.string(suffix).'>'
+    let suffix_regex = b:suffix_regex
+"    Decho 'suffix_regex = <'.string(suffix_regex).'>'
 
     let expr = s:remove_prefix_n_suffix(expr)
 
@@ -404,7 +408,8 @@ function! s:capture_variable(expr) "{{{2
 
     if var_name != ''  && var_value != ''
         let s:variables[var_name] = '('.var_value.')'
-"        " Decho 's:variables = <'.string(s:variables).'>'
+        let variables = s:variables
+"        Decho 'variables = <'.string(variables).'>'
     endif
 endfunction "}}}2
 
@@ -496,12 +501,14 @@ function! s:build_result(expr, result) "{{{2
     call s:capture_variable(output)
 
     "bang isn't used and type is not append result
-    if (s:bang == '!' && g:crunch_result_type_append)
-                \|| (s:bang == '' && !g:crunch_result_type_append)
+    if (s:bang == '!' && g:crunch_result_type_append) ||
+                \ (s:bang == '' && !g:crunch_result_type_append)
         let output = a:result
     endif
-"    " Decho 's:prefix = <'.s:prefix.'>'
-"    " Decho 's:suffix = <'.s:suffix.'>'
+    let prefix = s:prefix
+"    Decho 'prefix = <'.string(prefix).'>'
+    let suffix = s:suffix
+"    Decho 'suffix = <'.string(suffix).'>'
 "    Decho 'output = <'.output.'>'
     return s:prefix.output.s:suffix
 endfunction "}}}2
@@ -547,7 +554,8 @@ function! s:build_prefix_and_suffix_regex() "{{{2
     let s:comment_start = matchstr(&commentstring, '\v.+\ze\%s')
     let s:prefixs = ['*','//', s:comment_start]
     call filter (s:prefixs, "v:val != ''")
-"    " Decho 's:prefixs = <'.s:prefixs.'>'
+    let prefixs = s:prefixs
+"    Decho 'prefixs = <'.string(prefixs).'>'
     let b:prefix_regex = join( map(copy(s:prefixs), 'escape(v:val, ''\/'')'), '\|')
 "    Decho "[".b:prefix_regex."]= REGEX for the prefixes"
     let b:prefix_regex= '\V\^\s\*\('.b:prefix_regex.'\)\=\s\*\v'
@@ -557,7 +565,8 @@ function! s:build_prefix_and_suffix_regex() "{{{2
     let s:comment_end = matchstr(&commentstring, '\v.+\%s\zs.*')
     let s:suffixs = ['//', s:comment_end]
     call filter (s:suffixs, "v:val != ''")
-"    " Decho 's:suffixs = <'.s:suffixs.'>'
+    let suffixs = s:suffixs
+"    Decho 'suffixs = <'.string(suffixs).'>'
     let b:suffix_regex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
 "    Decho "[".b:suffix_regex."]= REGEX for suffixes "
     let b:suffix_regex= '\V\[^ ]\{-1,}\zs\s\*\(\('.b:suffix_regex.'\)\.\*\)\=\s\*\$\v'
