@@ -183,11 +183,7 @@ function! crunch#operator(type) "{{{2
 "    Decho 'a:type = <'.a:type.'>'
     "yank the relevant text, and also set the visual selection (which will be reused if the text
     "needs to be replaced)
-    if a:type =~ '^\d\+$'
-        "if type is a number, then select that many lines
-        silent execute 'normal! V'.a:type.'$y'
-
-    elseif a:type =~ '^.$'
+    if a:type =~ '^.$'
         "if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
         silent execute 'normal! `<' . a:type . '`>y'
 "        Decho 'catch all type'
@@ -227,6 +223,7 @@ function! crunch#operator(type) "{{{2
         call setreg('@', repl, regtype)
         "reselect the visual region and paste
         normal! gvp
+        execute "normal! gvo\<Esc>"
     endif
 
     "restore saved settings and register value
