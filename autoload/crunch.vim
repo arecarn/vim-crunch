@@ -15,6 +15,7 @@ set cpo&vim
 let s:variables = {}
 
 let s:valid_variable = '\v[a-zA-Z_]+[a-zA-Z0-9_]*'
+let s:variable_regex = '\v('.s:valid_variable.'\v)\ze([^(a-zA-Z0-9_]|$)'
 
 " Number Regex Patterns
 let sign = '\v[-+]?'
@@ -26,30 +27,6 @@ let s:error_tag = 'Crunch error: '
 let s:is_exclusive = 0
 let s:bang = ''
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
-
- " PRIVATE FUNCTIONS DEBUG {{{1
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:d_header(text) abort "{{{2
-    try
-        call util#debug#print_header(a:text)
-    catch
-    endtry
-endfunction "}}}2
-
-function! s:d_var_msg(variable, text) abort "{{{2
-    try
-        call util#debug#print_var_msg(a:variable, a:text)
-    catch
-    endtry
-endfunction "}}}2
-
-function! s:d_msg(text) abort "{{{2
-    try
-        call util#debug#print_msg(a:text)
-    catch
-    endtry
-endfunction "}}}2
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}1
 
 " PUBLIC FUNCTIONS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -69,11 +46,11 @@ function! crunch#cmd_line_crunch(user_input) "{{{2
         if s:valid_line(expr) == 0 | return | endif
         let result = crunch#core(expr)
 
-        echomsg expr." = ".result
+        echomsg expr.' = '.result
 
         "TODO make this optional
         if has('clipboard')
-            echo "Yanked Result"
+            echo 'Yanked Result'
             "yank the result into the correct register
             if match(&clipboard, '\C\vunnamed') != -1
                 call setreg('*', result, 'c')
@@ -96,11 +73,11 @@ function! crunch#eval(exprs) abort "{{{2
     " Takes string of mathematical expressions delimited by new lines
     " evaluates "each line individually while saving variables when they occur
 
-    call s:d_header('Inizilation')
+"    Decho '== Inizilation =='
     let s:variables = deepcopy(g:crunch_user_variables, 0)
 
     let expr_list = split(a:exprs, '\n', 1)
-    call s:d_var_msg(string(expr_list), 'List of expr')
+"    Decho 'expr_list = <'.string(expr_list).'>'
 
     for i in range(len(expr_list))
         try
@@ -119,7 +96,7 @@ function! crunch#eval(exprs) abort "{{{2
 
             let expr_list[i] = s:mark_e_notation(expr_list[i])
             let expr_list[i] = s:replace_captured_variable(expr_list[i])
-            let expr_list[i] = s:replace_variable2(expr_list[i], i)
+            let expr_list[i] = s:replace_variable_with_value(expr_list[i], i)
             let expr_list[i] = s:unmark_e_notation(expr_list[i])
             let result  = crunch#core(expr_list[i])
         catch /Crunch error: /
@@ -128,9 +105,9 @@ function! crunch#eval(exprs) abort "{{{2
         endtry
         let expr_list[i] = s:build_result(orig_expr, result)
     endfor
-    call s:d_msg(string(expr_list).'= the expr_lines_list')
+"    Decho string(expr_list).'= the expr_lines_list'
     let expr_lines = join(expr_list, "\n")
-    call s:d_msg(string(expr_lines).'= the expr_lines')
+"    Decho expr_lines.'= the expr_lines'
     let s:variables = {}
     return expr_lines
 endfunction "}}}2
@@ -174,7 +151,7 @@ endfunction "}}}2
 
 function! crunch#operator(type) "{{{2
 
-    call s:d_header('Operator')
+"    Decho '== Operator =='
     "backup settings that we will change
     let sel_save = &selection
     let cb_save = &clipboard
@@ -185,37 +162,37 @@ function! crunch#operator(type) "{{{2
     "backup the unnamed register, which we will be yanking into
     let reg_save = @@
 
-    call s:d_var_msg(string(a:type), 'Operator Selection Type')
+"    Decho 'a:type = <'.a:type.'>'
     "yank the relevant text, and also set the visual selection (which will be reused if the text
     "needs to be replaced)
     if a:type =~ '^\d\+$'
         "if type is a number, then select that many lines
-        silent exe 'normal! V'.a:type.'$y'
+        silent execute 'normal! V'.a:type.'$y'
 
     elseif a:type =~ '^.$'
         "if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
-        silent exe "normal! `<" . a:type . "`>y"
-        call s:d_msg('catch all type')
+        silent execute 'normal! `<' . a:type . '`>y'
+"        Decho 'catch all type'
         let type=a:type
 
     elseif a:type == 'block'
         "block-based text motion
-        silent exe "normal! `[\<C-V>`]y"
-        call s:d_msg('block type')
-        let type=''
+        silent execute "normal! `[\<C-V>`]y"
+"        Decho 'block type'
+        let type="\<C-V>"
 
     elseif a:type == 'line'
         "line-based text motion
-        silent exe "normal! `[V`]y"
+        silent execute "normal! `[V`]y"
         let type='V'
     else
         "char-based text motion
-        silent exe "normal! `[v`]y"
+        silent execute "normal! `[v`]y"
         let type='v'
     endif
 
     let regtype = type
-    call s:d_var_msg(regtype, "the regtype")
+"    Decho 'regtype = <'.regtype.'>'
     let repl = crunch#eval(@@)
 
     "if the function returned a value, then replace the text
@@ -241,24 +218,28 @@ function! s:crunch_init(expr) "{{{2
     " Gets the expression from current line, builds the suffix/prefix regex if
     " need, and  removes the suffix and prefix from the expression
 
-    call s:d_header('Crunch Inizilation Debug')
+"    Decho '== Crunch Inizilation Debug =='
 
     let expr = a:expr
 
     if !exists('b:filetype') || &filetype !=# b:filetype
         let b:filetype = &filetype
-        call s:d_msg('filetype set, rebuilding prefix/suffix regex')
-        call s:d_msg('['.&filetype.']= filetype')
+"        Decho 'filetype set, rebuilding prefix/suffix regex'
+"        Decho '['.&filetype.']= filetype'
         call s:build_prefix_and_suffix_regex()
     endif
 
     let s:prefix = matchstr(expr, b:prefix_regex)
-    call s:d_var_msg(s:prefix, "s:prefix")
-    call s:d_var_msg(b:prefix_regex, "prefix regex")
+    let prefix = s:prefix
+"    Decho 'prefix = <'.string(prefix).'>'
+    let prefix_regex = b:prefix_regex
+"    Decho 'prefix_regex = <'.string(prefix_regex).'>'
 
     let s:suffix = matchstr(expr, b:suffix_regex)
-    call s:d_var_msg(s:suffix, "s:suffix")
-    call s:d_var_msg(b:suffix_regex, "suffix regex")
+    let suffix = s:suffix
+"    Decho 'suffix = <'.string(suffix).'>'
+    let suffix_regex = b:suffix_regex
+"    Decho 'suffix_regex = <'.string(suffix_regex).'>'
 
     let expr = s:remove_prefix_n_suffix(expr)
 
@@ -270,19 +251,19 @@ function! s:handle_cmd_input(cmd_input, bang) "{{{2
     " test if there is an arg in the correct form.
     " return the arg if it's valid otherwise an empty string is returned
 
-    call s:d_header('Handle Args')
-    call s:d_var_msg(a:cmd_input,'the cmd_input')
+"    Decho '== Handle Args =='
+"    Decho 'a:cmd_input = <'.string(a:cmd_input).'>'
 
     "was there a bang after the command?
     let s:bang = a:bang
 
     "find command switches in the expression and extract them into a list
     let options = split(matchstr(a:cmd_input, '\v^\s*(-\a+\ze\s+)+'), '\v\s+-')
-    call s:d_var_msg(string(options),'the options')
+"    Decho 'options = <'.string(options).'>'
 
     "remove the command switches from the cmd_input
     let expr = substitute(a:cmd_input, '\v\s*(-\a+\s+)+', '', 'g')
-    call s:d_var_msg(expr,'the commandline expr')
+"    Decho 'expr = <'.string(expr).'>'
 
     return expr
 endfunction "}}}2
@@ -295,27 +276,27 @@ function! s:valid_line(expr) "{{{2
     " that may or may not contain whitespace. If the line is invalid this
     " function returns false
 
-    call s:d_header('Valid Line')
-    call s:d_msg('[' . a:expr . ']= the tested string' )
+"    Decho '== Valid Line =='
+"    Decho '[' . a:expr . ']= the tested string'
 
     "checks for commented lines
     if a:expr =~ '\v^\s*'.g:crunch_comment
-        call s:d_msg('test1 failed comment')
+"        Decho 'test1 failed comment'
         return 0
     endif
 
     "checks for empty/blank lines
     if a:expr =~ '\v^\s*$'
-        call s:d_msg('test2 failed blank line')
+"        Decho 'test2 failed blank line'
         return 0
     endif
 
     "checks for lines that don't need evaluation
     if a:expr =~ '\v\C^\s*'.s:valid_variable.'\s*\=\s*-?\s*'.s:num_pat.'\s*$'
-        call s:d_msg('test3 failed dosnt need evaluation')
+"        Decho 'test3 failed dosnt need evaluation'
         return 0
     endif
-    call s:d_msg('It is a valid line!')
+"    Decho 'It is a valid line!'
     return 1
 endfunction "}}}2
 
@@ -326,24 +307,24 @@ function! s:remove_old_result(expr) "{{{2
     " eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
     " inspired by Ihar Filipau's inline calculator
 
-    call s:d_header('Remove Old Result')
+"    Decho '== Remove Old Result =='
 
     let expr = a:expr
     "if it's a variable declaration with an expression ignore the first = sign
     "else if it's just a normal expression just remove it
-    call s:d_msg('[' . expr . ']= expression before removed result')
+"    Decho '[' . expr . ']= expression before removed result'
 
-    let expr = substitute(expr, '\v\s*\=\s*('.s:num_pat.')?\s*$', "", "")
-    call s:d_msg('[' . expr . ']= after removed old result')
+    let expr = substitute(expr, '\v\s*\=\s*('.s:num_pat.')?\s*$', '', '')
+"    Decho '[' . expr . ']= after removed old result'
 
-    let expr = substitute(expr, '\v\s*\=\s*Crunch error:.*\s*$', "", "")
-    call s:d_msg('[' . expr . ']= after removed old error')
+    let expr = substitute(expr, '\v\s*\=\s*Crunch error:.*\s*$', '', '')
+"    Decho '[' . expr . ']= after removed old error'
 
-    let expr = substitute(expr, '\v^\s\+\ze?.', "", "")
-    call s:d_msg('[' . expr . ']= after removed whitespace')
+    let expr = substitute(expr, '\v^\s\+\ze?.', '', '')
+"    Decho '[' . expr . ']= after removed whitespace'
 
-    let expr = substitute(expr, '\v.\zs\s+$', "", "")
-    call s:d_msg('[' . expr . ']= after removed whitespace')
+    let expr = substitute(expr, '\v.\zs\s+$', '', '')
+"    Decho '[' . expr . ']= after removed whitespace'
 
     return expr
 endfunction "}}}2
@@ -352,15 +333,15 @@ endfunction "}}}2
 function! s:fix_multiplication(expr) "{{{2
     " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
 
-    call s:d_header('Fix Multiplication')
+"    Decho '== Fix Multiplication =='
 
     "deal with ')( -> )*(', ')5 -> )*5' and 'sin(1)sin(1)'
     let expr = substitute(a:expr,'\v(\))\s*([(\.[:alnum:]])', '\1\*\2','g')
-    call s:d_msg('[' . expr . ']= fixed multiplication 1')
+"    Decho '[' . expr . ']= fixed multiplication 1'
 
     "deal with '5sin( -> 5*sin(', '5( -> 5*( ', and  '5x -> 5*x'
     let expr = substitute(expr,'\v(\d)\s*([(a-df-zA-DF-Z])', '\1\*\2','g')
-    call s:d_msg('[' . expr . ']= fixed multiplication 2')
+"    Decho '[' . expr . ']= fixed multiplication 2'
 
     return expr
 endfunction "}}}2
@@ -371,11 +352,11 @@ function! s:integer_to_float(expr) "{{{2
     " command
     " NOTE: from HowMuch.vim
 
-    call s:d_header('Integer to Float')
-    call s:d_msg('['.a:expr.']= before int to float conversion')
+"    Decho '== Integer to Float =='
+"    Decho '['.a:expr.']= before int to float conversion'
     let expr = a:expr
     let expr = substitute(expr,'\(^\|[^.0-9]\)\zs\([eE]-\?\)\@<!\d\+\ze\([^.0-9]\|$\)', '&.0', 'g')
-    call s:d_msg('['.expr.']= after int to float conversion')
+"    Decho '['.expr.']= after int to float conversion'
     return expr
 endfunction "}}}2
 
@@ -401,10 +382,10 @@ function! s:unmark_e_notation(expr) "{{{3
     " 5#-3 -> 5e-3
 
     let expr = a:expr
-    call s:d_var_msg(expr, 'before Unmarking E notation')
-    "put back the e and remove the following ".0"
+"    Decho 'expr = <'.expr.'>'
+    "put back the e and remove the following '.0'
     let expr = substitute(expr, '\v#([-]?\d+)(\.0)?', 'e\1', 'g')
-    call s:d_var_msg(expr, 'after Unmarking E notation')
+"    Decho 'expr = <'.expr.'>'
     return expr
 endfunction! "}}}3
 " }}}2
@@ -414,7 +395,7 @@ endfunction! "}}}3
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:capture_variable(expr) "{{{2
 
-    call s:d_header('Capture Variable')
+"    Decho '== Capture Variable =='
 
     let var_name_pat = '\v\C^\s*\zs'.s:valid_variable.'\ze\s*\=\s*'
     let var_value_pat = '\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$'
@@ -422,66 +403,45 @@ function! s:capture_variable(expr) "{{{2
     let var_name = matchstr(a:expr, var_name_pat)
     let var_value = matchstr(a:expr, var_value_pat)
 
-    call s:d_var_msg(var_name, 'the name of the variable')
-    call s:d_var_msg(var_value, 'the value of the variable')
+"    Decho 'var_name = <'.string(var_name).'>'
+"    Decho 'var_value = <'.string(var_value).'>'
 
     if var_name != ''  && var_value != ''
         let s:variables[var_name] = '('.var_value.')'
-        call s:d_var_msg(string(s:variables), 'captured variables')
+        let variables = s:variables
+"        Decho 'variables = <'.string(variables).'>'
     endif
 endfunction "}}}2
 
 
+" TODO this is the same as s:replace_variable_with_value
 function! s:replace_captured_variable(expr) "{{{2
 
-    call s:d_header('Replace Captured Variablee')
+"    Decho '== Replace Captured Variablee =='
 
     let expr = a:expr
-    call s:d_msg("[".expr."]= expression before variable replacement ")
+"    Decho '['.expr.']= expression before variable replacement'
 
     "strip the variable marker, if any
-    let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', "", "")
-    call s:d_msg("[".expr."]= expression striped of variable")
+    let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', '', '')
+"    Decho '['.expr.']= expression striped of variable'
 
-    let variable_regex = '\v('.s:valid_variable .'\v)\ze([^(a-zA-Z0-9_]|$)' "TODO move this up to the top
     "replace variable with it's value
-    let expr = substitute(expr, variable_regex,
-                \ '\=s:get_variable_value3(submatch(1))', 'g' )
+    let expr = substitute(
+                \ expr,
+                \ s:variable_regex,
+                \ '\=s:get_stored_variable_value(submatch(1))', 'g')
 
-    call s:d_msg("[".expr."]= expression after variable replacement")
+"    Decho '['.expr.']= expression after variable replacement'
     return expr
 endfunction "}}}2
 
 
-function! s:replace_variable(expr) "{{{2
-    " Replaces the variable within an expression with the value of that
-    " variable inspired by Ihar Filipau's inline calculator
+function! s:get_stored_variable_value(variable) abort "{{{2
 
-    call s:d_header('Replace Variable')
-
-    let expr = a:expr
-    call s:d_msg("[".expr."]= expression before variable replacement ")
-
-    "strip the variable marker, if any
-    let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', "", "")
-    call s:d_msg("[".expr."]= expression striped of variable")
-
-    "replace variable with it's value
-    let expr = substitute( expr, '\v('.s:valid_variable.
-                \'\v)\ze([^(a-zA-Z0-9_]|$)',
-                \ '\=s:get_variable_value(submatch(1))', 'g' )
-
-    call s:d_msg("[".expr."]= expression after variable replacement")
-    return expr
-endfunction "}}}2
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:get_variable_value3(variable) abort
-
-    let value = get(s:variables, a:variable, "not found")
-    if value == "not found"
-        "call s:throw("value for ".a:variable." not found")
+    let value = get(s:variables, a:variable, 'not found')
+    if value == 'not found'
+        "call s:throw('value for '.a:variable.' not found')
         return a:variable
     endif
 
@@ -489,70 +449,42 @@ function! s:get_variable_value3(variable) abort
 endfunction "}}}2
 
 
-function! s:get_variable_value(variable) "{{{2
+function! s:replace_variable_with_value(expr, num) "{{{2
 
-    call s:d_header('Get Variable Value')
-    call s:d_msg("[".getline('.')."]= the current line")
-
-    call s:d_msg("[" . a:variable . "]= the variable")
-
-    let search_line = search('\v\C^('.b:prefix_regex.
-                \ ')?\V'.a:variable.'\v\s*\=\s*' , "bnW")
-
-    call s:d_msg("[".search_line."]= result of search for variable")
-    if search_line == 0
-        call s:throw("variable ".a:variable." not found")
-    endif
-
-    call s:d_msg("[" .getline(search_line). "]= line with variable value")
-    let line = s:remove_prefix_n_suffix(getline(search_line))
-    call s:d_header('Get Variable Value Contiuned')
-
-    let variable_value = matchstr(line,'\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$')
-    call s:d_msg("[" . variable_value . "]= the variable value")
-    if variable_value == ''
-        call s:throw('value for '.a:variable.' not found')
-    endif
-
-    return '('.variable_value.')'
-endfunction "}}}2
-
-
-function! s:replace_variable2(expr, num) "{{{2
-
-    call s:d_header('Replace Variable 2')
+"    Decho '== Replace Variable =='
 
     let expr = a:expr
-    call s:d_msg("[".expr."]= expression before variable replacement ")
+"    Decho '['.expr.']= expression before variable replacement '
 
     "strip the variable marker, if any
-    let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', "", "")
-    call s:d_msg("[".expr."]= expression striped of variable")
+    let expr = substitute( expr, '\v\C^\s*'.s:valid_variable.'\s*\=\s*', '', '')
+"    Decho '['.expr.']= expression striped of variable'
 
     "replace variable with it's value
-    let expr = substitute( expr, '\v('.s:valid_variable.
-                \'\v)\ze([^(a-zA-Z0-9_]|$)',
-                \ '\=s:get_variable_value2(submatch(1), a:num)', 'g' )
+    let expr = substitute(
+                \ expr,
+                \ s:variable_regex,
+                \ '\=s:get_searched_variable_value(submatch(1), a:num)', 'g')
 
-    call s:d_msg("[".expr."]= expression after variable replacement")
+"    Decho '['.expr.']= expression after variable replacement'
     return expr
 endfunction "}}}2
 
 
-function! s:get_variable_value2(variable, num) "{{{2
+function! s:get_searched_variable_value(variable, num) "{{{2
 
-    call s:d_msg("[".a:num."]= is the num")
-    call s:d_msg("[".a:variable."]= is the variable to be replaced")
+"    Decho '['.a:num.']= is the num'
+"    Decho '['.a:variable.']= is the variable to be replaced'
     let search_line = search('\v\C^('.b:prefix_regex.')?\V'.a:variable.'\v\s*\=\s*',
-                \"bnW" )
+                \'bnW' )
 
-    call s:d_msg("[".search_line."]= search line")
+"    Decho '['.search_line.']= search line'
 
     let line = s:remove_prefix_n_suffix(getline(search_line))
     let variable_value = matchstr(line,'\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$')
-    call s:d_msg("[" . variable_value . "]= the variable value")
+"    Decho '[' . variable_value . ']= the variable value'
     if variable_value == ''
-        call s:throw("value for ".a:variable." not found")
+        call s:throw('value for '.a:variable.' not found')
     else
         return '('.variable_value.')'
     endif
@@ -569,13 +501,15 @@ function! s:build_result(expr, result) "{{{2
     call s:capture_variable(output)
 
     "bang isn't used and type is not append result
-    if (s:bang == '!' && g:crunch_result_type_append)
-                \|| (s:bang == '' && !g:crunch_result_type_append)
+    if (s:bang == '!' && g:crunch_result_type_append) ||
+                \ (s:bang == '' && !g:crunch_result_type_append)
         let output = a:result
     endif
-    call s:d_var_msg(s:prefix, "s:prefix")
-    call s:d_var_msg(s:suffix, "s:suffix")
-    call s:d_var_msg(output, "output")
+    let prefix = s:prefix
+"    Decho 'prefix = <'.string(prefix).'>'
+    let suffix = s:suffix
+"    Decho 'suffix = <'.string(suffix).'>'
+"    Decho 'output = <'.output.'>'
     return s:prefix.output.s:suffix
 endfunction "}}}2
 
@@ -584,10 +518,10 @@ function! s:add_leading_zero(expr) "{{{2
     " convert .5*.34 -> 0.5*0.34
 
     let expr = a:expr
-    call s:d_header('Add Leading Zero')
-    call s:d_msg('['.expr.']= before adding leading zero')
+"    Decho '== Add Leading Zero =='
+"    Decho '['.expr.']= before adding leading zero'
     let expr = substitute(expr,'\v(^|[^.0-9])\zs\.\ze([0-9])', '0&', 'g')
-    call s:d_msg('['.expr.']= after adding leading zero')
+"    Decho '['.expr.']= after adding leading zero'
     return expr
 endfunction "}}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
@@ -598,15 +532,15 @@ function! s:remove_prefix_n_suffix(expr) "{{{2
     " Removes the prefix and suffix from a string
 
     let expr = a:expr
-    call s:d_header('Remove Line Prefix and Suffix')
+"    Decho '== Remove Line Prefix and Suffix =='
 
-    call s:d_msg('['.b:prefix_regex.']= the REGEX of the prefix')
-    call s:d_msg('['.b:suffix_regex.']= the REGEX of the suffix')
-    call s:d_msg('['.expr.']= expression BEFORE removing prefix/suffix')
+"    Decho '['.b:prefix_regex.']= the REGEX of the prefix'
+"    Decho '['.b:suffix_regex.']= the REGEX of the suffix'
+"    Decho '['.expr.']= expression BEFORE removing prefix/suffix'
     let expr = substitute(expr, b:prefix_regex, '', '')
-    call s:d_msg('['.expr.']= expression AFTER removing prefix')
+"    Decho '['.expr.']= expression AFTER removing prefix'
     let expr = substitute(expr, b:suffix_regex, '', '')
-    call s:d_msg('['.expr.']= expression AFTER removing suffix')
+"    Decho '['.expr.']= expression AFTER removing suffix'
     return expr
 endfunction "}}}2
 
@@ -615,24 +549,26 @@ function! s:build_prefix_and_suffix_regex() "{{{2
     " from a list of suffixes builds a regex expression for all suffixes in the
     " list
 
-    call s:d_header('Build Line Prefix')
-    call s:d_msg( "[".&commentstring."]=  the comment string ")
+"    Decho '== Build Line Prefix =='
+"    Decho "[".&commentstring."]=  the comment string "
     let s:comment_start = matchstr(&commentstring, '\v.+\ze\%s')
     let s:prefixs = ['*','//', s:comment_start]
     call filter (s:prefixs, "v:val != ''")
-    call s:d_var_msg(string(s:prefixs), "s:prefixs")
+    let prefixs = s:prefixs
+"    Decho 'prefixs = <'.string(prefixs).'>'
     let b:prefix_regex = join( map(copy(s:prefixs), 'escape(v:val, ''\/'')'), '\|')
-    call s:d_msg("[".b:prefix_regex."]= REGEX for the prefixes")
+"    Decho '['.b:prefix_regex.']= REGEX for the prefixes'
     let b:prefix_regex= '\V\^\s\*\('.b:prefix_regex.'\)\=\s\*\v'
 
-    call s:d_header('Build Line Suffix')
-    call s:d_msg( "[".&commentstring."]=  the comment string ")
+"    Decho '== Build Line Suffix =='
+"    Decho '['.&commentstring.']=  the comment string '
     let s:comment_end = matchstr(&commentstring, '\v.+\%s\zs.*')
     let s:suffixs = ['//', s:comment_end]
-    call filter (s:suffixs, "v:val != ''")
-    call s:d_var_msg(string(s:suffixs), "s:suffixs")
+    call filter(s:suffixs, "v:val != ''")
+    let suffixs = s:suffixs
+"    Decho 'suffixs = <'.string(suffixs).'>'
     let b:suffix_regex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
-    call s:d_msg( "[".b:suffix_regex."]= REGEX for suffixes ")
+"    Decho '['.b:suffix_regex.']= REGEX for suffixes'
     let b:suffix_regex= '\V\[^ ]\{-1,}\zs\s\*\(\('.b:suffix_regex.'\)\.\*\)\=\s\*\$\v'
 
     "NOTE: these regex is very non magic see :h \V
@@ -671,12 +607,12 @@ function! s:vim_eval(expr) "{{{2
     " if there is no error echo the result and save a copy of it to the default
     " paste register
 
-    call s:d_header('Evaluate Expression')
-    call s:d_msg('[' . a:expr . "]= the final expression")
+"    Decho '== Evaluate Expression =='
+"    Decho '[' . a:expr . ']= the final expression'
 
     let result = string(eval(a:expr))
-    call s:d_msg('['.result.']= before trailing ".0" removed')
-    call s:d_msg('['.matchstr(result,'\v\.0+$').']= trailing ".0"')
+"    Decho '['.result.']= before trailing ".0" removed'
+"    Decho '['.matchstr(result,'\v\.0+$').']= trailing ".0"'
 
     "check for trailing '.0' in result and remove it (occurs with vim eval)
     if result =~ '\v\.0+$'
