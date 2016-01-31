@@ -193,6 +193,10 @@ function! crunch#operator(type) "{{{2
 "        Decho 'catch all type'
         let type=a:type
 
+        if a:type ==# 'V'
+            call crunch#linewise_operator()
+        endif
+
     elseif a:type == 'block'
         "block-based text motion
         silent execute "normal! `[\<C-V>`]y"
@@ -203,6 +207,8 @@ function! crunch#operator(type) "{{{2
         "line-based text motion
         silent execute "normal! `[V`]y"
         let type='V'
+        call crunch#linewise_operator()
+
     else
         "char-based text motion
         silent execute "normal! `[v`]y"
