@@ -297,7 +297,16 @@ see |crunch-comments|
 Defualt 1
 
 Controls weather or not the result of each expression(s) is appended onto the
-end or if the result replaces the expression(s)
+end or if the result replaces the expression(s)o
+
+Options:
+0: the expression is replaced with the result
+
+1: the result is appended after the expression
+
+2: for line-wise operations the result is appended after the expression but
+   for character-wise and block-wise expressions the expression is replaced
+   with the result
 ------------------------------------------------------------------------------
 4.4 g:crunch_user_variables                           *crunch-user-variables*
 
