@@ -128,7 +128,7 @@ function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{
 
         try
             let s:selection = selection#new(a:count, a:first_line, a:last_line)
-        catch
+        catch /^Vim\%((\a\+)\)\=:E117/  " catch error E117: Unknown function
             call s:throw('Please install selection.vim for this operation')
         endtry
 
