@@ -1,13 +1,11 @@
 language: vim
 
-git:
-    submodules: false
-before_install:
-    git submodule update --init --recursive
-
 before_script: |
+    mkdir -p ~/.vim/bundle
+    cd ~/.vim/bundle
     git clone https://github.com/junegunn/vader.vim.git
     git clone https://github.com/arecarn/selection.vim.git
+    cd -
 
     hg clone https://code.google.com/p/vim/
     cd vim
@@ -17,11 +15,4 @@ before_script: |
     cd -
 
 script: |
-    vim -Nu <(cat << VIMRC
-    filetype off
-    set rtp+=vader.vim
-    set rtp+=selection.vim
-    set rtp+=.
-    filetype plugin indent on
-    syntax enable
-    VIMRC) -c 'Vader! tests/*' > /dev/null
+    vim -Nu  tests/vimrc_test -c 'Vader! tests/*' > /dev/null
