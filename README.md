@@ -11,8 +11,8 @@ Usage
 | Mode   | Key Mapping | Description                                |
 |--------|-------------|--------------------------------------------|
 | normal | g={motion}  | Evaluate the text that {motion} moves over |
-| normal | g==         | Evalue the current                         |
-| visual | g=          | Evalue the highligted expressions          |
+| normal | g==         | Evaluate the current line                  |
+| visual | g=          | Evaluate the highlighted expressions       |
 
 * `:[range]Crunch[!]`
     * Evaluates the current visual selection or provided range and adds result
@@ -41,20 +41,20 @@ Math With Looser Syntax
 The following chart shows the looser math syntax provided with crunch, compared
 to the default math syntax.
 
-|       **Feature**         |    **With crunch**      |  **Without crunch** |
-| ------------------------- | ---------------------   | ------------------- |
-|Implied Multiplication     |                         |                     |
-|                           |`cos(0)cos(0) = 1`       |`cos(0)*cos(0) = 1.0`|
-|                           |`2sin(1) = 11.682942`    |`2*sin(1) = 1.682942`|
-|                           |`sin(1)2 = 1.682942`     |`sin(1)*2 = 1.682942`|
-|                           |`(2*3)(3*2) = 36`        |`(2*3)*(3*2) = 36`   |
-|                           |`2(3*2) = 12`            |`2*(3*2) = 12`       |
-|Integer to Float Conversion|                         |                     |
-|                           |`1/2 = 0.5`              |`1.0/2.0 = 0.5`      |
-|                           |`.25*4 = 1`              |`0.25*4 = 1.0`       |
-|Decimals w/o Leading Zeros |                         |                     |
-|                           |`.5/2 = 0.25`            |`0.5/2 = 0.25`       |
-|                           |`.25*4 = 1`              |`0.25*4 = 1.0`       |
-|Removed Zeros In Result    |                         |                     |
-|                           |`0.25*4 = 1`             |`0.25*4 = 1.0`       |
-|                           |`pow(2,8) = 256`         |`pow(2,8)= 256.0`    |
+| Feature                     | With crunch         | Without crunch      |
+|-----------------------------|---------------------|---------------------|
+| Implied Multiplication      |                     |                     |
+|                             | cos(0)cos(0) = 1    | cos(0)*cos(0) = 1.0 |
+|                             | 2sin(1) = 11.682942 | 2*sin(1) = 1.682942 |
+|                             | sin(1)2 = 1.682942  | sin(1)*2 = 1.682942 |
+|                             | (2*3)(3*2) = 36     | (2*3)*(3*2) = 36    |
+|                             | 2(3*2) = 12         | 2*(3*2) = 12        |
+| Integer to Float Conversion |                     |                     |
+|                             | 1/2 = 0.5           | 1.0/2.0 = 0.5       |
+|                             | .25*4 = 1           | 0.25*4 = 1.0        |
+| Decimals w/o Leading Zeros  |                     |                     |
+|                             | .5/2 = 0.25         | 0.5/2 = 0.25        |
+|                             | .25*4 = 1           | 0.25*4 = 1.0        |
+| Removed Zeros In Result     |                     |                     |
+|                             | 0.25*4 = 1          | 0.25*4 = 1.0        |
+|                             | pow(2,8) = 256      | pow(2,8)= 256.0     |
