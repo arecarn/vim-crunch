@@ -1,7 +1,7 @@
 language: vim
 
 before_script: |
-    make setup
+    sudo make setup
 
     mkdir -p ~/.vim/bundle
     cd ~/.vim/bundle
