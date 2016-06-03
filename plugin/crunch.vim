@@ -8,7 +8,7 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-if exists("g:loaded_crunch")
+if exists('g:loaded_crunch')
     finish
 else
     let g:loaded_crunch = 1

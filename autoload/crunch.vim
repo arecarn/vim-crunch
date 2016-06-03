@@ -32,12 +32,12 @@ let s:input_type = ''
 
 " PUBLIC FUNCTIONS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! crunch#cmd_line_crunch(user_input) "{{{2
+function! crunch#cmd_line_crunch(user_input) abort "{{{2
     " If there is no user input prompts the user for it, then evaluate the
     " input as a mathematical expression, display the result as well as
     " copying it to the user's clipboard
 
-    if a:user_input != ''
+    if a:user_input !=# ''
         let expr = a:user_input
     else
         let expr = s:get_user_input()
@@ -121,7 +121,7 @@ function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{
     let s:input_type = ''
     let cmd_input_expr  = s:handle_cmd_input(a:cmd_input, a:bang)
 
-    if cmd_input_expr != '' "an expression was passed in
+    if cmd_input_expr !=# '' "an expression was passed in
         "TODO only call this once if possible 03 May 2014
         call crunch#cmd_line_crunch(cmd_input_expr)
     else "no command was passed in
@@ -132,10 +132,10 @@ function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{
             call s:throw('Please install selection.vim for this operation')
         endtry
 
-        if s:selection.content == '' "no lines or Selection was returned
+        if s:selection.content ==# '' "no lines or Selection was returned
             call crunch#cmd_line_crunch(s:selection.content)
         else
-            if s:selection.type == 'lines'
+            if s:selection.type ==# 'lines'
                 let s:input_type = 'linewise'
             endif
             call s:selection.over_write(crunch#eval(s:selection.content))
@@ -145,7 +145,7 @@ function! crunch#command(count, first_line, last_line, cmd_input, bang) abort "{
 endfunction "}}}2
 
 
-function! crunch#core(expression) "{{{2
+function! crunch#core(expression) abort "{{{2
     " The core functionality of crunch
 
     let expr = s:fix_multiplication(a:expression)
@@ -167,7 +167,7 @@ function! crunch#visual_operator() abort
 endfunction
 
 
-function! crunch#operator(type) "{{{2
+function! crunch#operator(type) abort "{{{2
 
 "    Decho '== Operator =='
     "backup settings that we will change
@@ -183,7 +183,7 @@ function! crunch#operator(type) "{{{2
 "    Decho 'a:type = <'.a:type.'>'
     "yank the relevant text, and also set the visual selection (which will be reused if the text
     "needs to be replaced)
-    if a:type =~ '^.$'
+    if a:type =~# '^.$'
         "if type is 'v', 'V', or '<C-V>' (i.e. 0x16) then reselect the visual region
         silent execute 'normal! `<' . a:type . '`>y'
 "        Decho 'catch all type'
@@ -193,21 +193,21 @@ function! crunch#operator(type) "{{{2
             call crunch#linewise_operator()
         endif
 
-    elseif a:type == 'block'
+    elseif a:type ==# 'block'
         "block-based text motion
-        silent execute "normal! `[\<C-V>`]y"
+        silent execute 'normal! `[\<C-V>`]y'
 "        Decho 'block type'
         let type="\<C-V>"
 
-    elseif a:type == 'line'
+    elseif a:type ==# 'line'
         "line-based text motion
-        silent execute "normal! `[V`]y"
+        silent execute 'normal! `[V`]y'
         let type='V'
         call crunch#linewise_operator()
 
     else
         "char-based text motion
-        silent execute "normal! `[v`]y"
+        silent execute 'normal! `[v`]y'
         let type='v'
     endif
 
@@ -235,7 +235,7 @@ endfunction "}}}2
 
 " INITIALIZATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:crunch_init(expr) "{{{2
+function! s:crunch_init(expr) abort "{{{2
     " Gets the expression from current line, builds the suffix/prefix regex if
     " need, and  removes the suffix and prefix from the expression
 
@@ -268,7 +268,7 @@ function! s:crunch_init(expr) "{{{2
 endfunction "}}}2
 
 
-function! s:handle_cmd_input(cmd_input, bang) "{{{2
+function! s:handle_cmd_input(cmd_input, bang) abort "{{{2
     " test if there is an arg in the correct form.
     " return the arg if it's valid otherwise an empty string is returned
 
@@ -292,7 +292,7 @@ endfunction "}}}2
 
 " FORMAT EXPRESSION{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:valid_line(expr) "{{{2
+function! s:valid_line(expr) abort "{{{2
     " Checks the line to see if it is a variable definition, or a blank line
     " that may or may not contain whitespace. If the line is invalid this
     " function returns false
@@ -301,19 +301,19 @@ function! s:valid_line(expr) "{{{2
 "    Decho '[' . a:expr . ']= the tested string'
 
     "checks for commented lines
-    if a:expr =~ '\v^\s*'.g:crunch_comment
+    if a:expr =~# '\v^\s*'.g:crunch_comment
 "        Decho 'test1 failed comment'
         return 0
     endif
 
     "checks for empty/blank lines
-    if a:expr =~ '\v^\s*$'
+    if a:expr =~# '\v^\s*$'
 "        Decho 'test2 failed blank line'
         return 0
     endif
 
     "checks for lines that don't need evaluation
-    if a:expr =~ '\v\C^\s*'.s:valid_variable.'\s*\=\s*-?\s*'.s:num_pat.'\s*$'
+    if a:expr =~# '\v\C^\s*'.s:valid_variable.'\s*\=\s*-?\s*'.s:num_pat.'\s*$'
 "        Decho 'test3 failed dosnt need evaluation'
         return 0
     endif
@@ -322,7 +322,7 @@ function! s:valid_line(expr) "{{{2
 endfunction "}}}2
 
 
-function! s:remove_old_result(expr) "{{{2
+function! s:remove_old_result(expr) abort "{{{2
     " Remove old result if any
     " eg '5+5 = 10' becomes '5+5'
     " eg 'var1 = 5+5 =10' becomes 'var1 = 5+5'
@@ -351,7 +351,7 @@ function! s:remove_old_result(expr) "{{{2
 endfunction "}}}2
 
 
-function! s:fix_multiplication(expr) "{{{2
+function! s:fix_multiplication(expr) abort "{{{2
     " turns '2sin(5)3.5(2)' into '2*sing(5)*3.5*(2)'
 
 "    Decho '== Fix Multiplication =='
@@ -368,7 +368,7 @@ function! s:fix_multiplication(expr) "{{{2
 endfunction "}}}2
 
 
-function! s:integer_to_float(expr) "{{{2
+function! s:integer_to_float(expr) abort "{{{2
     " Convert Integers in the exprs to floats by calling a substitute
     " command
     " NOTE: from HowMuch.vim
@@ -384,7 +384,7 @@ endfunction "}}}2
 
 " E NOTATION {{{2
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:mark_e_notation(expr) "{{{3
+function! s:mark_e_notation(expr) abort "{{{3
     " e.g
     " 5e3  -> 5#3
     " 5e-3 -> 5#-3
@@ -397,7 +397,7 @@ endfunction  "}}}3
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:unmark_e_notation(expr) "{{{3
+function! s:unmark_e_notation(expr) abort "{{{3
     " e.g
     " 5#3  -> 5e3
     " 5#-3 -> 5e-3
@@ -408,13 +408,13 @@ function! s:unmark_e_notation(expr) "{{{3
     let expr = substitute(expr, '\v#([-]?\d+)(\.0)?', 'e\1', 'g')
 "    Decho 'expr = <'.expr.'>'
     return expr
-endfunction! "}}}3
+endfunction "}}}3
 " }}}2
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
 " HANDLE VARIABLES {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:capture_variable(expr) "{{{2
+function! s:capture_variable(expr) abort "{{{2
 
 "    Decho '== Capture Variable =='
 
@@ -427,7 +427,7 @@ function! s:capture_variable(expr) "{{{2
 "    Decho 'var_name = <'.string(var_name).'>'
 "    Decho 'var_value = <'.string(var_value).'>'
 
-    if var_name != ''  && var_value != ''
+    if var_name !=# ''  && var_value !=# ''
         let s:variables[var_name] = '('.var_value.')'
         let variables = s:variables
 "        Decho 'variables = <'.string(variables).'>'
@@ -436,7 +436,7 @@ endfunction "}}}2
 
 
 " TODO this is the same as s:replace_variable_with_value
-function! s:replace_captured_variable(expr) "{{{2
+function! s:replace_captured_variable(expr) abort "{{{2
 
 "    Decho '== Replace Captured Variablee =='
 
@@ -461,7 +461,7 @@ endfunction "}}}2
 function! s:get_stored_variable_value(variable) abort "{{{2
 
     let value = get(s:variables, a:variable, 'not found')
-    if value == 'not found'
+    if value ==# 'not found'
         "call s:throw('value for '.a:variable.' not found')
         return a:variable
     endif
@@ -470,7 +470,7 @@ function! s:get_stored_variable_value(variable) abort "{{{2
 endfunction "}}}2
 
 
-function! s:replace_variable_with_value(expr, num) "{{{2
+function! s:replace_variable_with_value(expr, num) abort "{{{2
 
 "    Decho '== Replace Variable =='
 
@@ -492,7 +492,7 @@ function! s:replace_variable_with_value(expr, num) "{{{2
 endfunction "}}}2
 
 
-function! s:get_searched_variable_value(variable, num) "{{{2
+function! s:get_searched_variable_value(variable, num) abort "{{{2
 
 "    Decho '['.a:num.']= is the num'
 "    Decho '['.a:variable.']= is the variable to be replaced'
@@ -504,7 +504,7 @@ function! s:get_searched_variable_value(variable, num) "{{{2
     let line = s:remove_prefix_n_suffix(getline(search_line))
     let variable_value = matchstr(line,'\v\=\s*\zs-?\s*'.s:num_pat.'\ze\s*$')
 "    Decho '[' . variable_value . ']= the variable value'
-    if variable_value == ''
+    if variable_value ==# ''
         call s:throw('value for '.a:variable.' not found')
     else
         return '('.variable_value.')'
@@ -514,7 +514,7 @@ endfunction "}}}2
 
 " RESULT HANDLING{{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:build_result(expr, result) "{{{2
+function! s:build_result(expr, result) abort "{{{2
 
     let output = a:expr .' = '. a:result
 
@@ -531,11 +531,11 @@ function! s:build_result(expr, result) "{{{2
 "    Decho 's:input_type = <'.input_type.'>'
 
     let is_not_append_result_type = (
-                \   (s:bang == '!' && g:crunch_result_type_append == 1) ||
-                \   (s:bang == '' && g:crunch_result_type_append == 0) ||
+                \   (s:bang ==# '!' && g:crunch_result_type_append == 1) ||
+                \   (s:bang ==# '' && g:crunch_result_type_append == 0) ||
                 \   (
-                \     (s:bang == '' && g:crunch_result_type_append == 2) &&
-                \     (s:input_type != 'linewise')
+                \     (s:bang ==# '' && g:crunch_result_type_append == 2) &&
+                \     (s:input_type !=# 'linewise')
                 \   )
                 \ )
 
@@ -553,7 +553,7 @@ function! s:build_result(expr, result) "{{{2
 endfunction "}}}2
 
 
-function! s:add_leading_zero(expr) "{{{2
+function! s:add_leading_zero(expr) abort "{{{2
     " convert .5*.34 -> 0.5*0.34
 
     let expr = a:expr
@@ -567,7 +567,7 @@ endfunction "}}}2
 
 " PREFIX/SUFFIX {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:remove_prefix_n_suffix(expr) "{{{2
+function! s:remove_prefix_n_suffix(expr) abort "{{{2
     " Removes the prefix and suffix from a string
 
     let expr = a:expr
@@ -584,7 +584,7 @@ function! s:remove_prefix_n_suffix(expr) "{{{2
 endfunction "}}}2
 
 
-function! s:build_prefix_and_suffix_regex() "{{{2
+function! s:build_prefix_and_suffix_regex() abort "{{{2
     " from a list of suffixes builds a regex expression for all suffixes in the
     " list
 
@@ -592,7 +592,7 @@ function! s:build_prefix_and_suffix_regex() "{{{2
 "    Decho "[".&commentstring."]=  the comment string "
     let s:comment_start = matchstr(&commentstring, '\v.+\ze\%s')
     let s:prefixs = ['*','//', s:comment_start]
-    call filter (s:prefixs, "v:val != ''")
+    call filter (s:prefixs, "v:val !=# ''")
     let prefixs = s:prefixs
 "    Decho 'prefixs = <'.string(prefixs).'>'
     let b:prefix_regex = join( map(copy(s:prefixs), 'escape(v:val, ''\/'')'), '\|')
@@ -603,7 +603,7 @@ function! s:build_prefix_and_suffix_regex() "{{{2
 "    Decho '['.&commentstring.']=  the comment string '
     let s:comment_end = matchstr(&commentstring, '\v.+\%s\zs.*')
     let s:suffixs = ['//', s:comment_end]
-    call filter(s:suffixs, "v:val != ''")
+    call filter(s:suffixs, "v:val !=# ''")
     let suffixs = s:suffixs
 "    Decho 'suffixs = <'.string(suffixs).'>'
     let b:suffix_regex = join( map(copy(s:suffixs), 'escape(v:val, ''\/'')'), '\|')
@@ -614,7 +614,7 @@ function! s:build_prefix_and_suffix_regex() "{{{2
 endfunction "}}}2
 
 
-function! s:get_user_input() "{{{2
+function! s:get_user_input() abort "{{{2
     " prompt the user for an expression
 
     call inputsave()
@@ -626,7 +626,7 @@ endfunction "}}}2
 
 " EVALUATION {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:eval_math(expr) "{{{2
+function! s:eval_math(expr) abort "{{{2
     " Return Output
     " append result (option: Append)
     " replace result (option: Replace)
@@ -641,7 +641,7 @@ function! s:eval_math(expr) "{{{2
 endfunction "}}}2
 
 
-function! s:vim_eval(expr) "{{{2
+function! s:vim_eval(expr) abort "{{{2
     " Evaluates the expression and checks for errors in the process. Also
     " if there is no error echo the result and save a copy of it to the default
     " paste register
@@ -654,7 +654,7 @@ function! s:vim_eval(expr) "{{{2
 "    Decho '['.matchstr(result,'\v\.0+$').']= trailing ".0"'
 
     "check for trailing '.0' in result and remove it (occurs with vim eval)
-    if result =~ '\v\.0+$'
+    if result =~# '\v\.0+$'
         let result = string(str2nr(result))
     endif
 
@@ -664,7 +664,7 @@ endfunction "}}}2
 
 " ERRORS {{{
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! s:echo_error(error_string) "{{{2
+function! s:echo_error(error_string) abort "{{{2
 
     echohl Warning_msg
     echomsg a:error_string
