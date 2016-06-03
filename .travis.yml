@@ -1,18 +1,19 @@
 language: vim
 
 before_script: |
+    make setup
+
     mkdir -p ~/.vim/bundle
     cd ~/.vim/bundle
     git clone https://github.com/junegunn/vader.vim.git
     git clone https://github.com/arecarn/selection.vim.git
     cd -
 
-    hg clone https://code.google.com/p/vim/
+    git clone https://github.com/vim/vim
     cd vim
     ./configure --with-features=huge
     make
     sudo make install
     cd -
 
-script: |
-    vim -Nu  tests/vimrc_test -c 'Vader! tests/*' > /dev/null
+script: make
