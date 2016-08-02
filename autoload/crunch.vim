@@ -97,8 +97,8 @@ function! crunch#eval(exprs) abort "{{{2
             let orig_expr = expr_list[i]
 
             let expr_list[i] = s:mark_e_notation(expr_list[i])
-            let expr_list[i] = s:replace_captured_variable(expr_list[i])
-            let expr_list[i] = s:replace_variable_with_value(expr_list[i], i)
+            let expr_list[i] = s:replace_captured_variable_with_value(expr_list[i])
+            let expr_list[i] = s:replace_searched_variable_with_value(expr_list[i])
             let expr_list[i] = s:unmark_e_notation(expr_list[i])
             let result  = crunch#core(expr_list[i])
         catch /Crunch error: /
@@ -439,8 +439,7 @@ function! s:capture_variable(expr) abort "{{{2
 endfunction "}}}2
 
 
-" TODO this is the same as s:replace_variable_with_value
-function! s:replace_captured_variable(expr) abort "{{{2
+function! s:replace_captured_variable_with_value(expr) abort "{{{2
 
 "    Decho '== Replace Captured Variablee =='
 
@@ -456,7 +455,7 @@ function! s:replace_captured_variable(expr) abort "{{{2
     let expr = substitute(
                 \ expr,
                 \ s:variable_regex,
-                \ '\=s:get_stored_variable_value(submatch(1))', 'g')
+                \ '\=s:get_captured_variable_value(submatch(1))', 'g')
     let expr = s:mark_e_notation(expr)
 
     let expr = s:unmark_e_notation(expr)
@@ -465,7 +464,7 @@ function! s:replace_captured_variable(expr) abort "{{{2
 endfunction "}}}2
 
 
-function! s:get_stored_variable_value(variable) abort "{{{2
+function! s:get_captured_variable_value(variable) abort "{{{2
 
     let value = get(s:variables, a:variable, 'not found')
     if value ==# 'not found'
@@ -476,7 +475,7 @@ function! s:get_stored_variable_value(variable) abort "{{{2
 endfunction "}}}2
 
 
-function! s:replace_variable_with_value(expr, num) abort "{{{2
+function! s:replace_searched_variable_with_value(expr) abort "{{{2
 
 "    Decho '== Replace Variable =='
 
@@ -492,7 +491,7 @@ function! s:replace_variable_with_value(expr, num) abort "{{{2
     let expr = substitute(
                 \ expr,
                 \ s:variable_regex,
-                \ '\=s:get_searched_variable_value(submatch(1), a:num)', 'g')
+                \ '\=s:get_searched_variable_value(submatch(1))', 'g')
     let expr = s:mark_e_notation(expr)
     let expr = s:unmark_e_notation(expr)
 
@@ -501,9 +500,8 @@ function! s:replace_variable_with_value(expr, num) abort "{{{2
 endfunction "}}}2
 
 
-function! s:get_searched_variable_value(variable, num) abort "{{{2
+function! s:get_searched_variable_value(variable) abort "{{{2
 
-"    Decho '['.a:num.']= is the num'
 "    Decho '['.a:variable.']= is the variable to be replaced'
     let search_line = search('\v\C^('.b:prefix_regex.')?\V'.a:variable.'\v\s*\=\s*',
                 \'bnW' )
