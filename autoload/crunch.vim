@@ -85,9 +85,9 @@ function! crunch#eval(exprs) abort "{{{2
         try
             let orig_line = expr_list[i]
             let expr_list[i] = s:crunch_init(expr_list[i])
-            call s:capture_variable(expr_list[i])
 
             if s:valid_line(expr_list[i]) == 0
+                call s:capture_variable(expr_list[i])
                 let expr_list[i] = orig_line
                 continue
             endif

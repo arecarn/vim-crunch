@@ -500,11 +500,22 @@ Expect:
   .25*4 = 1
   pow(2,8) = 256
 ##############################################################################
-Given ():
+Given (variable with e notation):
   n = 2.304e7
   n/10
 Do:
   g=G
-Expect:
+Expect(variable with e notation is evaluated correctly):
   n = 2.304e7
   n/10 = 2304000
+##############################################################################
+Given(stale derived variable):
+  x = 20
+  x = x = 10
+  x
+Do:
+  g=G
+Expect(stale derived variable value is reevaluated):
+  x = 20
+  x = x = 20
+  x = 20
