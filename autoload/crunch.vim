@@ -110,7 +110,7 @@ function! crunch#eval(exprs) abort "{{{2
 "    Decho string(expr_list).'= the expr_lines_list'
     let expr_separator = "\n"
     if len(split(a:exprs, "\n")) <= 1
-        let expr_separator = ";"
+        let expr_separator = ';'
     endif
     let expr_lines = join(expr_list, expr_separator)
 "    Decho expr_lines.'= the expr_lines'
