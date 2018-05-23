@@ -159,6 +159,15 @@ evaluate the expressions and see the results.
 area = pow(radius,2)*pi = 78.5375
 volume = pow(radius,3)*pi*4/3 = 523.583333
 
+Could use ";" to separate different expressions in one line. For the following
+line:
+
+"a = 3; b = 7; c = a * b"
+
+When press `g=i"`, you will get:
+
+"a = 3; b = 7; c = a * b = 21"
+
 ------------------------------------------------------------------------------
 User defined variables.
 
