@@ -1,24 +1,24 @@
 ##############################################################################
 Given:
-   Chillie
-   1/2 teaspoon garlic salt
-   8*(2+1/2) cups tomato sauce
-   1 (8 ounce) jar salsa
-   4 tablespoons chili seasoning mix
-   1 (15 ounce) can light red kidney beans
-   1 (15 ounce) can dark red kidney beans
+  Chili
+  1/2 teaspoon garlic salt
+  8*(2+1/2) cups tomato sauce
+  1 (8 ounce) jar salsa
+  4 tablespoons chili seasoning mix
+  1 (15 ounce) can light red kidney beans
+  1 (15 ounce) can dark red kidney beans
 Execute ():
   let g:selection_mode="v"
-Do (Test :Crunch append result to surrouned expression):
+Do (Test :Crunch append result to surround expression):
   jjviW:Crunch!\<CR>
 Expect:
-   Chillie
-   1/2 teaspoon garlic salt
-   20 cups tomato sauce
-   1 (8 ounce) jar salsa
-   4 tablespoons chili seasoning mix
-   1 (15 ounce) can light red kidney beans
-   1 (15 ounce) can dark red kidney beans
+  Chili
+  1/2 teaspoon garlic salt
+  20 cups tomato sauce
+  1 (8 ounce) jar salsa
+  4 tablespoons chili seasoning mix
+  1 (15 ounce) can light red kidney beans
+  1 (15 ounce) can dark red kidney beans
 ##############################################################################
 Given:
   5*5/366

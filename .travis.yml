@@ -3,12 +3,6 @@ language: vim
 before_script: |
     sudo make setup
 
-    mkdir -p ~/.vim/bundle
-    cd ~/.vim/bundle
-    git clone https://github.com/junegunn/vader.vim.git
-    git clone https://github.com/arecarn/selection.vim.git
-    cd -
-
     git clone https://github.com/vim/vim
     cd vim
     ./configure --with-features=huge

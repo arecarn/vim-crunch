@@ -11,6 +11,9 @@ PATHSEP=$(strip $(PATHSEP2))
 .PHONY: setup
 setup:
 	pip install vim-vint
+	mkdir build
+	git clone https://github.com/junegunn/vader.vim.git build/vader.vim
+	git clone https://github.com/arecarn/selection.vim.git build/selection.vim
 
 .PHONY: clean
 clean:
