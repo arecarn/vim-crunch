@@ -27,6 +27,7 @@ Do (Test Operator: single line with variable):
 Expect:
   a = 3; b = 7; c = a*b = 21
 ##############################################################################
+Given:  
   5*5
 Do (Test Operator: inner word):
   g=iW
