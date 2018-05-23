@@ -113,7 +113,7 @@ function! crunch#eval(exprs) abort "{{{2
 "    Decho string(expr_list).'= the expr_lines_list'
     let expr_separator = "\n"
     let expr_lines = join(expr_list, expr_separator)
-    let expr_lines = substitute(expr_lines, separator_magic, ";", 'g')
+    let expr_lines = substitute(expr_lines, separator_magic, ';', 'g')
 "    Decho expr_lines.'= the expr_lines'
     let s:variables = {}
     return expr_lines
