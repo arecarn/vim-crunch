@@ -1,0 +1,101 @@
+=============================================================================
+After:
+  let g:crunch_result_type_append = 1
+Before:
+  let g:crunch_result_type_append = 1
+  let g:selection_mode = ''
+
+-----------------------------------------------------------------------------
+Given:
+  foo = 123
+  bar = 456
+  foo * bar
+  sin(foo)pow(bar,2)
+Execute (Test :%Crunch with g:crunch_result_type_append = 1):
+  %Crunch
+Expect:
+  foo = 123
+  bar = 456
+  foo * bar = 56088
+  sin(foo)pow(bar,2) = -95630.49224
+------------------------------------------------------------------------------
+Given:
+  foo = 123
+  bar = 456
+  foo * bar
+  sin(foo)pow(bar,2)
+Do (Test v_g=  with g:crunch_result_type_append = 1):
+  vG$hg=
+Expect:
+  foo = 123
+  bar = 456
+  foo * bar = 56088
+  sin(foo)pow(bar,2) = -95630.49224
+
+=============================================================================
+After:
+  let g:crunch_result_type_append = 1
+Before:
+  let g:crunch_result_type_append = 0
+  let g:selection_mode = ''
+
+------------------------------------------------------------------------------
+Given:
+  foo = 123
+  bar = 456
+  foo * bar
+  sin(foo)pow(bar,2)
+Execute (Test :%Crunch with g:crunch_result_type_append = 0):
+  %Crunch
+Expect:
+  foo = 123
+  bar = 456
+  56088
+  -95630.49224
+------------------------------------------------------------------------------
+Given:
+  foo = 123
+  bar = 456
+  foo * bar
+  sin(foo)pow(bar,2)
+Do (Test v_g=  with g:crunch_result_type_append = 0):
+  vG$hg=
+Expect:
+  foo = 123
+  bar = 456
+  56088
+  -95630.49224
+
+=============================================================================
+After:
+  let g:crunch_result_type_append = 1
+Before:
+  let g:crunch_result_type_append = 2
+  let g:selection_mode = ''
+
+-----------------------------------------------------------------------------
+Given:
+  foo = 123
+  bar = 456
+  foo * bar
+  sin(foo)pow(bar,2)
+Execute (Test :%Crunch with g:crunch_result_type_append = 2):
+  %Crunch
+Expect:
+  foo = 123
+  bar = 456
+  foo * bar = 56088
+  sin(foo)pow(bar,2) = -95630.49224
+------------------------------------------------------------------------------
+Given:
+  foo = 123
+  bar = 456
+  foo * bar
+  sin(foo)pow(bar,2)
+Do (Test v_g=  with g:crunch_result_type_append = 2):
+  vG$hg=
+Expect:
+  foo = 123
+  bar = 456
+  56088
+  -95630.49224

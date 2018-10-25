@@ -1,0 +1,13 @@
+language: vim
+
+before_script: |
+    sudo make setup
+
+    git clone https://github.com/vim/vim
+    cd vim
+    ./configure --with-features=huge
+    make
+    sudo make install
+    cd -
+
+script: make

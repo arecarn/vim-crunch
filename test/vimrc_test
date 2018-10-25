@@ -1,0 +1,11 @@
+set nocompatible
+
+filetype off
+
+execute 'set runtimepath+=build/vader.vim'
+execute 'set runtimepath+=build/selection.vim'
+execute 'set runtimepath+=../crunch.vim'
+set runtimepath+=.
+
+filetype plugin indent on
+syntax enable

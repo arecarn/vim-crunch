@@ -1,0 +1,202 @@
+##############################################################################
+Given:
+  Chili
+  1/2 teaspoon garlic salt
+  8*(2+1/2) cups tomato sauce
+  1 (8 ounce) jar salsa
+  4 tablespoons chili seasoning mix
+  1 (15 ounce) can light red kidney beans
+  1 (15 ounce) can dark red kidney beans
+Execute ():
+  let g:selection_mode="v"
+Do (Test :Crunch append result to surround expression):
+  jjviW:Crunch!\<CR>
+Expect:
+  Chili
+  1/2 teaspoon garlic salt
+  20 cups tomato sauce
+  1 (8 ounce) jar salsa
+  4 tablespoons chili seasoning mix
+  1 (15 ounce) can light red kidney beans
+  1 (15 ounce) can dark red kidney beans
+##############################################################################
+Given:
+  5*5/366
+Execute:
+  let g:selection_mode="n"
+Do:
+  :%Crunch\<CR>
+Expect:
+  5*5/366 = 0.068306
+##############################################################################
+Given:
+  5*5/366
+  5*5/366
+Execute:
+  let g:selection_mode="n"
+Do:
+  :.,$Crunch\<CR>
+Expect:
+  5*5/366 = 0.068306
+  5*5/366 = 0.068306
+##############################################################################
+Given (Surrouned Expressions):
+  Some text here  sin(43).5    Some text here
+  Some text here  cos(0)cos(0) Some text also here
+  Some text here  2sin(1)       Some text also here
+  Some text here  sin(1)2       Some text also here
+  Some text here  (2*3)(3*2)   Some text also here
+  Some text here  2(3*2)       Some text also here
+  Some text here  .25*4       Some text also here
+  Some text here  1/2         Some text also here
+  Some text here  .5/2         Some text also here
+  Some text here  pow(2,8)    Some text also here
+Execute:
+  let g:selection_mode=""
+Do (Test :Crunch append result to surrouned expression):
+  fs\<C-V>9j11l:Crunch\<CR>
+Expect:
+  Some text here  sin(43).5 = -0.415887    Some text here
+  Some text here  cos(0)cos(0) = 1         Some text also here
+  Some text here  2sin(1) = 1.682942        Some text also here
+  Some text here  sin(1)2 = 1.682942        Some text also here
+  Some text here  (2*3)(3*2) = 36          Some text also here
+  Some text here  2(3*2) = 12              Some text also here
+  Some text here  .25*4 = 1               Some text also here
+  Some text here  1/2 = 0.5               Some text also here
+  Some text here  .5/2 = 0.25              Some text also here
+  Some text here  pow(2,8) = 256          Some text also here
+##############################################################################
+Given (Surrouned Expressions):
+  Some text here  sin(43).5    Some text here
+  Some text here  cos(0)cos(0) Some text also here
+  Some text here  2sin(1)       Some text also here
+  Some text here  sin(1)2       Some text also here
+  Some text here  (2*3)(3*2)   Some text also here
+  Some text here  2(3*2)       Some text also here
+  Some text here  .25*4       Some text also here
+  Some text here  1/2         Some text also here
+  Some text here  .5/2         Some text also here
+  Some text here  pow(2,8)    Some text also here
+Execute:
+  let g:selection_mode=""
+Do (Test :Crunch! replace surrouned expressions with result):
+  fs\<C-V>9j11l:Crunch!\<CR>
+Expect:
+  Some text here  -0.415887     Some text here
+  Some text here  1             Some text also here
+  Some text here  1.682942       Some text also here
+  Some text here  1.682942       Some text also here
+  Some text here  36            Some text also here
+  Some text here  12            Some text also here
+  Some text here  1            Some text also here
+  Some text here  0.5          Some text also here
+  Some text here  0.25          Some text also here
+  Some text here  256          Some text also here
+##############################################################################
+Given (Expressions between spaces):
+  sin(43).5
+  cos(0)cos(0)
+
+  2sin(1)
+  sin(1)2
+
+  (2*3)(3*2)
+  2(3*2)
+
+  .25*4
+  1/2
+
+  .5/2
+  pow(2,8)
+Execute:
+  let g:selection_mode="V"
+Do (Test :Crunch and evaluate all expressions appending the result):
+  VG:Crunch\<CR>
+Expect:
+  sin(43).5 = -0.415887
+  cos(0)cos(0) = 1
+
+  2sin(1) = 1.682942
+  sin(1)2 = 1.682942
+
+  (2*3)(3*2) = 36
+  2(3*2) = 12
+
+  .25*4 = 1
+  1/2 = 0.5
+
+  .5/2 = 0.25
+  pow(2,8) = 256
+##############################################################################
+Given (Expressions between spaces):
+  sin(43).5 = -0.415887
+  cos(0)cos(0) = 1
+
+  2sin(1) = 1.682942
+  sin(1)2 = 1.682942
+
+  (2*3)(3*2) = 36
+  2(3*2) = 12
+
+  .25*4 = 1
+  1/2 = 0.5
+
+  .5/2 = 0.25
+  pow(2,8) = 256
+Execute:
+  let g:selection_mode="V"
+Do (Test Crunch! and evaluate all expressions replacing them with their result):
+  VG:Crunch!\<CR>
+Expect:
+  -0.415887
+  1
+
+  1.682942
+  1.682942
+
+  36
+  12
+
+  1
+  0.5
+
+  0.25
+  256
+##############################################################################
+Given (Expressions between spaces):
+  5e-3 * 2
+  5.0e-3.0 * 2
+  5e3 * 2
+  5.0e3.0 * 2
+Execute:
+  let g:selection_mode="V"
+Do (Test Crunch! and evaluate all expressions replacing them with their result):
+  VG:Crunch!\<CR>
+Expect:
+  0.01
+  0.01
+  10000
+  10000
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+Execute:
+  let g:selection_mode="V"
+Do ():
+  VG:Crunch\<CR>
+Expect:
+  x = 5*5 = 25
+  x*5 = 125
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+Execute:
+  let g:selection_mode="V"
+Do (test that variables are captured even after):
+  VG:Crunch!\<CR>
+Expect:
+  25
+  125

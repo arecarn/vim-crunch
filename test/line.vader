@@ -1,0 +1,393 @@
+Given:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+Execute (variables):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
+  5.34234*2
+Execute (variables):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+##############################################################################
+Given:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo
+  doubletest = pow(2,10)
+  doubletest / 23.42
+Execute (variables):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+##############################################################################
+Given:
+  radius = 3
+     " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi
+   volume = pow(radius,3)*pi*4/3
+Execute (variables, comments):
+  let g:selection_mode="V"
+  " check if all regex are independent of value of 'magic' setting
+  set nomagic
+  %Crunch
+Expect:
+  radius = 3
+     " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+   volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi
+  volume = pow(radius,3)*pi*4/3
+Execute (variables, comments):
+  let g:selection_mode="V"
+  call search('pow')
+  .Crunch
+Expect:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3
+##############################################################################
+Given:
+  radius = 3
+  pi = 3.1415
+  area = pow(radius,2)*pi =
+  volume = pow(radius,3)*pi*4/3 =
+Execute (variables, equal sign and no result):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  radius = 3
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) =
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) =
+  5.34234*2 =
+Execute (variables, equal sign and no result):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+##############################################################################
+Given:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo =
+  doubletest = pow(2,10) =
+  doubletest / 23.42 =
+Execute (variable with matching sub strings, equal sign and no result):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+Execute (existing expression result):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+##############################################################################
+Given:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+Execute (variable name sub strings):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  " -0.131483
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
+  5.34234*2 = 10.68468
+
+  A_a2 = 30.34
+  B_b2 = 80.08
+  C_c2 = .9
+  x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+  x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+
+  A_a3 = .45
+  B_b3 = 10A_a3
+  C_c3 = A_a3/.95
+  x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+  x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+
+  var1 = 10
+  var2 = .05
+  2var2*var1
+  var1/10var2/.5
+
+  Yet_Another_Var_534 = 20
+  Yet_Another_Var_283 = 30
+  Yet_Another_Var_283 + Yet_Another_Var_534
+Execute (variable names):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  " -0.131483
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+
+  A_a2 = 30.34
+  B_b2 = 80.08
+  C_c2 = .9
+  x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -0.011287
+  x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -2.628133
+
+  A_a3 = .45
+  B_b3 = 10A_a3 = 4.5
+  C_c3 = A_a3/.95 = 0.473684
+  x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -0.106395
+  x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -9.893605
+
+  var1 = 10
+  var2 = .05
+  2var2*var1 = 1
+  var1/10var2/.5 = 0.1
+
+  Yet_Another_Var_534 = 20
+  Yet_Another_Var_283 = 30
+  Yet_Another_Var_283 + Yet_Another_Var_534 = 50
+##############################################################################
+Given():
+  //a = 3
+  //  b = 8
+  // c = 1
+  //  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
+  // x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
+  // " 10.68468
+  //  5.34234*2
+
+  /*A_a2 = 30.34
+  /*  B_b2 = 80.08
+  /*  C_c2 = 0.9
+  /* x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+  /*x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+
+  /*A_a3 = 0.45
+  /* B_b3 = 10A_a3
+  /*   C_c3 = A_a3/.953
+  /*   x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+  /*x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+
+  /* var1 = 10
+  var2 = 0.05*/
+  /*2var2*var1
+  var1/10var2/.5  */
+  /*Yet_Another_Var_534 = 20   */
+  /*Yet_Another_Var_283 = 30*/
+  /*   Yet_Another_Var_283 + Yet_Another_Var_534*/
+Execute (Line prefix/suffix):
+  let g:selection_mode="V"
+  %Crunch
+Expect():
+  //a = 3
+  //  b = 8
+  // c = 1
+  //  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  // x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  // " 10.68468
+  //  5.34234*2 = 10.68468
+
+  /*A_a2 = 30.34
+  /*  B_b2 = 80.08
+  /*  C_c2 = 0.9
+  /* x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -0.011287
+  /*x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -2.628133
+
+  /*A_a3 = 0.45
+  /* B_b3 = 10A_a3 = 4.5
+  /*   C_c3 = A_a3/.953 = 0.472193
+  /*   x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -0.106057
+  /*x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -9.893943
+
+  /* var1 = 10
+  var2 = 0.05*/
+  /*2var2*var1 = 1
+  var1/10var2/.5 = 0.1  */
+  /*Yet_Another_Var_534 = 20   */
+  /*Yet_Another_Var_283 = 30*/
+  /*   Yet_Another_Var_283 + Yet_Another_Var_534 = 50*/
+##############################################################################
+Given():
+  453453454534534*453
+  cat+5
+  cat =
+  cat + 5
+
+  453453454534534*453 = Crunch error:453453454534534 is too large for VimScript evaluation
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
+Execute(Errors):
+  let g:selection_mode="V"
+  %Crunch
+Expect():
+  453453454534534*453 = 2.054144e17
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
+
+  453453454534534*453 = 2.054144e17
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
+##############################################################################
+Given():
+  "variables digits
+  var2 = 10
+  var2b = 20
+  2var2 + 20
+
+  "variable in all caps
+  VARIABLE = 30
+  "variable with underscores
+  var_2b = 0.5
+  VARIABLE * var_2b
+
+  "variable names that are part of over variable names
+  abc = 2
+  var2abc= 20
+  2abc*2var2abc + abc
+Execute (Variable names comments):
+  let g:selection_mode="V"
+  %Crunch
+Expect():
+  "variables digits
+  var2 = 10
+  var2b = 20
+  2var2 + 20 = 40
+
+  "variable in all caps
+  VARIABLE = 30
+  "variable with underscores
+  var_2b = 0.5
+  VARIABLE * var_2b = 15
+
+  "variable names that are part of over variable names
+  abc = 2
+  var2abc= 20
+  2abc*2var2abc + abc = 162
+##############################################################################
+Given():
+  var1 = -10*200
+  var2 = -20
+  var1 + var2
+Execute (negative variables):
+  let g:selection_mode="V"
+  %Crunch
+Expect():
+  var1 = -10*200 = -2000
+  var2 = -20
+  var1 + var2 = -2020
+##############################################################################
+Given ():
+  sin(1)sin(1)
+  2sin(1)
+  sin(1)2
+  (2*3)(3*2)
+  (2*3)(3*2)
+  2(3*2)
+  " Integer Conversion Test
+  1/2
+  " Decimal w/o Leading Zeros Conversion
+  .5/2
+  " Remove Zeros In Result
+  .25*4
+  pow(2,8)
+Execute (command, implicit multiplication, comments, remove zeros in result, no leading zero, forced integer conversion):
+  let g:selection_mode="V"
+  %Crunch
+Expect:
+  sin(1)sin(1) = 0.708073
+  2sin(1) = 1.682942
+  sin(1)2 = 1.682942
+  (2*3)(3*2) = 36
+  (2*3)(3*2) = 36
+  2(3*2) = 12
+  " Integer Conversion Test
+  1/2 = 0.5
+  " Decimal w/o Leading Zeros Conversion
+  .5/2 = 0.25
+  " Remove Zeros In Result
+  .25*4 = 1
+  pow(2,8) = 256
+##############################################################################

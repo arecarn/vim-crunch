@@ -1,0 +1,521 @@
+Given:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi
+  volume = pow(radius,3)*pi*4/3
+Do (Test Operator: inner paragraph):
+  g=ip
+Expect:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given:
+  5*5
+Do (Test Operator: single line):
+  g==
+Expect:
+  5*5 = 25
+##############################################################################
+Given:
+  5*5
+Do (Test Operator: inner word):
+  g=iW
+Expect:
+  5*5 = 25
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+Do ():
+  g=ip
+Expect:
+  x = 5*5 = 25
+  x*5 = 125
+##############################################################################
+Given ():
+  x = 100
+
+  x = 5*5
+  x*5
+Do ():
+  jjg=ip
+Expect:
+  x = 100
+
+  x = 5*5 = 25
+  x*5 = 125
+##############################################################################
+Given ():
+  x = 100
+  x = 5*5
+  x*5
+Do ():
+  g=ip
+Expect:
+  x = 100
+  x = 5*5 = 25
+  x*5 = 125
+
+##############################################################################
+Given ():
+  x = 5*5
+  x*5
+
+  x = 100
+Do ():
+  g=ip
+Expect:
+  x = 5*5 = 25
+  x*5 = 125
+
+  x = 100
+
+##############################################################################
+Given ():
+  Lorem ipsum dolor 5*5  sit amet, consectetur.
+  Lorem ipsum dolor 5*5  sit amet, consectetur.
+Do (Test: evaluate surrouned text with operator):
+  f5\<C-V>iWjg=
+Expect:
+  Lorem ipsum dolor 5*5 = 25  sit amet, consectetur.
+  Lorem ipsum dolor 5*5 = 25  sit amet, consectetur.
+
+##############################################################################
+Given ():
+  // x = 12
+  /* x = 10  */
+  x * 10
+Do (Test: evaluate surrouned text with operator):
+  g=ip
+Expect:
+  // x = 12
+  /* x = 10  */
+  x * 10 = 100
+##############################################################################
+Given:
+  I have 5*5 cats
+  and... 3/6 dogs
+Do:
+  7lj2lg=
+Expect:
+  I have 5*5 = 25  cats
+  and... 3/6 = 0.5 dogs
+##############################################################################
+Given:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+Do():
+  g=G
+Expect:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
+  5.34234*2
+Do (variables):
+  g=ip
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+##############################################################################
+Given:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo
+  doubletest = pow(2,10)
+  doubletest / 23.42
+Do ():
+  g=ip
+Expect:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+##############################################################################
+Given:
+  radius = 3
+     " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi
+   volume = pow(radius,3)*pi*4/3
+Execute (variables, comments):
+  " check if all regex are independent of value of 'magic' setting
+  set nomagic
+Do ():
+  g=ip
+Expect:
+  radius = 3
+     " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+   volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi
+  volume = pow(radius,3)*pi*4/3
+Do (variables, comments):
+  /pow\<CR>
+  g==
+Expect:
+  radius = 3
+  " radius = 5
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3
+##############################################################################
+Given:
+  radius = 3
+  pi = 3.1415
+  area = pow(radius,2)*pi =
+  volume = pow(radius,3)*pi*4/3 =
+Do(variables, equal sign and no result):
+  g=ip
+Expect:
+  radius = 3
+  pi = 3.1415
+  area = pow(radius,2)*pi = 28.2735
+  volume = pow(radius,3)*pi*4/3 = 113.094
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) =
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) =
+  5.34234*2 =
+Do (variables, equal sign and no result):
+  g=ip
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+##############################################################################
+Given:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo =
+  doubletest = pow(2,10) =
+  doubletest / 23.42 =
+Do (variable with matching sub strings, equal sign and no result):
+  g=ip
+Expect:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+Do (existing expression result):
+  g=ip
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+##############################################################################
+Given:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+Do (variable name sub strings):
+  g=ip
+Expect:
+  test = 10
+  testTwo = 2.78790
+  (test + 4) / testTwo = 5.021701
+  doubletest = pow(2,10) = 1024
+  doubletest / 23.42 = 43.723313
+##############################################################################
+Given:
+  a = 3
+  b = 8
+  c = 1
+  " -0.131483
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
+  5.34234*2 = 10.68468
+
+  A_a2 = 30.34
+  B_b2 = 80.08
+  C_c2 = .9
+  x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+  x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+
+  A_a3 = .45
+  B_b3 = 10A_a3
+  C_c3 = A_a3/.95
+  x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+  x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+
+  var1 = 10
+  var2 = .05
+  2var2*var1
+  var1/10var2/.5
+
+  Yet_Another_Var_534 = 20
+  Yet_Another_Var_283 = 30
+  Yet_Another_Var_283 + Yet_Another_Var_534
+Do (variable names):
+  g=G
+Expect:
+  a = 3
+  b = 8
+  c = 1
+  " -0.131483
+  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  5.34234*2 = 10.68468
+
+  A_a2 = 30.34
+  B_b2 = 80.08
+  C_c2 = .9
+  x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -0.011287
+  x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -2.628133
+
+  A_a3 = .45
+  B_b3 = 10A_a3 = 4.5
+  C_c3 = A_a3/.95 = 0.473684
+  x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -0.106395
+  x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -9.893605
+
+  var1 = 10
+  var2 = .05
+  2var2*var1 = 1
+  var1/10var2/.5 = 0.1
+
+  Yet_Another_Var_534 = 20
+  Yet_Another_Var_283 = 30
+  Yet_Another_Var_283 + Yet_Another_Var_534 = 50
+##############################################################################
+Given():
+  //a = 3
+  //  b = 8
+  // c = 1
+  //  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a)
+  // x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a)
+  // " 10.68468
+  //  5.34234*2
+
+  /*A_a2 = 30.34
+  /*  B_b2 = 80.08
+  /*  C_c2 = 0.9
+  /* x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+  /*x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2)
+
+  /*A_a3 = 0.45
+  /* B_b3 = 10A_a3
+  /*   C_c3 = A_a3/.953
+  /*   x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+  /*x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3)
+
+  /* var1 = 10
+  var2 = 0.05*/
+  /*2var2*var1
+  var1/10var2/.5  */
+  /*Yet_Another_Var_534 = 20   */
+  /*Yet_Another_Var_283 = 30*/
+  /*   Yet_Another_Var_283 + Yet_Another_Var_534*/
+Do (Line prefix/suffix):
+  g=G
+Expect():
+  //a = 3
+  //  b = 8
+  // c = 1
+  //  x = (-b+sqrt(pow(b,2)-4*a*c))/(2*a) = -0.131483
+  // x = (-b-sqrt(pow(b,2)-4*a*c))/(2*a) = -2.535184
+  // " 10.68468
+  //  5.34234*2 = 10.68468
+
+  /*A_a2 = 30.34
+  /*  B_b2 = 80.08
+  /*  C_c2 = 0.9
+  /* x = (-B_b2+sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -0.011287
+  /*x = (-B_b2-sqrt(pow(B_b2,2)-4*A_a2*C_c2))/(2A_a2) = -2.628133
+
+  /*A_a3 = 0.45
+  /* B_b3 = 10A_a3 = 4.5
+  /*   C_c3 = A_a3/.953 = 0.472193
+  /*   x = (-B_b3+sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -0.106057
+  /*x = (-B_b3-sqrt(pow(B_b3,2)-4*A_a3*C_c3))/(2A_a3) = -9.893943
+
+  /* var1 = 10
+  var2 = 0.05*/
+  /*2var2*var1 = 1
+  var1/10var2/.5 = 0.1  */
+  /*Yet_Another_Var_534 = 20   */
+  /*Yet_Another_Var_283 = 30*/
+  /*   Yet_Another_Var_283 + Yet_Another_Var_534 = 50*/
+##############################################################################
+Given():
+  453453454534534*453
+  cat+5
+  cat =
+  cat + 5
+
+  453453454534534*453 = Crunch error:453453454534534 is too large for VimScript evaluation
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
+Do(Errors):
+  g=G
+Expect():
+  453453454534534*453 = 2.054144e17
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
+
+  453453454534534*453 = 2.054144e17
+  cat+5 = Crunch error: value for cat not found
+  cat = Crunch error: value for cat not found
+  cat + 5 = Crunch error: value for cat not found
+##############################################################################
+Given():
+  "variables digits
+  var2 = 10
+  var2b = 20
+  2var2 + 20
+
+  "variable in all caps
+  VARIABLE = 30
+  "variable with underscores
+  var_2b = 0.5
+  VARIABLE * var_2b
+
+  "variable names that are part of over variable names
+  abc = 2
+  var2abc= 20
+  2abc*2var2abc + abc
+Do (Variable names comments):
+  g=G
+Expect():
+  "variables digits
+  var2 = 10
+  var2b = 20
+  2var2 + 20 = 40
+
+  "variable in all caps
+  VARIABLE = 30
+  "variable with underscores
+  var_2b = 0.5
+  VARIABLE * var_2b = 15
+
+  "variable names that are part of over variable names
+  abc = 2
+  var2abc= 20
+  2abc*2var2abc + abc = 162
+##############################################################################
+Given():
+  var1 = -10*200
+  var2 = -20
+  var1 + var2
+Do (negative variables):
+  g=ip
+Expect():
+  var1 = -10*200 = -2000
+  var2 = -20
+  var1 + var2 = -2020
+##############################################################################
+Given():
+  cos(0)*cos(0)
+  2sin(2)2
+
+  (2*3)(3*2)
+  2(2*2)
+  .25*4
+Do (no leading zero, implied multiplication):
+  g=G
+Expect():
+  cos(0)*cos(0) = 1
+  2sin(2)2 = 3.63719
+
+  (2*3)(3*2) = 36
+  2(2*2) = 8
+  .25*4 = 1
+##############################################################################
+Given ():
+  sin(1)sin(1)
+  2sin(1)
+  sin(1)2
+  (2*3)(3*2)
+  (2*3)(3*2)
+  2(3*2)
+  " Integer Conversion Test
+  1/2
+  " Decimal w/o Leading Zeros Conversion
+  .5/2
+  " Remove Zeros In Result
+  .25*4
+  pow(2,8)
+Do (command, implicit multiplication, comments, remove zeros in result, no leading zero, forced integer conversion):
+  g=ip
+Expect:
+  sin(1)sin(1) = 0.708073
+  2sin(1) = 1.682942
+  sin(1)2 = 1.682942
+  (2*3)(3*2) = 36
+  (2*3)(3*2) = 36
+  2(3*2) = 12
+  " Integer Conversion Test
+  1/2 = 0.5
+  " Decimal w/o Leading Zeros Conversion
+  .5/2 = 0.25
+  " Remove Zeros In Result
+  .25*4 = 1
+  pow(2,8) = 256
+##############################################################################
+Given (variable with e notation):
+  n = 2.304e7
+  n/10
+Do:
+  g=G
+Expect(variable with e notation is evaluated correctly):
+  n = 2.304e7
+  n/10 = 2304000
+##############################################################################
+Given(stale derived variable):
+  x = 20
+  x = x = 10
+  x
+Do:
+  g=G
+Expect(stale derived variable value is reevaluated):
+  x = 20
+  x = x = 20
+  x = 20

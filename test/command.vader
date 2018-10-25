@@ -1,0 +1,31 @@
+Before:
+  redir => g:MsgOutputGot
+Execute (Test Commandline Input #1):
+  let g:MsgOutputExpect = "\n5*5 = 25\nYanked Result"
+  Crunch 5*5
+After:
+  redir END
+  AssertEqual g:MsgOutputExpect, g:MsgOutputGot
+------------------------------------------------------------------------------
+Before:
+Do (Test Commandline Input #1):
+  p
+Expect ():
+  25
+After:
+##############################################################################
+Before:
+  redir => g:MsgOutputGot
+Execute (Test Commandline Input #2):
+  let g:MsgOutputExpect = "\nsin(5*5) = -0.132352\nYanked Result"
+  Crunch sin(5*5)
+After:
+  redir END
+  AssertEqual g:MsgOutputExpect, g:MsgOutputGot
+------------------------------------------------------------------------------
+Before:
+Do (Test Commandline Input #2):
+  p
+Expect ():
+  -0.132352
+After:

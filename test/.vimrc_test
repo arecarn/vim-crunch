@@ -1,0 +1,19 @@
+set nocompatible
+
+let s:hasWindows = has("win16") || has("win32") || has("win64")
+if s:hasWindows
+    let s:vimpath = $HOME."/vimfiles"
+    cd $HOME "start in home directory, this is just here for convince
+else
+    let s:vimpath = $HOME."/.vim"
+endif
+
+filetype off
+
+execute "set rtp+=".s:vimpath."/bundle/vader.vim"
+execute "set rtp+=".s:vimpath."/bundle/crunch.vim"
+execute "set rtp+=".s:vimpath."/bundle/selection.vim"
+set rtp+=.
+
+filetype plugin indent on
+syntax enable

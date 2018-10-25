@@ -1,0 +1,442 @@
+*Crunch* An easier way to perform calculations inside Vim
+
+*crunch* *crunch.txt*
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+--------->                                                          <---------
+--------->  ______   ______   __  __   __   __   ______   __  __    <---------
+---------> /\  ___\ /\  == \ /\ \/\ \ /\ '-.\ \ /\  ___\ /\ \_\ \   <---------
+---------> \ \ \____\ \  __< \ \ \_\ \\ \ \-.  \\ \ \____\ \  __ \  <---------
+--------->  \ \_____\\ \_\ \_\\ \_____\\ \_\\"\_\\ \_____\\ \_\ \_\ <---------
+--------->   \/_____/ \/_/ /_/ \/_____/ \/_/ \/_/ \/_____/ \/_/\/_/ <---------
+--------->                                                          <---------
+--------->                                                          <---------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+        A Vim plugin that provides a calculator with variable support
+
+==============================================================================
+
+     1. Overview .................................... |crunch-overview|
+     2. Usage ....................................... |crunch-usage|
+        2.1 Mappings ................................ |crunch-mappings|
+        2.2 Commands ................................ |crunch-commands|
+     3. Features..................................... |crunch-features|
+        3.1 Variables ............................... |crunch-variables|
+        3.2 Comments ................................ |crunch-comment|
+        3.3 Prefix & Suffix ......................... |crunch-prefix-suffix||
+        3.4 Looser Syntax ........................... |crunch-looser-syntax|
+     4. Configuration ............................... |crunch-configuration|
+         4.1 g:crunch_prompt ........................ |crunch-prompt|
+         4.2 g:crunch_comment ....................... |crunch-comment|
+         4.3 g:crunch_result_type_append ............ |crunch-result-type-append|
+         4.4 g:crunch_user_variables ................ |crunch-user-variables|
+     5. Known Issues ................................ |crunch-known-issues|
+     6. Contribute .................................. |crunch-contribute|
+     7. Change Log .................................. |crunch-change-log|
+         7.1 Plans .................................. |crunch-plans|
+     8. Credits ..................................... |crunch-credits|
+     9. License ..................................... |crunch-licenece|
+
+
+==============================================================================
+1. OVERVIEW                                                 *crunch-overview*
+
+Crunch makes calculations in Vim more accessible and loosens Vim's math
+syntax such as allowing for implied multiplication. Crunch also forces 
+floating point to be used when evaluating.
+
+REQUIREMENTS~
+* Vim compiled with |+float| feature.
+* |selection.vim| https://github.com/arecarn/selection.vim
+ 
+If you want to do math in Vim without Crunch the process goes as follows.
+From insert mode or command line more:
+    <CTRL-R>=5+5<CR>
+
+Or just from command line mode:
+    :echo 5+5<CR>
+
+One Problem with this method is when you expect a floating point result from
+integer division:
+                                     e.g.
+                                   5/2 = 2
+
+You can see that the result is the truncated version of the actual result.
+When what you actually wanted was:
+
+                                5.0/2.0 = 2.5
+
+Or when you enter a floating point number like this:
+
+                                     .5/2
+
+A decimal without a leading zero produces an error when you actually wanted
+was this 0.5/2 = 0.25
+
+Crunch solves these trivial problems and many more.
+
+
+==============================================================================
+2. USAGE                                                       *crunch-usage*
+
+------------------------------------------------------------------------------
+2.1 MAPPINGS                                                *crunch-mappings*
+
+g={motion}              Evaluate the text that {motion} moves over
+
+g==                     Evalue the current line appending the result
+
+Note: the option |g:crunch_result_type_append| controls whether or not the
+result of each expression(s) is appended to the expression or if the result
+replaces the expression(s)
+
+------------------------------------------------------------------------------
+2.2 Commands
+
+:[range]Crunch[!]                                                   *:Crunch*
+   Evaluates the current visual selection or provided range and adds result to
+   the end of the line(s) With the [!] crunch does not append the result but
+   replaces the provided range or visual selection with the result. This
+   behavior can be reversed  by setting |g:crunch_result_type_append| = 0
+
+:Crunch
+    Provides a prompt in the command for you to enter your mathematical
+    expression. The result is then available to be pasted from the default
+    register.
+
+:Crunch [expr]
+    Where [expr] is some mathematical expression to be evaluated. The result
+    is then available to be pasted from the default register.
+
+------------------------------------------------------------------------------
+NOTES~
+
+If invalid expressions are used Crunch will report errors, and append that
+error as a result.
+
+
+==============================================================================
+3. FEATURES                                                 *crunch-features*
+
+------------------------------------------------------------------------------
+3.1  VARIABLES                                             *crunch-variables*
+
+When using |:Crunch| with a range or the operator |g=| you can use variables
+to define values and store results.
+
+A variable name consists of ASCII letters, digits and the underscore. It
+cannot start with a digit.
+
+Valid variable names:
+  counter
+  _aa3p
+  very_long_variable_name_with_underscores
+  FuncLength2
+  LENGTH
+
+Invalid names
+  foo+bar
+  6var
+
+------------------------------------------------------------------------------
+EXAMPLE~
+Calculate area and volume given the radius.
+
+radius = 5
+pi = 3.1415
+area = pow(radius,2)*pi
+volume = pow(radius,3)*pi*4/3
+
+First two lines work like constants denoting Pi and the radius.  You can then
+visually select the next two lines and use either select all the lines and
+enter |:Crunch| or with the cursor anywhere in the paragraph type |g=|ip to
+evaluate the expressions and see the results.
+
+area = pow(radius,2)*pi = 78.5375
+volume = pow(radius,3)*pi*4/3 = 523.583333
+
+------------------------------------------------------------------------------
+User defined variables.
+
+g:crunch_variables
+
+
+
+------------------------------------------------------------------------------
+NOTES~
+
+When performing evaluations variables above the evaluated area are found
+as long as they are the only thing on the line, otherwise only variables
+inside the evaluated area are considered.
+
+
+------------------------------------------------------------------------------
+3.2 COMMENTS                                                *crunch-comments*
+
+Crunch has support for ignoring lines with comments. By default the string to
+start a comment it '"' just like Vim Script, but this can be configured
+|g:crunch_comment| global variable.
+
+------------------------------------------------------------------------------
+3.3  PREFIX & SUFFIX                                   *crunch-prefix-suffix*
+
+The |:Crunch| command and |g=| operator using a range ignores certain prefixes
+and suffixes in a line. There are currently two patterns that are used as
+suffixes and prefixes in all file types '*' and '//' the third pattern is
+varies by file type and is based of the '|commentstring|' variable in Vim.
+Bellow is a table summarizing some prefixes for different file types.
+
+==============================================
+    File Type    |      Valid Expression
+==============================================
+ C               |/*
+ Java            | * 5*5
+ JavaScrip       | *
+                 | */
+                 |----------------------------
+                 |/* 5*5
+                 | */
+                 |----------------------------
+                 |//  5*5
+                 |----------------------------
+                 |/*5*5*/
+                 |----------------------------
+                 |/*  5*5   */
+ ----------------+----------------------------
+ HTML            |<!-- 5*5
+                 |-->
+                 |----------------------------
+                 |<!--
+                 |* 5*5
+                 |-->
+                 |----------------------------
+                 |/*5*5*/
+                 |----------------------------
+                 |//5*5
+ ----------------+----------------------------
+ Python          |#5*5
+                 |----------------------------
+                 |#5*5#
+                 |----------------------------
+                 |// 5*5
+                 |----------------------------
+                 |* 5*5 */
+ ----------------+----------------------------
+
+If your language's commentstrig is unsupported by vim or you would like to use
+a different comment string, don't worry. All you have to do is add an autocmd
+to update commentstring for the desired language your vimrc.
+
+e.g. adding support for apache file type.(spaces escaped)
+
+autocmd FileType apache set commentstring=#\ %s
+
+e.g. changing the commentstring for Python to use the multi-line version of a
+comment
+
+autocmd FileType python set commentstring='''%s'''
+
+------------------------------------------------------------------------------
+3.4  LOOSER SYNTAX                                     *crunch-looser-syntax*
+
+The following chart shows the looser math syntax provided with Crunch, compared
+to the default math syntax.
+
+---------------------------+-----------------------+--------------------------
+         Feature           |      With Crunch      |      Without Crunch
+---------------------------+-----------------------+--------------------------
+Implied Multiplication     |                       |
+                           |cos(0)cos(0) = 1       |cos(0)*cos(0) = 1.0
+                           |2sin(1) = 1.682942     |2*sin(1) = 1.682942
+                           |sin(1)2 = 1.682942     |sin(1)*2 = 1.682942
+                           |(2*3)(3*2) = 36        |(2*3)*(3*2) = 36
+                           |2(3*2) = 12            |2*(3*2) = 12
+---------------------------+-----------------------+--------------------------
+Integer to Float Conversion|                       |
+                           |1/2 = 0.5              |1.0/2.0 = 0.5
+                           |.25*4 = 1              |0.25*4 = 1.0
+---------------------------+-----------------------+--------------------------
+Decimals w/o Leading Zeros |                       |
+                           |.5/2 = 0.25            |0.5/2 = 0.25
+                           |.25*4 = 1              |0.25*4 = 1.0
+---------------------------+-----------------------+--------------------------
+Removed Zeros In Result    |                       |
+                           |0.25*4 = 1             |0.25*4 = 1.0
+                           |pow(2,8) = 256         |pow(2,8)= 256.0
+------------------------------------------------------------------------------
+Note: all the examples 'Without Crunch' work fine with Crunch as well.
+
+Crunch Allows you to just type in mathematical expressions without having to
+worry about the syntax as much, and getting the answer you expect.
+
+
+==============================================================================
+4. CONFIGURATION                                       *crunch-configuration*
+
+------------------------------------------------------------------------------
+4.1 g:crunch_prompt                                           *crunch-prompt*
+
+Default 'Calc >> '
+
+The prompt provided when using |:Crunch| without a range
+
+------------------------------------------------------------------------------
+4.2 g:crunch_comment                                         *crunch-comment*
+
+Default '"'
+
+see |crunch-comments|
+
+------------------------------------------------------------------------------
+4.3 g:crunch_result_type_append                   *crunch-result-type-append*
+
+Defualt 1
+
+Controls whether or not the result of each expression(s) is appended to the 
+expression or if the result replaces the expression(s).
+
+Options:
+0: the expression is replaced with the result
+
+1: the result is appended to the expression
+
+2: for line-wise operations the result is appended to the expression but
+   for character-wise and block-wise expressions the expression is replaced
+   with the result
+------------------------------------------------------------------------------
+4.4 g:crunch_user_variables                           *crunch-user-variables*
+
+Default {}
+
+Dictionary that can be used to define user variable(s).
+
+EXAMPLE~
+
+let g:crunch_user_variables = {'foo': 123,  'j':456}
+
+ALTERNATIVELY~
+
+let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
+
+==============================================================================
+5. KNOWN ISSUES                                         *crunch-known-issues*
+
+* Modulus operation is not supported due to converting all numbers into floats
+* Expression similar to the following evaluate 23.43.22 + 0 = 23.43. This is
+  caused by the way str2float() converts 23.34.22 into 23.34
+
+
+==============================================================================
+6. CONTRIBUTE                                             *crunch-contribute*
+
+Repository and Bug Tracker:
+https://github.com/arecarn/crunch
+
+
+==============================================================================
+7. CHANGE LOG                                             *crunch-change-log*
+
+------------------------------------------------------------------------------
+Version 3
+
+- add support for evaluating numbers with e notation e.g. 5e3 or 5e-3
+
+- add operator |g=|
+
+- add support for evaliating expressings inside lines as well as visual blocks
+
+- make |:Crunch|  perform it's old behavior in addition to evalating ranges
+  and selections when they are provided
+
+- remove |:CrunchLine| and |:CrunchBlock| commands and their mappings in favor
+  of the enhanced |:Crunch| command  and |g=| operator
+
+------------------------------------------------------------------------------
+Version 2
+
+02 Oct  2013 - Prefix & Suffix Ignore added
+
+12 Sept 2013 - Removed '#' from variable declaration and usage
+
+29 Aug  2013 - Add CrunchBlock mapping
+
+27 Aug  2013 - Allow expressions to be input as an argument to |:Crunch|
+             - command  e.g. '|:Crunch| 5*5'
+
+------------------------------------------------------------------------------
+Version 1
+
+08 July 2013 - Improved Map handling
+
+07 July 2013 - Move most of plugin to autoload
+
+04 July 2013 - Streamline code
+             - Add more multiplication fixes
+             -  - )(, n(
+             - Added visual selection
+
+27 Jun  2013 - Added Variables
+             - Clearing of previous result
+             - Made Crunch and CrunchLine two different functions
+             - Removed visual selection in favor of whole line evaluation.
+             - Made calculator prompt customizable
+
+24 Jun  2013 added multiplication fix
+19 Jun  2013 first version
+
+------------------------------------------------------------------------------
+7.1  PLANS                                                     *crunch-plans*
+
+- add option for using different evaluation engines such as:
+  * Python
+  * Octave
+  * bc
+  * User Configurable
+
+
+==============================================================================
+8. CREDITS                                                   *crunch-credits*
+
+
+Sources inspiration and credits for this plugin
+
+- http://patorjk.com/
+  ASCII font courtesy of Patrick Gillespie
+
+- https://github.com/gregsexton/VimCalc
+  Greg Sexton Wrote Vimcalc
+
+- http://vimrc-dissection.blogspot.com/2011/01/vim-inline-calculator-revisited.html
+  Ihar Filipau inspired most of the variable code
+
+- https://github.com/hrsh7th/vim-neco-calc
+  hrsh7th wrote Neco-calc, and provided a solid int to float conversion method
+
+- https://github.com/sk1418/HowMuch
+  sk1418 wrote a similar plugin with visual block/characterwise evaluation
+
+- Marcelo Montu (github: mMontu)
+  For contributing to make crunch more user friendly and useful
+
+
+==============================================================================
+9. LICENSE                                                  *crunch-licenece*
+                 DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                            Version 2, December 2004
+
+                Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+       Everyone is permitted to copy and distribute verbatim or modified
+      copies of this license document, and changing it is allowed as long
+                            as the name is changed.
+
+                  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+        TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+                    0. You just DO WHAT THE FUCK YOU WANT TO
+
+vim:tw=78:ts=8:ft=help:norl:fdm=manual:
