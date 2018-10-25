@@ -46,8 +46,8 @@
 1. OVERVIEW                                                 *crunch-overview*
 
 Crunch makes calculations in Vim more accessible and loosens Vim's math
-syntax, allowing Implied multiplication. Crunch also forces floating point to
-be used when evaluating.
+syntax such as allowing for implied multiplication. Crunch also forces 
+floating point to be used when evaluating.
 
 REQUIREMENTS~
 * Vim compiled with |+float| feature.
@@ -90,8 +90,8 @@ g={motion}              Evaluate the text that {motion} moves over
 
 g==                     Evalue the current line appending the result
 
-Note: the option |g:crunch_result_type_append| controls weather or not the
-result of each expression(s) is appended onto the end or if the result
+Note: the option |g:crunch_result_type_append| controls whether or not the
+result of each expression(s) is appended to the expression or if the result
 replaces the expression(s)
 
 ------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ replaces the expression(s)
 :[range]Crunch[!]                                                   *:Crunch*
    Evaluates the current visual selection or provided range and adds result to
    the end of the line(s) With the [!] crunch does not append the result but
-   replaces the provided range or visual selection with the result this
+   replaces the provided range or visual selection with the result. This
    behavior can be reversed  by setting |g:crunch_result_type_append| = 0
 
 :Crunch
@@ -296,15 +296,15 @@ see |crunch-comments|
 
 Defualt 1
 
-Controls weather or not the result of each expression(s) is appended onto the
-end or if the result replaces the expression(s)o
+Controls whether or not the result of each expression(s) is appended to the 
+expression or if the result replaces the expression(s).
 
 Options:
 0: the expression is replaced with the result
 
-1: the result is appended after the expression
+1: the result is appended to the expression
 
-2: for line-wise operations the result is appended after the expression but
+2: for line-wise operations the result is appended to the expression but
    for character-wise and block-wise expressions the expression is replaced
    with the result
 ------------------------------------------------------------------------------
@@ -318,7 +318,7 @@ EXAMPLE~
 
 let g:crunch_user_variables = {'foo': 123,  'j':456}
 
-ALTERNATIVLY~
+ALTERNATIVELY~
 
 let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
 
