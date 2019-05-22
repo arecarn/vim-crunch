@@ -34,6 +34,7 @@
          4.2 g:crunch_comment ....................... |crunch-comment|
          4.3 g:crunch_result_type_append ............ |crunch-result-type-append|
          4.4 g:crunch_user_variables ................ |crunch-user-variables|
+         4.5 g:crunch_precision ..................... |crunch-precision|
      5. Known Issues ................................ |crunch-known-issues|
      6. Contribute .................................. |crunch-contribute|
      7. Change Log .................................. |crunch-change-log|
@@ -294,7 +295,7 @@ see |crunch-comments|
 ------------------------------------------------------------------------------
 4.3 g:crunch_result_type_append                   *crunch-result-type-append*
 
-Defualt 1
+Default 1
 
 Controls whether or not the result of each expression(s) is appended to the 
 expression or if the result replaces the expression(s).
@@ -321,6 +322,17 @@ let g:crunch_user_variables = {'foo': 123,  'j':456}
 ALTERNATIVELY~
 
 let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
+
+------------------------------------------------------------------------------
+4.5 g:crunch_precision                                     *crunch-precision*
+
+Default 6
+
+Controls the output precision of floating point numbers. Default is 6, to
+maintain the old behaviour of this plugin. Maximum precision depends on the
+precision of the floating point library used when compiling vim, see
+|floating-point-precision| for details. Trailing 0s are removed.
+
 
 ==============================================================================
 5. KNOWN ISSUES                                         *crunch-known-issues*
