@@ -21,6 +21,7 @@ let g:crunch_prompt = get(g:, 'crunch_prompt', 'Calc >> ')
 let g:crunch_comment = get(g:, 'crunch_comment', '"')
 let g:crunch_user_variables = get(g:, 'crunch_user_variables', {})
 let g:crunch_result_type_append = get(g:, 'crunch_result_type_append', 1)
+let g:crunch_precision = get(g:, 'crunch_precision', 6)
 let g:util_debug = get(g:, 'util_debug', 0)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 
