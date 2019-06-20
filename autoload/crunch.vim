@@ -656,7 +656,7 @@ function! s:vim_eval(expr) abort "{{{2
 "    Decho '== Evaluate Expression =='
 "    Decho '[' . a:expr . ']= the final expression'
     let precision = str2nr(g:crunch_precision)
-    let result = printf("%.".precision."f",(eval(a:expr)))
+    let result = printf('%.'.precision.'f',(eval(a:expr)))
 "    Decho '['.result.']= before trailing ".0" removed'
 "    Decho '['.matchstr(result,'\v\.0+$').']= trailing ".0"'
 
