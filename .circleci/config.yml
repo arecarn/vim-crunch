@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run: |
+          sudo make setup
+          git clone https://github.com/vim/vim
+          cd vim
+          ./configure --with-features=huge
+          make
+          sudo make install
+          cd -
+
+      - run: make
