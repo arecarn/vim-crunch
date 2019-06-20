@@ -328,10 +328,10 @@ let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
 
 Default 6
 
-Controls the output precision of floating point numbers. Default is 6, to
-maintain the old behaviour of this plugin. Maximum precision depends on the
-precision of the floating point library used when compiling vim, see
-|floating-point-precision| for details. Trailing 0s are removed.
+Controls the output precision of floating point numbers. Default is 6 The
+Maximum precision depends on the precision of the floating point library used
+when compiling vim, see |floating-point-precision| for details. Note that
+trailing 0s in results are removed.
 
 
 ==============================================================================
@@ -340,7 +340,6 @@ precision of the floating point library used when compiling vim, see
 * Modulus operation is not supported due to converting all numbers into floats
 * Expression similar to the following evaluate 23.43.22 + 0 = 23.43. This is
   caused by the way str2float() converts 23.34.22 into 23.34
-
 
 ==============================================================================
 6. CONTRIBUTE                                             *crunch-contribute*
