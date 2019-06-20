@@ -9,3 +9,4 @@ set runtimepath+=.
 
 filetype plugin indent on
 syntax enable
+set nomore
