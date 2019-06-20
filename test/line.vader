@@ -301,12 +301,12 @@ Execute(Errors):
   let g:selection_mode="V"
   %Crunch
 Expect():
-  453453454534534*453 = 2.054144e17
+  453453454534534*453 = 205414414904143904
   cat+5 = Crunch error: value for cat not found
   cat = Crunch error: value for cat not found
   cat + 5 = Crunch error: value for cat not found
 
-  453453454534534*453 = 2.054144e17
+  453453454534534*453 = 205414414904143904
   cat+5 = Crunch error: value for cat not found
   cat = Crunch error: value for cat not found
   cat + 5 = Crunch error: value for cat not found
