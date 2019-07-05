@@ -328,10 +328,10 @@ let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
 
 Default 6
 
-Controls the output precision of floating point numbers. Default is 6 The
-Maximum precision depends on the precision of the floating point library used
-when compiling vim, see |floating-point-precision| for details. Note that
-trailing 0s in results are removed.
+Controls the output precision of floating point numbers formated with printf
+specifier %g. The Maximum precision depends on the precision of the floating
+point library used when compiling vim, see |floating-point-precision| for
+details. Note that trailing 0s in results are removed.
 
 
 ==============================================================================
