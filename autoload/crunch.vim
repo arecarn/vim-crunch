@@ -657,11 +657,10 @@ function! s:vim_eval(expr) abort "{{{2
 "    Decho '[' . a:expr . ']= the final expression'
     let precision = str2nr(g:crunch_precision)
     let result = printf('%.'.precision.'g',(eval(a:expr)))
-"    Decho '['.result.']= before trailing ".0" removed'
-"    Decho '['.matchstr(result,'\v\.0+$').']= trailing ".0"'
 
-    "check for trailing '.0' in result and remove it (occurs with vim eval)
-    let result = substitute(result, '\v\.=0+$', '', '')
+    "trim any trailing '.0's in result
+    let result = substitute(result, '\v\.\d{-}\zs(0+$|0+\zee)', '', '')
+    let result = substitute(result, '\v\.$|\d\zs\.\zee', '', '')
 
     return result
 endfunction "}}}2
