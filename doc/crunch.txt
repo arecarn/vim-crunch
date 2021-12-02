@@ -34,6 +34,7 @@
          4.2 g:crunch_comment ....................... |crunch-comment|
          4.3 g:crunch_result_type_append ............ |crunch-result-type-append|
          4.4 g:crunch_user_variables ................ |crunch-user-variables|
+         4.5 g:crunch_precision ..................... |crunch-precision|
      5. Known Issues ................................ |crunch-known-issues|
      6. Contribute .................................. |crunch-contribute|
      7. Change Log .................................. |crunch-change-log|
@@ -46,8 +47,8 @@
 1. OVERVIEW                                                 *crunch-overview*
 
 Crunch makes calculations in Vim more accessible and loosens Vim's math
-syntax, allowing Implied multiplication. Crunch also forces floating point to
-be used when evaluating.
+syntax such as allowing for implied multiplication. Crunch also forces 
+floating point to be used when evaluating.
 
 REQUIREMENTS~
 * Vim compiled with |+float| feature.
@@ -90,8 +91,8 @@ g={motion}              Evaluate the text that {motion} moves over
 
 g==                     Evalue the current line appending the result
 
-Note: the option |g:crunch_result_type_append| controls weather or not the
-result of each expression(s) is appended onto the end or if the result
+Note: the option |g:crunch_result_type_append| controls whether or not the
+result of each expression(s) is appended to the expression or if the result
 replaces the expression(s)
 
 ------------------------------------------------------------------------------
@@ -100,7 +101,7 @@ replaces the expression(s)
 :[range]Crunch[!]                                                   *:Crunch*
    Evaluates the current visual selection or provided range and adds result to
    the end of the line(s) With the [!] crunch does not append the result but
-   replaces the provided range or visual selection with the result this
+   replaces the provided range or visual selection with the result. This
    behavior can be reversed  by setting |g:crunch_result_type_append| = 0
 
 :Crunch
@@ -303,17 +304,17 @@ see |crunch-comments|
 ------------------------------------------------------------------------------
 4.3 g:crunch_result_type_append                   *crunch-result-type-append*
 
-Defualt 1
+Default 1
 
-Controls weather or not the result of each expression(s) is appended onto the
-end or if the result replaces the expression(s)o
+Controls whether or not the result of each expression(s) is appended to the 
+expression or if the result replaces the expression(s).
 
 Options:
 0: the expression is replaced with the result
 
-1: the result is appended after the expression
+1: the result is appended to the expression
 
-2: for line-wise operations the result is appended after the expression but
+2: for line-wise operations the result is appended to the expression but
    for character-wise and block-wise expressions the expression is replaced
    with the result
 ------------------------------------------------------------------------------
@@ -327,9 +328,20 @@ EXAMPLE~
 
 let g:crunch_user_variables = {'foo': 123,  'j':456}
 
-ALTERNATIVLY~
+ALTERNATIVELY~
 
 let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
+
+------------------------------------------------------------------------------
+4.5 g:crunch_precision                                     *crunch-precision*
+
+Default 6
+
+Controls the output precision of floating point numbers formated with printf
+specifier %g. The Maximum precision depends on the precision of the floating
+point library used when compiling vim, see |floating-point-precision| for
+details. Note that trailing 0s in results are removed.
+
 
 ==============================================================================
 5. KNOWN ISSUES                                         *crunch-known-issues*
@@ -337,7 +349,6 @@ let g:crunch_user_variables = {'e': exp(1),  'pi':3.14159265359}
 * Modulus operation is not supported due to converting all numbers into floats
 * Expression similar to the following evaluate 23.43.22 + 0 = 23.43. This is
   caused by the way str2float() converts 23.34.22 into 23.34
-
 
 ==============================================================================
 6. CONTRIBUTE                                             *crunch-contribute*
