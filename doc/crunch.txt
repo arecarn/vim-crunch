@@ -189,7 +189,7 @@ The |:Crunch| command and |g=| operator using a range ignores certain prefixes
 and suffixes in a line. There are currently two patterns that are used as
 suffixes and prefixes in all file types '*' and '//' the third pattern is
 varies by file type and is based of the '|commentstring|' variable in Vim.
-Bellow is a table summarizing some prefixes for different file types.
+Below is a table summarizing some prefixes for different file types.
 
 ==============================================
     File Type    |      Valid Expression
