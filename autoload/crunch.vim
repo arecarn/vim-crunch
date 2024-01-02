@@ -78,7 +78,10 @@ function! crunch#eval(exprs) abort "{{{2
 "    Decho '== Inizilation =='
     let s:variables = deepcopy(g:crunch_user_variables, 0)
 
-    let expr_list = split(a:exprs, '\n', 1)
+    let separator_magic = "\t   \t  \t\n"
+
+    let processed_exprs = substitute(a:exprs, ';', separator_magic, 'g')
+    let expr_list = split(processed_exprs, '\n', 1)
 "    Decho 'expr_list = <'.string(expr_list).'>'
 
     for i in range(len(expr_list))
@@ -108,7 +111,9 @@ function! crunch#eval(exprs) abort "{{{2
         let expr_list[i] = s:build_result(orig_expr, result)
     endfor
 "    Decho string(expr_list).'= the expr_lines_list'
-    let expr_lines = join(expr_list, "\n")
+    let expr_separator = "\n"
+    let expr_lines = join(expr_list, expr_separator)
+    let expr_lines = substitute(expr_lines, separator_magic, ';', 'g')
 "    Decho expr_lines.'= the expr_lines'
     let s:variables = {}
     return expr_lines
